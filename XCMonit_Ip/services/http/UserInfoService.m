@@ -13,7 +13,6 @@
 
 @implementation UserInfoService
 
-#define USER_INFO_SERVICE_URL  @"http://183.57.82.43/ys/index.php?r=service/service/getuserinfo"
 
 -(void)reciveLoginInfo:(NSURLResponse*) response data:(NSData*)data error:(NSError*)connectionError
 {
@@ -33,6 +32,7 @@
                 if(array.count==2)
                 {
                     UserAllInfoModel *userAll = [[UserAllInfoModel alloc] initWithItems:array[1]];
+                    DLog(@"userAll:%@",userAll);
                     if (_httpBlock)
                     {
                     
@@ -73,10 +73,10 @@
 }
 -(void)requestUserInfo
 {
-    NSString *strUrl = [[NSString alloc] initWithFormat:@"%@&session_id=%@",USER_INFO_SERVICE_URL,[UserInfo sharedUserInfo].strSessionId];
+    NSString *strUrl = [[NSString alloc] initWithFormat:@"%@index.php?r=service/service/getuserinfo&session_id=%@",XCLocalized(@"httpserver"),[UserInfo sharedUserInfo].strSessionId];
     NSURL *url=[NSURL URLWithString:strUrl];//创建URL
     NSMutableURLRequest *request=[[NSMutableURLRequest alloc]initWithURL:url];//通过URL创建网络请求
-    [request setTimeoutInterval:3];//设置超时时间
+    [request setTimeoutInterval:XC_HTTP_TIMEOUT];//设置超时时间
     [request setHTTPMethod:@"POST"];//设置请求方式
     __block UserInfoService *weakSelf = self;
     [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue mainQueue] completionHandler:

@@ -17,66 +17,101 @@
 #import "AddDeviceService.h"
 #import "Toast+UIView.h"
 #import "ProgressHUD.h"
+#import "ZBarSDK.h"
+#import "MBProgressHUD.h"
 
-@interface AddDevViewController ()<UITextFieldDelegate>
+@interface AddDevViewController ()<UITextFieldDelegate,ZBarReaderDelegate,MBProgressHUDDelegate>
 {
-    UIActivityIndicatorView *_viewActivity;
+    int num;
+    BOOL upOrdown;
+    BOOL bScane;
 }
+@property (nonatomic,assign) BOOL bTrue;
+@property (nonatomic, retain) UIImageView * line;
 @property (nonatomic,strong) UITextField *txtNo;
-@property (nonatomic,strong) UITextField *txtAuth;
+@property (nonatomic,strong) MBProgressHUD *mbHUD;
+@property (nonatomic,strong) AddDeviceService *addDevice;
+
 @end
 
 @implementation AddDevViewController
 
+-(void) dealloc
+{
+    [_txtNo removeFromSuperview];
+    _txtNo = nil;
+    [_mbHUD removeFromSuperview];
+    _mbHUD = nil;
+    _addDevice = nil;
+    DLog(@"add dev dealloc");
+}
+
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
-    if (self) {
+    if (self)
+    {
         // Custom initialization
+        bScane = NO;
     }
     return self;
 }
 
 - (void)viewDidLoad
 {
-    _txtNo = [[UITextField alloc] initWithFrame:Rect(20, 100, 280, 40)];
-    [_txtNo setBorderStyle:UITextBorderStyleBezel];
-    [_txtNo setPlaceholder:NSLocalizedString(@"inputNO", nil)];
+    _txtNo = [[UITextField alloc] initWithFrame:Rect(0, 100, kScreenWidth, 40)];
+    [_txtNo setPlaceholder:XCLocalized(@"inputNO")];
     [_txtNo setKeyboardType:UIKeyboardTypeNumberPad];//UIKeyboardTypeNumberPad
     _txtNo.delegate = self;
-    [self.view addSubview:_txtNo];
     
-//    _txtAuth = [[UITextField alloc] initWithFrame:Rect(20, 160, 280, 40)];
-//    [_txtAuth setBorderStyle:UITextBorderStyleBezel];
-//    [_txtAuth setPlaceholder:@"请输出验证码"];
-//    [_txtAuth setKeyboardType:UIKeyboardTypeASCIICapable];
-//    _txtAuth.delegate = self;
-//    [self.view addSubview:_txtAuth];
+    [_txtNo setBackgroundColor:[UIColor whiteColor]];
+    [self.view addSubview:_txtNo];
+    [_txtNo setBorderStyle:UITextBorderStyleNone];
+    UIImageView *imgPwd = [[UIImageView alloc] init];
+    imgPwd.frame = Rect(0, 0, 20, 39.5);
+    _txtNo.leftView = imgPwd;
+    _txtNo.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
+    _txtNo.leftViewMode = UITextFieldViewModeAlways;
     
     [super viewDidLoad];
-    [self setNaviBarTitle:NSLocalizedString(@"AddCamera", nil)];
+    [self setNaviBarTitle:XCLocalized(@"AddCamera")];
     [self setNaviBarRightBtn:nil];
     UIButton *btn = [CustomNaviBarView createImgNaviBarBtnByImgNormal:@"NaviBtn_Back"
                     imgHighlight:@"NaviBtn_Back_H" target:self action:@selector(navBack)];
     [self setNaviBarLeftBtn:btn];
     [_txtNo becomeFirstResponder];
     
-//    _viewActivity = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle: UIActivityIndicatorViewStyleWhiteLarge];
-//    _viewActivity.center = self.view.center;
-//    _viewActivity.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
-//    _viewActivity.backgroundColor = [UIColor blackColor];
-//    [self.view addSubview:_viewActivity];
+    _mbHUD = [[MBProgressHUD alloc] initWithView:self.view];
+    [self.view addSubview:_mbHUD];
+    [self.view bringSubviewToFront:_mbHUD];
+    _mbHUD.delegate = self;
+    _mbHUD.labelText = XCLocalized(@"AddCamera");
+    _bTrue = YES;
+    [self.view setBackgroundColor:RGB(247, 247, 247)];
+}
+
+-(void)authNO:(NSString *)strInfo
+{
+    _txtNo.text = strInfo;
+    [self authDevice];
+}
+
+
+-(void)viewDidAppear:(BOOL)animated
+{
+    [super viewDidAppear:animated];
 }
 
 -(void)doneKeyBoard
 {
     if ([_txtNo isFirstResponder])
     {
-        if (_txtNo.text.length>8) {
+        if (_txtNo.text.length>8)
+        {
             [self authDevice];
         }else
         {
-            [self.view makeToast:NSLocalizedString(@"serialLength", nil) duration:1.0 position:@"center"];
+            [self.view makeToast:XCLocalized(@"serialLength") duration:1.0 position:@"center"];
         }
     }
 }
@@ -90,9 +125,12 @@
     [super viewWillDisappear:animated];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
-
 -(void)navBack
 {
+    if (!_bTrue)
+    {
+        return;
+    }
     _txtNo.delegate = nil;
     [self dismissViewControllerAnimated:YES completion:^{}];
 }
@@ -102,11 +140,6 @@
     // Dispose of any resources that can be recreated.
 }
 
--(void) dealloc
-{
-    _txtNo = nil;
-}
-
 -(void)authDevice
 {
     if (_txtNo.text.length < 9)
@@ -114,83 +147,60 @@
         DLog(@"序列号错误");
         return;
     }
-
-
-    [ProgressHUD show:NSLocalizedString(@"Addcamera", nil)];
-    AddDeviceService *addDevice = [[AddDeviceService alloc] init];
-    __weak AddDevViewController *weakSelf = self;
-    addDevice.addDeviceBlock = ^(int nStatus)
+    [_txtNo resignFirstResponder];
+    _bTrue = NO;
+    __weak AddDevViewController *weakself = self;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [weakself.mbHUD show:YES];
+    });
+    if(_addDevice == nil)
     {
-        [ProgressHUD dismiss];
+        _addDevice = [[AddDeviceService alloc] init];
+    }
+    __weak AddDevViewController *weakSelf = self;
+    _addDevice.addDeviceBlock = ^(int nStatus)
+    {
         NSString *strMsg = nil;
         switch (nStatus)
         {
             case 1:
-                strMsg = NSLocalizedString(@"addOk",nil);
+                strMsg = XCLocalized(@"addOk");
                 break;
             case 45:
-                strMsg = NSLocalizedString(@"bindingError", nil);
+                strMsg = XCLocalized(@"bindingError");
                 break;
             case 44:
-                strMsg = NSLocalizedString(@"serialError", nil);
+                strMsg = XCLocalized(@"serialError");
                 break ;
+            case 64:
+                strMsg = XCLocalized(@"serialError");
+                break;
             case -999:
-                strMsg= NSLocalizedString(@"addTimeout", nil);
+                strMsg = XCLocalized(@"addTimeout");
                 break;
             default:
-                strMsg = NSLocalizedString(@"ServerException", nil);
+                strMsg = XCLocalized(@"ServerException");
                 break;
         }
-        [self.view makeToast:strMsg duration:2.0 position:@"center" title:NSLocalizedString(@"Addcamera", nil)];
+        weakSelf.bTrue = YES;
+        dispatch_async(dispatch_get_main_queue(),
+        ^{
+            [weakself.mbHUD hide:YES];
+        });
+        [weakSelf.view makeToast:strMsg];
         if (nStatus ==1)
         {
             [[NSNotificationCenter defaultCenter] postNotificationName:NSUPDATE_DEVICE_LIST_VC object:nil];
-            [weakSelf navBack];
+            dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, 2.0 * NSEC_PER_SEC);
+            dispatch_after(popTime, dispatch_get_main_queue(), ^(void)
+            {
+               [weakSelf navBack];
+            });
         }
     };
-    [addDevice requestAddDevice:_txtNo.text auth:@""];
-
-
+    [_addDevice queryDeviceIsExits:_txtNo.text auth:@""];
 }
 
-
-#pragma mark 键盘事件 
-//-(void)textFieldDidEndEditing:(UITextField *)textField
-//{
-//    //执行添加设备的操作
-//    NSString *strNO = [_txtNo text];
-//    if (strNO.length==0) {
-//        //alertView;
-//    }
-//    NSError *error = nil;
-//    XCDecoder *decode = [[XCDecoder alloc] initWithP2P:strNO error:&error];
-//    if (error)
-//    {
-//        NSString *strTitle = nil;
-//        switch (error.code) {
-//            case CONNECT_P2P_SERVER:
-//                strTitle = [error localizedDescription];
-//                break;
-//            case CONNECT_DEV_ERROR:
-//                strTitle = [error localizedDescription];
-//                break;
-//            default:
-//                break;
-//        }
-//        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"添加错误" message:strTitle delegate:nil cancelButtonTitle:@"确定" otherButtonTitles:nil, nil];
-//        [alert show];
-//        decode = nil;
-//        return;
-//    }
-//    decode = nil;
-//    DevModel *devModel = [[DevModel alloc] initWithDev:@"设备" devNO:self.txtNo.text];
-//    [DeviceInfoDb insertDevInfo:devModel];
-//    
-//    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"添加设备" message:@"成功" delegate:nil cancelButtonTitle:@"确定" otherButtonTitles:nil, nil];
-//    [alert show];
-//    [[NSNotificationCenter defaultCenter] postNotificationName:NSUPDATE_DEVICE_LIST_VC object:nil];
-//    [self navBack];
-//}
 #pragma mark 重力处理
 - (BOOL)shouldAutorotate
 {
@@ -200,6 +210,30 @@
 {
     return UIInterfaceOrientationMaskPortrait;
 }
+
+
+-(BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string
+{
+    if ([textField.text length] >= 13 )//当字符串长度到13个的时候，只有删除按钮可以使用
+    {
+        NSString *emailRegex = @"[0-9]";//正则表达式0-9
+        NSPredicate *emailTest = [NSPredicate predicateWithFormat:@"SELF MATCHES %@", emailRegex];
+        BOOL bFlag = [emailTest evaluateWithObject:string];//检测字符内容
+        if(bFlag)
+        {
+            return NO;
+        }
+        else
+        {
+            return YES;
+        }
+        emailTest = nil;
+        emailRegex = nil;
+    }
+    return YES;
+}
+
+
 /*
 #pragma mark - Navigation
 

@@ -23,7 +23,6 @@
 @property (nonatomic,assign) NSInteger iProNumber;//省行政编号
 @property (nonatomic,assign) NSInteger iCountNumber;//市行政编号
 
-
 -(id)initWithItems:(NSArray*)items;
 
 @end

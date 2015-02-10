@@ -7,9 +7,10 @@
 //
 
 #import <UIKit/UIKit.h>
-
 #import "CustomViewController.h"
+
 @class DeviceInfoModel;
+
 @interface DevInfoViewController : CustomViewController
 
 -(void)setDeviceInfoModel:(DeviceInfoModel*)devInfo;

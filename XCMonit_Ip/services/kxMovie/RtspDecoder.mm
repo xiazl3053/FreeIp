@@ -10,13 +10,30 @@
 #import "XCNotification.h"
 #import "ProgressHUD.h"
 #import "Toast+UIView.h"
-#include "libswresample/swresample.h"
-#include "libavformat/avformat.h"
-#include "libswscale/swscale.h"
+#include <sys/time.h>
 #import "UtilsMacro.h"
 #import "RecordModel.h"
 #import "RecordDb.h"
+#include <stdio.h>
+#include "private_protocol.h"
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include "LongseDes.h"
+#import "RtspInfo.h"
+#import "P2PInitService.h"
 
+extern "C"
+{
+#include "libavformat/avformat.h"
+#include "libswscale/swscale.h"
+}
+
+
+#define RTSP_CONNECT_TIME_OUT 10
+int rtspConnect_time_out;// = 10;
 void avStreamFPSTimeBaseInfo(AVStream *st, CGFloat defaultTimeBase, CGFloat *pFPS, CGFloat *pTimeBase)
 {
     CGFloat fps, timebase;
@@ -29,7 +46,7 @@ void avStreamFPSTimeBaseInfo(AVStream *st, CGFloat defaultTimeBase, CGFloat *pFP
         timebase = defaultTimeBase;
     
     if (st->codec->ticks_per_frame != 1) {
-        NSLog(@"WARNING: st.codec.ticks_per_frame=%d", st->codec->ticks_per_frame);
+        DLog(@"WARNING: st.codec.ticks_per_frame=%d", st->codec->ticks_per_frame);
         //timebase *= st->codec->ticks_per_frame;
     }
     
@@ -46,6 +63,38 @@ void avStreamFPSTimeBaseInfo(AVStream *st, CGFloat defaultTimeBase, CGFloat *pFP
         *pTimeBase = timebase;
 }
 
+int getNextFrame(void *userData,unsigned char *cFrame,int nLength)
+{
+    int size = nLength;
+    int ret = -1;
+    struct timeval tv;
+    gettimeofday(&tv,NULL);
+    NSMutableArray *aryVideo = (__bridge NSMutableArray *)userData;
+    
+    do{
+        struct timeval result;
+        gettimeofday(&result,NULL);
+        @synchronized(aryVideo)
+        {
+            if (aryVideo.count>0)
+            {
+                NSData *data = [aryVideo objectAtIndex:0];
+                size = (int)data.length;
+                memcpy(cFrame, [data bytes], data.length);
+                [aryVideo removeObjectAtIndex:0];
+                ret = 0;
+            }
+        }
+        if(result.tv_sec-tv.tv_sec>=rtspConnect_time_out)
+        {
+            DLog(@"退出了");
+            return -1;
+        }
+    }while(ret);
+    return size;
+}
+
+
 @interface RtspDecoder()
 
 {
@@ -60,7 +109,6 @@ void avStreamFPSTimeBaseInfo(AVStream *st, CGFloat defaultTimeBase, CGFloat *pFP
     NSDictionary        *_info;
     NSUInteger          _artworkStream,_subtitleASSEvents;
     void *_swrBuffer;
-    SwrContext          *_swrContext;
     NSUInteger          _swrBufferSize;
     AVPacket            *_packet;
     CGFloat  pts;
@@ -102,49 +150,54 @@ void avStreamFPSTimeBaseInfo(AVStream *st, CGFloat defaultTimeBase, CGFloat *pFP
     NSMutableData *data;
     BOOL bRecord;
     NSString *strRtspPath;
+    BOOL bOpening;
+    BOOL bConnect;
+    private_protocol_info_t * info;
+    long lFrameNum;
 }
+@property (nonatomic,copy) NSString *strRecordPath;
+@property (nonatomic,copy) NSString *strDevName;
+@property (nonatomic,strong) NSMutableArray *aryVideo;
+
 
 @end
 
-
 @implementation RtspDecoder
 
-
-
-
+-(id)init
+{
+    self = [super init];
+    return self;
+}
 
 #pragma mark 解码整流程
 - (BOOL) openDecoder: (NSString *) path
                error: (NSError **) perror
 {
     pFormatCtx = NULL;
-    DLog(@"path:%@",path);
+    bOpening = NO;
+    bConnect = NO;
     strRtspPath = path;
+    
     kxMovieError errCode = [self openfile:path];
     if (errCode == kxMovieErrorNone)
     {
-        kxMovieError videoErr = [self openVideoStream];
-        if (videoErr != kxMovieErrorNone)
-        {
-            errCode = videoErr;
-        }
+        _maxBufferedDuration = 0.01;
+        _bIsDecoding = YES;
+        _videoFrameFormat = KxVideoFrameFormatRGB;
+        pts = 0;
+        bNotify = YES;
+        return YES;
     }
-    _maxBufferedDuration = 0.01;
-    if (errCode != kxMovieErrorNone)
+    else if (errCode != kxMovieErrorNone)
     {
-        [self closeFile];
-        NSString *errMsg =[DecoderPublic errorMessage:errCode];//(errCode);
-        NSLog(@"%@, %@", errMsg, path.lastPathComponent);
+        NSString *errMsg =[DecoderPublic errorMessage:errCode];
+        DLog(@"%@, %@", errMsg, path.lastPathComponent);
         if (perror)
             *perror = [DecoderPublic kxmovieError:errCode str:errMsg];
         return NO;
     }
-    _bIsDecoding = YES;
-    _videoFrameFormat = KxVideoFrameFormatRGB;
-    _videoArray = [[NSMutableArray alloc] init];
-    pts = 0;
-    bNotify = YES;
-    return YES;
+    return  NO;
 }
 
 #pragma mark 录像操作 ffmpeg
@@ -152,34 +205,160 @@ void avStreamFPSTimeBaseInfo(AVStream *st, CGFloat defaultTimeBase, CGFloat *pFP
 {
     pFormatCtx = NULL;
     _bIsDecoding = NO;
-    
-    av_register_all();
     avcodec_register_all();
     avformat_network_init();
     pFormatCtx = avformat_alloc_context();
     AVDictionary* options = NULL;
     av_dict_set(&options, "rtsp_transport", "tcp", 0);
-    if(avformat_open_input(&pFormatCtx, [strPath UTF8String], NULL, &options) != 0 )
+    av_dict_set(&options, "stimeout", "3500000", 0);
+    AVCodec *pCodec = NULL;
+    @synchronized(self)
     {
-        goto Release_format_input;
+        if(avformat_open_input(&pFormatCtx, [strPath UTF8String], NULL, &options) != 0 )
+        {
+            bOpening = NO;
+            goto Release_format_input;
+        }
     }
-    if(avformat_find_stream_info(pFormatCtx, NULL ) < 0 )
+
+    
+    bConnect = YES;
+    bOpening = YES;
+    pCodec = avcodec_find_decoder(AV_CODEC_ID_H264);
+    pCodecCtx = avcodec_alloc_context3(pCodec);
+    if(avcodec_open2(pCodecCtx, pCodec, NULL) < 0)
     {
-        goto Release_format_input;
+        return kxMovieErrorOpenCodec;
     }
+    pVideoFrame = avcodec_alloc_frame();
+    if( pVideoFrame == NULL )
+    {
+        return kxMovieErrorOpenCodec;
+    }
+    _fps = 25;
+    DLog(@"fps:%f",_fps);
     return kxMovieErrorNone;
 Release_open_input:
+    pFormatCtx = NULL;
     return kxMovieErrorOpenFile;
 Release_format_input:
-    DLog(@"打开文件失败，或者无法获取到视频流");
-    [self closeFile];
     return kxMovieErrorStreamNotFound;
+}
+
+#pragma mark 私有协议
+-(int)protocolInit:(RtspInfo*)rtspInfo path:(NSString *)strPath channel:(int)nChannel code:(int)nCode
+{
+    info = private_protocol_init();
+    int ret = 0;
+    if (info==NULL)
+    {
+        DLog(@"malloc info failed,out of memmory!");
+        return 999;
+    }
+    _aryVideo = [NSMutableArray array];
+    DLog(@"start login");
+    @synchronized(self)
+    {
+        ret = private_protocol_login(info, inet_addr([rtspInfo.strAddress UTF8String]), (int)rtspInfo.nPort, (char*)[rtspInfo.strUser UTF8String], (char*)[rtspInfo.strPwd UTF8String]);
+    }
+    if(ret < 0)
+    {
+        DLog(@"login failed!");
+        return 998;
+    }
+    DLog(@"login suc");
+    if (_bExit)
+    {
+        return 996;
+    }
+    setUserData((__bridge void*)_aryVideo);
+    __weak RtspDecoder *weakSelf = self;
+    rtspConnect_time_out = 30;
+    bConnect = YES;
+    dispatch_async(dispatch_get_global_queue(0, 0), ^{
+        [weakSelf ffmpegInit];
+    });
+    ret = private_protocol_getStream(info,nChannel,nCode);
+    if(ret==0)
+    {
+        strRtspPath = strPath;
+    }
+    else
+    {
+        return 997;
+    }
+    return 1;
+}
+
+#pragma mark 私有协议解码  ffmpeg初始化
+-(BOOL)ffmpegInit
+{
+    bNotify = YES;
+    pFormatCtx = NULL;
+    _bIsDecoding = NO;
+    AVInputFormat* pAvinputFmt = NULL;
+    AVCodec         *pCodec = NULL;
+    AVIOContext		*pb = NULL;
+    uint8_t	*buf = NULL;
+    buf = (uint8_t*)malloc(sizeof(uint8_t)*1024);
+    avcodec_register_all();
+    pb = avio_alloc_context(buf, 1024, 0, (__bridge void *)(_aryVideo), getNextFrame,NULL,NULL);
+    pAvinputFmt = av_find_input_format("H264");
+    pFormatCtx = avformat_alloc_context();
+    pFormatCtx->pb = pb;
+    @synchronized(self)
+    {
+        if(avformat_open_input(&pFormatCtx, "", pAvinputFmt, NULL) != 0 )
+        {
+            pFormatCtx = NULL;
+            av_free(pb);
+            return NO;
+        }
+    }
+
+    bConnect = YES;
+    bOpening = YES;
+    DLog(@"找到视频信息");
+    pCodec = avcodec_find_decoder(AV_CODEC_ID_H264);
+    pCodecCtx = avcodec_alloc_context3(pCodec);
+    if(avcodec_open2(pCodecCtx, pCodec, NULL) < 0)
+    {
+        DLog(@"没有找到视频信息?");
+        return NO;
+    }
+    pVideoFrame = avcodec_alloc_frame();
+    if( pVideoFrame == NULL )
+    {
+        DLog(@"初始化失败?");
+        return NO;
+    }
+    _fps = 25;
+    _bIsDecoding = YES;
+    
+    return YES;
+}
+
+-(void)dealloc
+{
+    if (bRecord)
+    {
+        [self stopRecord];
+    }
+    
+    DLog(@"rtsp释放");
+    [self closeScaler];
+    [self closeFile];
 }
 
 -(void)closeFile
 {
     _videoStream = -1;
-    
+    if (info)
+    {
+        private_protocol_stop(&info);
+        DLog(@"stopInfo");
+    }
+    [_aryVideo removeAllObjects];
     if (pVideoFrame)
     {
         av_free(pVideoFrame);
@@ -187,46 +366,53 @@ Release_format_input:
     }
     if (pCodecCtx)
     {
+        [[P2PInitService sharedP2PInitService].getTheLock lock];
         avcodec_close(pCodecCtx);
+        [[P2PInitService sharedP2PInitService].getTheLock unlock];
         pCodecCtx = NULL;
     }
-    if (pFormatCtx) {
-        
-        pFormatCtx->interrupt_callback.opaque = NULL;
-        pFormatCtx->interrupt_callback.callback = NULL;
-        
-        avformat_close_input(&pFormatCtx);
-        pFormatCtx = NULL;
+    if (pFormatCtx)
+    {
+        avformat_free_context(pFormatCtx);
     }
-    fclose(file_record);
+    DLog(@"avformat_free_context");
+
 }
 
 #pragma mark 视频流操作
 - (kxMovieError) openVideoStream
 {
-    kxMovieError errCode = kxMovieErrorStreamNotFound;
-    _videoStream = -1;
-    _artworkStream = -1;
-    _videoStreams = [self collectStreams:pFormatCtx type:AVMEDIA_TYPE_VIDEO];
-    for (NSNumber *n in _videoStreams)
+    for (int i = 0; i < pFormatCtx->nb_streams;i++)
     {
-        
-        const NSUInteger iStream = n.integerValue;
-        
-        if (0 == (pFormatCtx->streams[iStream]->disposition & AV_DISPOSITION_ATTACHED_PIC))
+        if (pFormatCtx->streams[i]->codec->codec_type == AVMEDIA_TYPE_VIDEO)
         {
-            errCode = [self openVideoCode:iStream];
-            if (errCode == kxMovieErrorNone)
-            {
-                break;
-            }
-        } else
-        {
-            
-            _artworkStream = iStream;
+            _videoStream = i;
+            break;
         }
     }
-    return errCode;
+    if( _videoStream == -1 )
+    {
+        DLog(@"找不到视频数据");
+        return kxMovieErrorOpenCodec;
+    }
+    pCodecCtx = pFormatCtx->streams[_videoStream]->codec;
+    AVCodec *pCodec = avcodec_find_decoder(pCodecCtx->codec_id);
+    if(avcodec_open2(pCodecCtx, pCodec, NULL) < 0)
+    {
+        return kxMovieErrorOpenCodec;
+    }
+    pVideoFrame = avcodec_alloc_frame();
+    if( pVideoFrame == NULL )
+    {
+        return kxMovieErrorOpenCodec;
+    }
+    AVStream *st = pFormatCtx->streams[_videoStream];
+    avStreamFPSTimeBaseInfo(st, 0.04, &_fps, &_videoTimeBase);
+    if (_fps==0) {
+        _fps = 25.0f;
+    }
+    DLog(@"fps:%f",_fps);
+    return kxMovieErrorNone;
 }
 
 -(NSArray *)collectStreams:(AVFormatContext *)formatCtx type:(enum AVMediaType)codecType
@@ -258,11 +444,10 @@ Release_format_input:
         avcodec_close(pCodecCtx);
         return kxMovieErrorAllocateFrame;
     }
-    _videoStream = videoStream;
-    
     // determine fps
     AVStream *st = pFormatCtx->streams[_videoStream];
     avStreamFPSTimeBaseInfo(st, 0.04, &_fps, &_videoTimeBase);
+    DLog(@"_fps:%f",_fps);
     return kxMovieErrorNone;
 }
 
@@ -285,7 +470,10 @@ Release_format_input:
         nRef =av_read_frame(pFormatCtx, &packet);
         if(nRef>=0)
         {
-            [data appendBytes:packet.data length:packet.size];
+            if(bRecord)
+            {
+                 [data appendBytes:packet.data length:packet.size];
+            }
             int len = avcodec_decode_video2(pCodecCtx,pVideoFrame,&gotframe,&packet);
             if (gotframe)
             {
@@ -313,7 +501,13 @@ Release_format_input:
         {
             //结束
             _isEOF = YES;
-            [[NSNotificationCenter defaultCenter] postNotificationName:NS_RTSP_DISCONNECT_VC object:nil];
+            if(bNotify)
+            {
+                bNotify = NO;
+                DLog(@"丢失连接");
+                [[NSNotificationCenter defaultCenter] postNotificationName:NS_RTSP_DISCONNECT_VC object:nil];
+            
+            }
             break;
         }
     }
@@ -326,16 +520,13 @@ Release_format_input:
 {
     if (!pVideoFrame->data[0])
         return nil;
-    
     KxVideoFrame *frame;
-    
+    if (!_swsContext &&
+        ![self setupScaler]) {
         
-        if (!_swsContext &&
-            ![self setupScaler]) {
-            
-            NSLog(@"fail setup video scaler");
-            return nil;
-        }
+        DLog(@"fail setup video scaler");
+        return nil;
+    }
         
         sws_scale(_swsContext,
                   (const uint8_t **)pVideoFrame->data,
@@ -363,7 +554,7 @@ Release_format_input:
 - (BOOL) setupScaler
 {
     [self closeScaler];
-    
+    DLog(@"pCodecCtx->height:%d-%d",pCodecCtx->width,pCodecCtx->height);
     _pictureValid = avpicture_alloc(&_picture,
                                     PIX_FMT_RGB24,
                                     pCodecCtx->width,
@@ -397,84 +588,6 @@ Release_format_input:
     }
 }
 
-#pragma mark  play函数
--(void)startPlay
-{
-    DLog(@"开启播放");
-    _dispatch_queue = dispatch_queue_create("com.xzl.newdecode", DISPATCH_QUEUE_CONCURRENT);
-    _decoding = NO;
-    _playing = YES;
-    __weak RtspDecoder *__weakSelf = self;
-    dispatch_async(dispatch_get_global_queue(0, 0), ^{
-        [__weakSelf tick];
-    });
-}
-#pragma mark 持续解码
--(void)tick
-{
-    if(!_playing){return;}
-    const NSUInteger leftFrames = _videoArray.count;
-    if (!leftFrames)
-    {
-        [self asyncDecodeFrames];
-    }
-    
-    float nTime = _fps;
-    dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, 1.0/nTime * NSEC_PER_SEC);
-    __weak RtspDecoder *weakSelf = self;
-    dispatch_after(popTime, dispatch_get_global_queue(0, 0), ^(void)
-    {
-       [weakSelf tick];
-    });
-}
-
-- (void) asyncDecodeFrames
-{
-    if (_decoding)
-    {
-        return;
-    }
-    
-    _decoding = YES;
-    if (!_playing)
-    {
-        return ;
-    }
-    BOOL good = YES;
-    while (good)
-    {
-        good = NO;
-        NSArray *frames = [self decodeFrames];
-        if(frames.count)
-        {
-            good = [self addFrames:frames];
-        }
-        frames = nil;
-    }
-    _decoding = NO;
-    
-}
-#pragma mark 添加frame
--(BOOL)addFrames:(NSArray*)frames
-{
-    @synchronized(_videoArray)
-    {
-        for (KxMovieFrame *frame in frames)
-        {
-            if (frame.type == KxMovieFrameTypeVideo)
-            {
-                [_videoArray addObject:frame];
-                _bufferedDuration += frame.duration;
-            }
-        }
-    }
-    return _playing && _bufferedDuration < _maxBufferedDuration;
-}
-
--(NSMutableArray*)getVideoArray
-{
-    return _videoArray;
-}
 - (NSUInteger) frameWidth
 {
     return _bIsDecoding ? pCodecCtx->width : 0;
@@ -487,7 +600,7 @@ Release_format_input:
 
 
 #pragma mark RTSP录像
--(void)startRecord
+-(void)recordStart:(NSString*)strPath name:(NSString*)strDevName
 {
     start = _moviePosition;
     //  创建文件  获取系统时间  序列号  peerName
@@ -502,6 +615,9 @@ Release_format_input:
     [fileformatter setDateFormat:@"YYYYMMddHHmmss"];
     NSString *filePath = [NSString stringWithFormat:@"%@.mp4",[fileformatter stringFromDate:senddate]];
     
+    _strRecordPath = strPath;
+    _strDevName = strDevName;
+    
     //创建一个目录
     NSString *strDir = [kLibraryPath  stringByAppendingPathComponent:@"record"];
     BOOL bFlag = YES;
@@ -513,7 +629,7 @@ Release_format_input:
                                                                  forKey: NSURLIsExcludedFromBackupKey error:nil];
         if(!success)
         {
-            NSLog(@"Error excluding不备份文件夹");
+            DLog(@"Error excluding不备份文件夹");
         }
     }
     //视频文件保存路径
@@ -522,6 +638,7 @@ Release_format_input:
     sprintf(cStart, "%s",[morelocationString UTF8String]);
     sprintf(cFileName,"%s",[filePath UTF8String]);
     DLog(@"strFile:%@",strFile);
+    lFrameNum = pCodecCtx->frame_number;
     if ([[NSFileManager defaultManager] createFileAtPath:strFile contents:nil attributes:nil])
     {
         DLog(@"创建文件成功:%@",strFile);
@@ -536,6 +653,7 @@ Release_format_input:
     {
         return ;
     }
+    lFrameNum = pCodecCtx->frame_number-lFrameNum;
     end = _moviePosition;
     if ([data writeToFile:strFile atomically:YES])
     {
@@ -545,26 +663,53 @@ Release_format_input:
                                                               forKey: NSURLIsExcludedFromBackupKey error:nil];
     if(!success)
     {
-        NSLog(@"Error excluding文件");
+        DLog(@"Error excluding文件");
     }
     NSDate *senddate=[NSDate date];
     NSDateFormatter  *dateformatter=[[NSDateFormatter alloc] init];
-    [dateformatter setDateFormat:@"YYYY-MM-dd HH-mm-ss"];
+    [dateformatter setDateFormat:@"YYYY-MM-dd HH:mm:ss"];
     NSString *  morelocationString=[dateformatter stringFromDate:senddate];
     DLog(@"结束时间:%@",morelocationString);
     //在数据库中加入纪录
     sprintf(cEnd, "%s",[morelocationString UTF8String]);
     RecordModel *record = [[RecordModel alloc] init];
-    record.strDevNO = strRtspPath;
+    NSString *strPathNO = nil;
+    if ([strRtspPath rangeOfString:@"trackID"].location != NSNotFound)
+    {
+        //DVR或者NVR
+        const char *cPath = [strRtspPath UTF8String];
+        char cAddr[100];
+        sscanf(cPath,"rtsp://%[^/]/",cAddr);
+        DLog(@"%s",cAddr);
+        strPathNO = [NSString stringWithFormat:@"rtsp://%s",cAddr];
+    }
+    else
+    {
+        strPathNO = strRtspPath;
+    }
+    record.strDevNO = strPathNO;
+    record.nFramesNum = lFrameNum;
+    record.nFrameBit = _fps;
     record.strStartTime = [NSString stringWithUTF8String:cStart];
     record.strEndTime = [NSString stringWithUTF8String:cEnd];
     record.strFile = [NSString stringWithUTF8String:cFileName];
-    
+    record.imgFile = _strRecordPath;
+    record.strDevName = _strDevName;
     NSDateFormatter *date=[[NSDateFormatter alloc] init];
-    [date setDateFormat:@"YYYY-MM-dd HH-mm-ss"];
+    [date setDateFormat:@"YYYY-MM-dd HH:mm:ss"];
     record.allTime = end-start;
     [RecordDb insertRecord:record];
     bRecord = NO;
     data = nil;
+    DLog(@"录像停止");
 }
+
+-(void)releaseRtspDecoder
+
+{
+    _bExit = YES;
+    _playing = NO;
+    rtspConnect_time_out = 1;
+}
+
 @end

@@ -11,9 +11,9 @@
 #import "CustomNaviBarView.h"
 
 
-#define RECT_NaviBar                            Rect(0.0f, StatusBarHeight, 320.0f, NaviBarHeight)
+#define RECT_NaviBar                            Rect(0.0f, StatusBarHeight,kScreenWidth, NaviBarHeight)
 #define RECT_SearchBarFrame                     Rect(0.0f, 0.0f, [CustomNaviBarView rightBtnFrame].origin.x-2.0f, NaviBarHeight)
-#define RECT_SearchBarCoverCancelBtnFrame       Rect(0.0f, 0.0f, 320.0f, NaviBarHeight)
+#define RECT_SearchBarCoverCancelBtnFrame       Rect(0.0f, 0.0f, kScreenWidth, NaviBarHeight)
 #define RECT_CancelBtnFrame                     Rect([CustomNaviBarView rightBtnFrame].origin.x, 0.0f, [CustomNaviBarView rightBtnFrame].size.width, NaviBarHeight)
 
 
@@ -267,7 +267,7 @@
             [_viewCtrlParent.view addSubview:_tableView];
             [UtilityFunc resetScrlView:_tableView contentInsetWithNaviBar:YES tabBar:NO];
             
-            UIView *footer = [[UIView alloc] initWithFrame:Rect(0.0f, 0.0f, 320.0f, 240.0f)];
+            UIView *footer = [[UIView alloc] initWithFrame:Rect(0.0f, 0.0f, kScreenWidth, 240.0f)];
             footer.backgroundColor = [UIColor clearColor];
             _tableView.tableFooterView = footer;
             UIButton *btnClearSearchRecord = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -358,7 +358,7 @@
     
     cell.backgroundColor = [UIColor clearColor];
     cell.textLabel.textColor = RGB_TextDarkGray;
-    cell.textLabel.font = [UIFont systemFontOfSize:SIZE_TextLarge];
+    cell.textLabel.font = [UIFont fontWithName:@"Helvetica" size:SIZE_TextLarge];
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
     
     NSString *strKeyword = _arrRecent[indexPath.row];

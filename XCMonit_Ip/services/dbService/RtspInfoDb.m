@@ -47,11 +47,24 @@
         NSArray *items = [[NSArray alloc] initWithObjects:[rs stringForColumn:@"id"],[rs stringForColumn:@"devName"],[rs stringForColumn:@"user"],
                           [rs stringForColumn:@"pwd"],[rs stringForColumn:@"address"],[rs stringForColumn:@"port"],
                           [rs stringForColumn:@"type"],[rs stringForColumn:@"channel"],nil];
-        DLog(@"RTSP-Column:%d",items.count);
         RtspInfo *info = [[RtspInfo alloc] initWithItems:items];
         [array addObject:info];
     }
     return  array;
 }
-
++(BOOL)removeByIndex:(NSInteger)nIndex
+{
+    FMDatabase *db = [RtspInfoDb initDatabaseRtsp];
+    NSString *strSql = @"delete from rtsp where id = ?";
+    return [db executeUpdate:strSql,[[NSNumber alloc] initWithInteger:nIndex]];
+}
++(BOOL)updateRtsp:(RtspInfo*)rtspInfo
+{
+    FMDatabase *db = [RtspInfoDb initDatabaseRtsp];
+    
+    NSString *strSql = @"update rtsp set devName = ? , user = ? , pwd =? , address = ? , port = ? , channel = ?  where id = ?";
+    
+    return [db executeUpdate:strSql,rtspInfo.strDevName,rtspInfo.strUser,rtspInfo.strPwd,rtspInfo.strAddress,[[NSNumber alloc] initWithInteger:rtspInfo.nPort],
+                            [[NSNumber alloc] initWithInteger:rtspInfo.nChannel],[[NSNumber alloc] initWithInteger:rtspInfo.nId]];
+}
 @end

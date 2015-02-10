@@ -7,15 +7,20 @@
 //
 
 #import "ImageCell.h"
-#import "MJPhotoBrowser.h"
-#import "MJPhoto.h"
 #import "UtilsMacro.h"
-#import "SDImageCache.h"
-#import "UIImageView+WebCache.h"
+#import "Picture.h"
+#import "RecordModel.h"
+#import "RecordView.h"
+#import "PictureView.h"
+#import "XCPhoto.h"
+
+
 @interface ImageCell()
 {
-    
+    NSMutableArray *arrayView;
+    NSMutableArray *arrayPic;
 }
+@property (nonatomic,strong) NSArray *arrayRecord;
 @end
 
 @implementation ImageCell
@@ -25,7 +30,8 @@
     self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
     if (self)
     {
-
+        arrayPic = [NSMutableArray array];
+        _aryImage = [NSMutableArray array];
     }
     return self;
 }
@@ -41,87 +47,157 @@
 
     // Configure the view for the selected state
 }
--(void)setArrayInfo:(NSArray*)array
+-(void)setArrayInfo:(NSArray*)array record:(NSArray*)aryRecord
 {
+    _bDel = NO;
+    [_aryImage removeAllObjects];
     if (_array)
     {
         [_array removeAllObjects];
         _array = nil;
     }
-    _array = [[NSMutableArray alloc] initWithArray:array];
+    if (_arrayRecord) {
+        _arrayRecord = nil;
+    }
+    if (arrayView) {
+        [arrayView removeAllObjects];
+    }
+    _arrayRecord = [[NSArray alloc] initWithArray:aryRecord];
+    arrayView = [[NSMutableArray alloc] init];
+    if(array.count>0)
+    {
+        _array = [[NSMutableArray alloc] initWithArray:array];
+    }
+    else
+    {
+        _array = [[NSMutableArray alloc] init];
+    }
+    
     [self freshCell];
-//    __weak ImageCell *weakSelf = self;
-//    dispatch_async(dispatch_get_global_queue(0, 0), ^
-//    {
-//       [weakSelf freshCell];
-//    });
 }
 
 -(void)freshCell
 {
+    [arrayPic removeAllObjects];
     for (UIView *view in self.contentView.subviews)
     {
         [view removeFromSuperview];
     }
-    CGFloat width = 70;
-    CGFloat height = 70;
-    CGFloat margin = 5;
-    CGFloat startX = 10;
-    CGFloat startY = 8;
-
-    for (int i = 0; i<_array.count; i++)
+    CGFloat width = kScreenWidth/3-2;//105
+    CGFloat height = 144;
+    NSInteger nLength = _arrayRecord.count+_array.count;
+    for (int i = 0; i<nLength; i++)
     {
-        UIImageView *imageView = [[UIImageView alloc] init];
-        [self.contentView addSubview:imageView];
-        
         // 计算位置
-        int row = i/4;
-        int column = i%4;
-        CGFloat x = startX + column * (width + margin);
-        CGFloat y = startY + row * (height + margin);
-        imageView.frame = CGRectMake(x, y, width, height);
-        
-        __weak ImageCell *weakSelf = self;
-//        [imageView setImageWithURL:[NSURL URLWithString:[_array objectAtIndex:i]] placeholderImage:[UIImage imageNamed:@"realplay.png"]];
-        dispatch_async(dispatch_get_global_queue(0, 0),
-       ^{
-               UIImage *image = [[UIImage alloc] initWithContentsOfFile:[weakSelf.array objectAtIndex:i]];
-                dispatch_async(dispatch_get_main_queue(),^
-               {
-                   [imageView setImage:image];
-               });
-       });
-        // 事件监听
-        imageView.tag = i;
-        imageView.userInteractionEnabled = YES;
-        [imageView addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapImage:)]];
-        
-        // 内容模式
-        imageView.clipsToBounds = YES;
-        imageView.contentMode = UIViewContentModeScaleAspectFill;
+        int row = i/3;
+        int column = i%3;
+        CGFloat x = 1 + column * (width+2);
+        CGFloat y = 4 + row * height;//149
+        if(i<_array.count)
+        {
+            PictureModel *picModel = (PictureModel *)[_array objectAtIndex:i];
+            PictureView *picView = [[PictureView alloc] initWithFrame:Rect(x, y, width, height)];
+            [self.contentView addSubview:picView];
+            
+            [picView.lblDev setText:picModel.strDevName];//设备名
+            NSString *time = [picModel.strFile stringByDeletingPathExtension];
+            NSString *hour = [time substringWithRange:NSMakeRange(0, 2)];
+            NSString *minite = [time substringWithRange:NSMakeRange(2, 2)];
+            NSString *second = [time substringWithRange:NSMakeRange(4, 2)];
+            NSString *strTime = [NSString stringWithFormat:@"%@:%@:%@",hour,minite,second];
+            [picView.lblTime setText:strTime];
+            
+            picView.imgView.userInteractionEnabled=YES;//图片属性设置
+            [picView.imgView addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapImage:)]];
+            picView.imgView.tag = picModel.nId;
+            
+            
+            __weak PictureView *__picView = picView;
+            NSString *strPath = [NSString stringWithFormat:@"%@/shoto/%@/%@",kLibraryPath,picModel.strTime,picModel.strFile];
+            picView.strPath = strPath;
+            __block NSString *__strPath = strPath;
+            dispatch_async(dispatch_get_global_queue(0, 0),
+            ^{
+                    UIImage *image = [[UIImage alloc] initWithContentsOfFile:__strPath];
+                    dispatch_async(dispatch_get_main_queue(),^
+                    {
+                          [__picView.imgView setImage:image];
+                    });
+           });
+           [arrayView addObject:picView.imgView];
+           [arrayPic addObject:picView];
+        }
+        else
+        {
+            //录像记录View
+            RecordView *rdView = [[RecordView alloc] initWithFrame:Rect(x, y, width, height)];
+            [self.contentView addSubview:rdView];
+            RecordModel *recordModel = (RecordModel *)[_arrayRecord objectAtIndex:i-_array.count];
+            
+            [rdView.lblDev setText:recordModel.strDevName];//设备名
+            
+            NSString *strTime = ([[recordModel.strStartTime stringByDeletingPathExtension] componentsSeparatedByString:@" "])[1];
+            if ([strTime rangeOfString:@"-"].location != NSNotFound)
+            {
+                NSString *newStrTime = [strTime stringByReplacingOccurrencesOfString:@"-" withString:@":"];
+                [rdView.lblTime setText:newStrTime];//时间
+            }
+            else
+            {
+                [rdView.lblTime setText:strTime];
+            }
+            
+            rdView.imgView.userInteractionEnabled=YES;//图片属性设置
+            [rdView.imgView addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapRecord:)]];
+            rdView.imgView.tag = recordModel.nId;
+
+            __weak RecordView *__rdView = rdView;
+            NSString *strPath = [NSString stringWithFormat:@"%@/record/%@",kLibraryPath,recordModel.imgFile];
+            __block NSString *__strPath = strPath;
+            dispatch_async(dispatch_get_global_queue(0, 0),
+           ^{
+                 UIImage *image = [[UIImage alloc] initWithContentsOfFile:__strPath];
+                 dispatch_async(dispatch_get_main_queue(),^
+                 {
+                      [__rdView.imgView setImage:image];
+                 });
+           });
+        }
     }
-    
 }
+-(void)tapRecord:(UITapGestureRecognizer*)tap
+{
+        //选择
+        if(_delegate && [_delegate respondsToSelector:@selector(addRecordView:view:index:)])
+        {
+            [_delegate addRecordView:self view:tap.view index:tap.view.tag];
+        }
+}
+
 - (void)tapImage:(UITapGestureRecognizer *)tap
 {
-    int count = _array.count;
+    NSInteger count = arrayPic.count;
+    [_aryImage removeAllObjects];
     // 1.封装图片数据
-    NSMutableArray *photos = [NSMutableArray arrayWithCapacity:count];
     for (int i = 0; i<count; i++) {
         // 替换为中等尺寸图片
-//        NSString *url = [_array objectAtIndex:i];
-        MJPhoto *photo = [[MJPhoto alloc] init];
-        photo.url = [_array objectAtIndex:i]; // 图片路径
-        photo.srcImageView = self.contentView.subviews[i]; // 来源于哪个UIImageView
-
-        [photos addObject:photo];
+//        MJPhoto *photo = [[MJPhoto alloc] init];
+//        PictureView *picture = (PictureView *)[arrayPic objectAtIndex:i];
+//        photo.url = picture.strPath; // 图片路径
+//        photo.srcImageView = picture.imgView;
+//        [_aryImage addObject:photo];
+        XCPhoto *photo = [[XCPhoto alloc] init];
+        PictureView *picture = (PictureView *)[arrayPic objectAtIndex:i];
+        photo.strPath = picture.strPath;
+        photo.nId = picture.imgView.tag;
+        photo.imgName = picture.imgView.image;
+        [_aryImage addObject:photo];
     }
-    
     // 2.显示相册
-    MJPhotoBrowser *browser = [[MJPhotoBrowser alloc] init];
-    browser.currentPhotoIndex = tap.view.tag; // 弹出相册时显示的第一张图片是？
-    browser.photos = photos; // 设置所有的图片
-    [browser show];
+    if(_delegate && [_delegate respondsToSelector:@selector(addPicView:view:index:)])
+    {
+        [_delegate addPicView:self view:tap.view index:tap.view.tag];
+    }
 }
 
 -(void)dealloc
@@ -134,7 +210,6 @@
     }
     for (UIView *view in self.contentView.subviews)
     {
-        
         [view removeFromSuperview];
     }
 }

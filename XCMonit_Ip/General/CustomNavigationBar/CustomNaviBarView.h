@@ -12,7 +12,7 @@
 
 @property (nonatomic, weak) UIViewController *m_viewCtrlParent;
 @property (nonatomic, readonly) BOOL m_bIsCurrStateMiniMode;
-
+@property (nonatomic, readonly) UIButton *m_btnBack;
 
 + (CGRect)rightBtnFrame;
 + (CGSize)barBtnSize;

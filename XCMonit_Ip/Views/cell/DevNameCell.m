@@ -33,7 +33,7 @@
     [self.contentView addSubview:_imgView];
     _lblName = [[UILabel alloc] initWithFrame:Rect(100, 20, 210, 12)];
     [_lblName setTextAlignment:NSTextAlignmentRight];
-    [_lblName setFont:[UIFont systemFontOfSize:14.0f]];
+    [_lblName setFont:[UIFont fontWithName:@"Helvetica" size:14.0f]];
     [self.contentView addSubview:_lblName];
 }
 

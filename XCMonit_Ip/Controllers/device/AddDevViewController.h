@@ -11,6 +11,6 @@
 
 @interface AddDevViewController : CustomViewController
 
-
+-(void)authNO:(NSString *)strInfo;
 
 @end

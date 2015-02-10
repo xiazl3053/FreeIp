@@ -8,6 +8,12 @@
 
 #import <Foundation/Foundation.h>
 
+typedef void(^HttpUpdPwd)(int nStatus);
+
 @interface UpdPwdService : NSObject
+
+@property (nonatomic,copy) HttpUpdPwd httpBlock;
+
+-(void)requestUpdPwd:(NSString*)strNewPwd old:(NSString *)strOldPwd;
 
 @end

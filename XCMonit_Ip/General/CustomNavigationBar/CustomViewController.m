@@ -19,6 +19,12 @@
 @implementation CustomViewController
 @synthesize m_viewNaviBar = _viewNaviBar;
 
+-(void)dealloc
+{
+    [_viewNaviBar removeFromSuperview];
+    _viewNaviBar = nil;
+    DLog(@"CustomViewController dealloc");
+}
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -46,10 +52,8 @@
     
     _viewNaviBar = [[CustomNaviBarView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, [CustomNaviBarView barSize].width, [CustomNaviBarView barSize].height)];
     _viewNaviBar.m_viewCtrlParent = self;
-    [self.view addSubview:_viewNaviBar];
-//    [_viewNaviBar setBackgroundColor:[UIColor blackColor]];
     
-//    [self.view setBackgroundColor:[UIColor colorWithPatternImage:[[UIImage imageNamed:@"GlobalBg"] resizableImageWithCapInsets:UIEdgeInsetsMake(0, 0, 0, 0)]]];
+    [self.view addSubview:_viewNaviBar];
     [self.view setBackgroundColor:[UIColor whiteColor]];
 }
 
@@ -57,11 +61,6 @@
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
-}
-
-- (void)dealloc
-{
-  //  [UtilityFunc cancelPerformRequestAndNotification:self];
 }
 
 - (void)viewWillAppear:(BOOL)animated

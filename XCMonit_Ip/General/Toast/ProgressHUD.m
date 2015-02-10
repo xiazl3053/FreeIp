@@ -50,6 +50,40 @@
 {
 	[[self shared] hudMake:status imgage:nil spin:YES hide:NO];
 }
++ (void)show:(NSString *)status viewInfo:(UIView *)view
+{
+    [self shared].viewInfo = view;
+    [[self shared] hudMake:status imgage:nil spin:YES hide:NO];
+}
+
++ (void)showPlayRight:(NSString *)status viewInfo:(UIView *)view
+{
+    [self shared].viewInfo = view;
+    [[self shared] showPlayRight:status imgage:nil spin:YES hide:NO];
+}
+
+-(void)showPlayRight:(NSString *)status imgage:(UIImage *)img spin:(BOOL)spin hide:(BOOL)hide
+{
+    [self hudCreate];
+    //---------------------------------------------------------------------------------------------------------------------------------------------
+    label.text = status;
+    label.hidden = (status == nil) ? YES : NO;
+    //---------------------------------------------------------------------------------------------------------------------------------------------
+    image.image = img;
+    image.hidden = (img == nil) ? YES : NO;
+    //---------------------------------------------------------------------------------------------------------------------------------------------
+    if (spin) [spinner startAnimating]; else [spinner stopAnimating];
+    //---------------------------------------------------------------------------------------------------------------------------------------------
+    [self hudOrient];
+    [self hudSize];
+    CGSize screen = [UIScreen mainScreen].bounds.size;
+    hud.center = CGPointMake(screen.height/2, screen.width/2);
+//    hud.bounds = CGRectMake(0, 0, hudWidth, hudHeight);
+    
+    [self hudShow];
+    //---------------------------------------------------------------------------------------------------------------------------------------------
+    if (hide) [NSThread detachNewThreadSelector:@selector(timedHide) toTarget:self withObject:nil];
+}
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------
 + (void)showSuccess:(NSString *)status
@@ -113,15 +147,24 @@
 	//---------------------------------------------------------------------------------------------------------------------------------------------
 	if (hud == nil)
 	{
-		hud = [[UIToolbar alloc] initWithFrame:[UIScreen mainScreen].applicationFrame];
-		hud.barTintColor = HUD_BACKGROUND_COLOR;
-		hud.translucent = YES;
+		hud = [[UIView alloc] initWithFrame:[UIScreen mainScreen].applicationFrame];
+		hud.backgroundColor = HUD_BACKGROUND_COLOR;
+	//	hud.translucent = YES;
 		hud.layer.cornerRadius = 10;
 		hud.layer.masksToBounds = YES;
 		//-----------------------------------------------------------------------------------------------------------------------------------------
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(rotate:) name:UIDeviceOrientationDidChangeNotification object:nil];
 	}
-	if (hud.superview == nil) [window addSubview:hud];
+    if (hud.superview == nil){
+        if (_viewInfo)
+        {
+            [_viewInfo addSubview:hud];
+        }
+        else
+        {
+            [window addSubview:hud];
+        }
+    }
 	//---------------------------------------------------------------------------------------------------------------------------------------------
 	if (spinner == nil)
 	{
@@ -164,7 +207,7 @@
 }
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------
-- (void)rotate:(NSNotification *)notification
+- (void)rotate:(NSNotification *) notification
 //-------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	[self hudOrient];
@@ -182,8 +225,8 @@
 	if (orient == UIInterfaceOrientationPortraitUpsideDown)	rotate = M_PI;
 	if (orient == UIInterfaceOrientationLandscapeLeft)		rotate = - M_PI_2;
 	if (orient == UIInterfaceOrientationLandscapeRight)		rotate = + M_PI_2;
-	//---------------------------------------------------------------------------------------------------------------------------------------------
-	hud.transform = CGAffineTransformMakeRotation(rotate);
+
+	hud.transform = CGAffineTransformMakeRotation(0.0);
 }
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -234,12 +277,12 @@
 		self.alpha = 1;
 
 		hud.alpha = 0;
-		hud.transform = CGAffineTransformScale(hud.transform, 1.4, 1.4);
+		hud.transform = CGAffineTransformScale(hud.transform, 1, 1);
 
 		NSUInteger options = UIViewAnimationOptionAllowUserInteraction | UIViewAnimationCurveEaseOut;
 
 		[UIView animateWithDuration:0.15 delay:0 options:options animations:^{
-			hud.transform = CGAffineTransformScale(hud.transform, 1/1.4, 1/1.4);
+			hud.transform = CGAffineTransformScale(hud.transform, 1, 1);
 			hud.alpha = 1;
 		}
 		completion:^(BOOL finished){ }];

@@ -14,7 +14,6 @@
 -(void)startConnect:(NSString *)strNo;
 -(void)startConnectWithChan:(NSString *)strNo channel:(int)nChannel;
 
--(void)pauseVideo;
 -(void)stopVideo;
 -(KxVideoFrame*)getNextFrame;
 -(NSMutableArray*)getVideoArray;
@@ -23,10 +22,11 @@
 -(void)releaseDecode;
 -(BOOL)setupVideoFrameFormat: (KxVideoFrameFormat) format;
 -(id)initWithFormat:(KxVideoFrameFormat)format;
--(void)recordStart;
+-(void)recordStart:(NSString*)strPath name:(NSString*)strDevName;
 -(void)recordStop;
 -(void)switchP2PCode:(int)nCode;
-
+-(void)sendPtzCmd:(int)nPtzCmd;
+-(NSMutableArray*)decodeFrames;
 
 
 @property (nonatomic,strong) NSMutableArray *videoArray;
@@ -42,4 +42,6 @@
 @property (nonatomic,assign) NSInteger nTagGl;
 @property (nonatomic,assign) int nChannel;
 @property (nonatomic,assign) BOOL bSwitch;
+@property (nonatomic,assign) BOOL nSwitchcode;
+
 @end

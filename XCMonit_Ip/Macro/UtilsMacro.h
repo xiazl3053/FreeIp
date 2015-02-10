@@ -30,8 +30,8 @@ enum connectP2P
     CONNECT_DEV_ERROR
 };
 
-#define  kTableviewCellHeight   59 
-#define  kTableViewRTSPCellHeight   59
+#define  kTableviewDeviceCellHeight   92
+#define  kTableViewRTSPCellHeight   69
 
 
 
@@ -55,11 +55,16 @@ enum connectP2P
 
 #define kDocumentPath [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0]
 #define kDatabasePath [kDocumentPath stringByAppendingPathComponent:@"xc.db"]
+#define kDatabaseUserRecord [kDocumentPath stringByAppendingPathComponent:@"xcRecord.db"]
 #define kDatabaseRecord [kDocumentPath stringByAppendingPathComponent:@"record.db"]
 #define kDatabaseRTSP [kDocumentPath stringByAppendingPathComponent:@"rtsp.db"]
 #define kLibraryPath  [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) objectAtIndex:0]
 #define kLibaryShoto [kLibraryPath stringByAppendingPathComponent:@"shoto"]
 #define IOS_SYSTEM_8 [[[UIDevice currentDevice] systemVersion] floatValue] >= 8.0
+
+#define XC_TAB_BAR_HEIGHT 49.0f
+
+
 
 
 #endif

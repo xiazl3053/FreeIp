@@ -30,7 +30,7 @@
     if (!_statusLabel) {
         UILabel *statusLabel = [[UILabel alloc] init];
         statusLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-        statusLabel.font = [UIFont boldSystemFontOfSize:13];
+        statusLabel.font = [UIFont fontWithName:@"Helvetica" size:13];
         statusLabel.textColor = MJRefreshLabelTextColor;
         statusLabel.backgroundColor = [UIColor clearColor];
         statusLabel.textAlignment = NSTextAlignmentCenter;

@@ -7,23 +7,54 @@
 //
 
 #import "UpdMobileViewController.h"
-
+#import "CustomNaviBarView.h"
 @interface UpdMobileViewController ()
+
+@property (nonatomic,strong) UITextField *txtMobile;
 
 @end
 
 @implementation UpdMobileViewController
+-(void)initHeadView
+{
+    
+    [self setNaviBarTitle:XCLocalized(@"updateEmail")];
+    UIButton *btn = [CustomNaviBarView createImgNaviBarBtnByImgNormal:@"NaviBtn_Back"
+                                                         imgHighlight:@"NaviBtn_Back_g" imgSelected:nil target:self action:@selector(navBack)];
+    [self setNaviBarLeftBtn:btn];
+    UIButton *right = [CustomNaviBarView createNormalNaviBarBtnByTitle:XCLocalized(@"save") target:self action:@selector(updateMobile)];
+    [self setNaviBarRightBtn:right];
+    
+}
 
-- (void)viewDidLoad {
+-(void)updateMobile
+{
+    
+}
+
+-(void)navBack
+{
+    [self dismissViewControllerAnimated:YES completion:nil];
+}
+- (void)viewDidLoad
+{
     [super viewDidLoad];
-    // Do any additional setup after loading the view.
+    [self initHeadView];
 }
 
-- (void)didReceiveMemoryWarning {
+- (void)didReceiveMemoryWarning
+{
     [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
 }
-
+#pragma mark 重力处理
+- (BOOL)shouldAutorotate
+{
+    return NO;
+}
+-(NSUInteger)supportedInterfaceOrientations
+{
+    return UIInterfaceOrientationMaskPortrait;
+}
 /*
 #pragma mark - Navigation
 

@@ -24,6 +24,6 @@
 
 #import <UIKit/UIKit.h>
 
-@interface RSKExampleViewController : UIViewController
+@interface RSKViewController : UIViewController <UIImagePickerControllerDelegate>
 
 @end

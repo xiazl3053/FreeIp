@@ -15,7 +15,7 @@
     self = [super initWithFrame:frame];
     if (self) {
         // Initialization code
-        [self setFont:[UIFont systemFontOfSize:15.0f]];
+        [self setFont:[UIFont fontWithName:@"Helvetica" size:15.0f]];
         [self setTextColor:[UIColor blackColor]];
     }
     return self;
@@ -25,7 +25,7 @@
     self = [super initWithFrame:frame];
     if (self) {
         // Initialization code
-        [self setFont:[UIFont systemFontOfSize:size]];
+        [self setFont:[UIFont fontWithName:@"Helvetica" size:size]];
         [self setTextColor:[UIColor blackColor]];
     }
     return self;

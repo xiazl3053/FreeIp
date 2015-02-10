@@ -8,6 +8,13 @@
 
 #import <Foundation/Foundation.h>
 
+typedef void(^HttpUpdEmail)(int nStatus);
+
 @interface UpdEmailService : NSObject
+
+
+@property (nonatomic,copy) HttpUpdEmail httpBlock;
+
+-(void)requestUpdEmail:(NSString*)strEmail;
 
 @end

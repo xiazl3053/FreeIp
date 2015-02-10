@@ -14,5 +14,7 @@
 +(BOOL)addRtsp:(RtspInfo*)rtspInfo;
 
 +(NSMutableArray*)queryAllRtsp;
++(BOOL)removeByIndex:(NSInteger)nIndex;
++(BOOL)updateRtsp:(RtspInfo*)rtspInfo;
 
 @end

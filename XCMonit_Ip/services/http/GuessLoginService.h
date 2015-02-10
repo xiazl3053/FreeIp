@@ -8,6 +8,12 @@
 
 #import <Foundation/Foundation.h>
 
+typedef void(^HttpGuessLogin)(int nstatus);
+
 @interface GuessLoginService : NSObject
+
+@property (nonatomic,copy) HttpGuessLogin httpGuessBlock;
+
+-(void)connectionHttpLogin;
 
 @end

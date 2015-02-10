@@ -7,7 +7,21 @@
 //
 
 #import <Foundation/Foundation.h>
-
+@class PictureModel;
 @interface PhoneDb : NSObject
+
++(BOOL)insertRecord:(PictureModel *)pic;
+
++(NSArray*)queryRecord:(NSString*)strTime end:(NSString*)strEndTime;
++(NSArray*)queryLastRecord;
+
++(BOOL)deleteRecord:(NSArray *)array;
++(BOOL)deleteRecordById:(NSInteger)nId;
++(NSString*)queryLastTime;
++(NSArray*)queryRecordByTime:(NSString*)strTime;
++(NSArray*)queryAllPhone;
+
++(NSArray*)queryPicByTimeSE:(NSString*)strStartTime end:(NSString*)strEndTime;
++(PictureModel *)queryPicByIndex:(NSInteger)nIndex;
 
 @end

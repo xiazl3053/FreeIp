@@ -11,32 +11,44 @@
 #endif
 #import "DevInfoMacro.h"
 
-//#define kServerName    “183.57.82.43”
-
 
 #ifdef __OBJC__
     #import <UIKit/UIKit.h>
     #import <Foundation/Foundation.h>
     #import "GlobalDefine.h"
+    #define XCLocalized(x) NSLocalizedString(x, "")
+
+#define    kUSER_INFO_MAX_LENGTH   64
+
+
 
 #endif
 
 
-
 /*
- 
+ P2P直接打洞成功:芬兰、俄罗斯民房、摩尔多瓦、
  
  lipo -create /Users/xiazhonglin/Desktop/iosp2p/avmv7/libenet.a
  /Users/xiazhonglin/Desktop/iosp2p/armv7s/libenet.a -output
  /Users/xiazhonglin/Desktop/iosp2p/new/libenet.a
  
- lipo -create /Users/xiazhonglin/Desktop/iosp2p/armv7/libenet.a /Users/xiazhonglin/Desktop/iosp2p/armv7s/libenet.a -output /Users/xiazhonglin/Desktop/iosp2p/libenet.a
+lipo -create armv7/lib/libavcodec.a arm64/lib/libavcodec.a -output universal/libavcodec.a
+lipo -create armv7/lib/libavformat.a arm64/lib/libavformat.a -output universal/libavformat.a
+lipo -create armv7/lib/libavutil.a arm64/lib/libavutil.a -output universal/libavutil.a
+lipo -create armv7/lib/libswscale.a arm64/lib/libswscale.a -output universal/libswscale.a
  
- lipo -create /Users/xiazhonglin/Desktop/iosp2p/armv7/libnattrav.a /Users/xiazhonglin/Desktop/iosp2p/armv7s/libnattrav.a -output /Users/xiazhonglin/Desktop/iosp2p/libnattrav.a
+ lipo -create i386/lib/libavcodec.a x86_64/lib/libavcodec.a -output universal/libavcodec.a
+ lipo -create i386/lib/libavformat.a x86_64/lib/libavformat.a -output universal/libavformat.a
+ lipo -create i386/lib/libavutil.a x86_64/lib/libavutil.a -output universal/libavutil.a
+ lipo -create i386/lib/libswscale.a x86_64/lib/libswscale.a -output universal/libswscale.a
  
- lipo -create /Users/xiazhonglin/Desktop/iosp2p/armv7/librutil.a /Users/xiazhonglin/Desktop/iosp2p/armv7s/librutil.a -output /Users/xiazhonglin/Desktop/iosp2p/librutil.a
- 
- lipo -create /Users/xiazhonglin/Desktop/iosp2p/armv7/libsdkclient.a /Users/xiazhonglin/Desktop/iosp2p/armv7s/libsdkclient.a -output /Users/xiazhonglin/Desktop/iosp2p/libsdkclient.a
+lipo -create armv7/libenet.a arm64/libenet.a -output universal/libenet.a
+
+lipo -create armv7/libnattrav.a arm64/libnattrav.a -output universal/libnattrav.a
+
+lipo -create armv7/librutil.a  arm64/librutil.a -output universal/librutil.a
+
+lipo -create armv7/libsdkclient.a arm64/libsdkclient.a -output universal/libsdkclient.a
  
  libnattrav.a  librutil.a libsdkclient.a
  
@@ -72,7 +84,9 @@ RTSP设备添加页面:
  7.密码
 
  
- 
+ 1.登录页面修改
+ 2.新添加一个注册页面
+
  
  
  
@@ -80,18 +94,139 @@ RTSP设备添加页面:
 2.看DVR、NVR实时流时，点击录像按钮时，录像按钮图标要设计成红色，而且要提示"开始录像",IPC录像时
 有提示“开始录像”，录像完成后图标要恢复正常，且提示“录像停止”。而且如果对应通道如果没有视频时，
 则抓拍和录像按钮应该设置成灰色，使其不能抓拍和录像           --图片修改   --已经修改
+ 
 3.本地录像显示默认显示当天录像，且支持按时间(具体到天)来查询录像,无录像文件时页面显示无录像文件的相关提示  --功能更改
-4.“更多” 里面添加"查看版本"信息    --
-5.增加”序列号扫描“功能
-6.FREEIP图标logo改成云状环绕的logo
+ 
+4.“更多” 里面添加"查看版本"信息 -- 有
+
+5.增加”序列号扫描“功能 --需要加入篮框
+ 
+6.FREEIP图标logo改成云状环绕的logo --改了
+ 
+//录像
+ 
+//录像-整体功能优化
+1.时间段搜索
+2.界面休整
+3.删除方式
+4.显示时间间隔
+ 
+
+//RTSP界面修改
+1.删除方式
+2.录像查看
+3.通道点播方式
+
+ 
+//播放界面
+1.图标
+2.
+ 
+//我的视频
+ 
+//管理
+ 
+//报警
+
  
  
+logo修改
+
+二维码扫描
+ 
+
  
 www.freeip.com
 1456738216
  
+添加rtsp页面  --已完善
+个人信息页面
+帮助页面
+设备详情
+ 
+     IOS客服端开发未完善部分处理
+1.新录像播放
+2.IOS8兼容
+3.图片3x
+    IDP个人账号审核状态
+  由于连续一个星期没有出现错误结论,
+  估计应该月底可以下载
+    IDP企业版申请状态
+    apple公司反馈回来结果，在企业版账号注册后，
+没有验证邮箱，选择公司类型为私企。
+    之后重新申请，后面还需要一系列4个步骤。
  
  
+       10月24日
+    1.两个边缘按钮修改       --ok
+    2.二维码扫描图片识别     --ok
+    3.保存图片问题          --ok
+    4.重力感应
+    5.列表排序             --ok
+    6.录像记录休整
+    7.视频播放横屏修改      --ok
+    8.我的与设备管理界面细节修改    --OK
+ 
+    11月3日
+    1.发布版本
+    2.RTSP修改
+    3.
  
  
- */
+    1月5日后工作内容
+    1.葡萄牙语加入，图片部分修改，与google翻译对应检测，是否有字母编写错误
+    2.云台操作实现
+    3.视频优化
+    4.DVR与NVR视频播放
+    5.直连的方式修改
+    6.图片查看整个模块修改
+    7.app store新版发布
+ 
+    1月7日
+    1.防止抓拍与录像的重复动作  
+    2.直连漏洞修改
+    3.修改FFMPEG版本中，对rtsp协议支持的部分
+    1月8日
+    1.直连实时播放与历史播放界面修改
+    2.直连实时播放流程修改
+    1月9日
+    1.图像浏览整体修改，替换开源资源
+    2.修改视频切换部分
+ 
+    svn import /Users/xiazhonglin/Documents/XCMonit_IpV5.1.3 https://172.18.191.42:8443/svn/xzlProject/trunk/ios/XCMonit_IpV5.1.3 -m "初始化导入"
+ 
+ 
+ zfe845251361     caoxi628688
+ 
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

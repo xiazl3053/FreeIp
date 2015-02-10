@@ -1,133 +1,60 @@
-/* 
-  Localizable.strings
-  LocalizableDemo
-
-  Created by Jordan Cao on 12-9-26.
-  Copyright (c) 2012年 AirView.com. All rights reserved.
-*/
-/*Loginbtn */
 "Loginbtn" = "登录";
-/*Loginuser */
 "Loginuser" = "请输入用户名";
-/*Loginpwd */
+"regUser"="请输入邮箱";
 "Loginpwd" = "请输入密码";
-/*Loginregister */
-"Loginregister" = "注册";
-
-/*http service*/
+"LoginpwdAgain" = "请再次输入密码";
+"Loginregister" = "注册账号";
 "httpserver" = "http://www.freeip.com/";
-
-/*P2P service*/
 "p2pserver" = "www.freeipc.com";
-
-/*offline*/
 "offline" = "离线";
-
-/*online*/
 "online" = "在线";
-
-/*device status*/
 "statu" = "状态";
-
-/*device type*/
 "type" = "类型";
-
-/*devNO*/
 "devNO" = "序列号";
-
-/*devDel*/
 "devDel" = "删除";
-
-/*home*/
-"home" = "我的";
-
-/*device*/
+"home" = "我的设备";
 "device" = "设备管理";
-
-/*more*/
+"deviceList" = "设备列表";
 "more" = "更多";
-
-/*picture*/
+"rtsp" = "直连";
 "picture" = "图片";
-
-/*userinfo*/
 "userinfo" = "用户信息";
-
-/*aboutus*/
 "aboutus" = "关于我们";
-
-/*version*/
-"version" = "当前版本";
-
-/*cancel*/
+"version" = "版本";
 "cancel" = "取消";
-
-/*confirm*/
 "confirm" = "确认";
-
-/*delete device request*/
 "delDeviceQuq" = "是否删除设备";
-
-/*logout*/
 "logout" = "注销";
-
-/*device*/
 "devDetails" = "设备详情";
-
-/*loading*/
 "loading" = "正在连接...";
-
-/*connectFail*/
 "connectFail" = "连接设备失败";
-
-/*Disconnect*/
 "Disconnect" = "设备连接中断";
-
-/*deviceinfotimeout*/
 "deviceinfotimeout" = "获取设备信息超时";
-
-/*updDevName*/
 "updDevName" = "修改设备名称";
-
-/*save*/
 "save" = "保存";
-
-/*cameraName*/
 "cameraName" = "设备名称(长度小于50)";
-
-/*userAuth*/
 "userAuth" = "用户名不能为空";
-
-/*pwdAuth*/
 "pwdAuth" = "密码不能为空";
-
-/*logining*/
 "logining" = "登录中...";
-
-/*authError*/
 "authError" = "用户名或者密码错误";
-
-/*loginTime*/
 "loginTime" = "连接超时...";
-
-/*ServerException*/
 "ServerException" = "服务器异常";
-
 "Remind" = "提示";
 "logoutRemind" = "是否注销";
 "AddCamera" = "添加设备";
 "inputNO" = "请输入序列号";
 "serialLength" = "序列号长度必须为13";
 "addOk" = "添加成功";
-"bindingError" = "该设备已被其他用户绑定";
+"bindingError" = "该设备已被绑定";
 "serialError" = "设备序列号不存在";
 "addTimeout" = "添加设备超时";
 "Modify" = "修改设备名";
-"cameraLess" = "长度必须小于50";
+"cameraLess" = "长度必须小于64";
 "cameranull" = "设备名不能为空";
 "updateOK" = "修改成功";
 "updateTimeOut" = "修改设备名超时";
 "nostream" = "没有获取到码流";
+"streamSetFail"="码流设置失败";
 "switchError" = "码流切换失败";
 "picturesView" = "图片";
 "Nickname" = "昵称";
@@ -145,7 +72,180 @@
 "NULLInfo" = "空";
 "videoSwitch" = "正在设置码流";
 "userTimeout" = "获取用户信息超时";
-"rtspList" = "RTSP列表";
-
+"rtspList" = "直连设备列表";
 "versionInfo" = "版本信息";
+"startTime"="开始时间";
+"endTime"="结束时间";
+"allTime"="总时长";
+"ipcType"="IPC";
+"DVR4"="DVR-4";
+"DVR8"="DVR-8";
+"DVR16"="DVR-16";
+"DVR24"="DVR-24";
+"DVR32"="DVR-32";
+"DVRError"="DVR-错误";
+"NVR4"="NVR-4";
+"NVR8"="NVR-8";
+"NVR16"="NVR-16";
+"NVR24"="NVR-24";
+"NVR32"="NVR-32";
+"NVRError"="NVR-错误";
+"deviceNULL" = "设备类型错误";
+"RegisterView" = "注册";
+"RegiAuth"="验证码";
+"Next"="Refresh";
+"UsernameAlready"="用户名已经注册";
+"TwoPwd"="两次输出的密码不一致";
+"RegTimeout"="注册失败，连接超时";
+"RegData"="注册失败,数据错误";
+"RegPic"="注册失败,验证码错误";
+"RegSuc"="注册成功";
+"Registering"="正在注册";
+"EnterImg"="验证码不能为空";
+"confirmPwd"="确认密码不能为空";
+"pwdNull"="密码不能为空";
+"userNull"="用户名不能为空";
+"picNull"="验证码不能为空";
+"ImageFail"="验证码获取失败";
+"auth_ico"="auth_default";
+"help"="帮助";
+"input"="输入";
+"saveLogin"="记住密码";
+"addrtsp"="添加直连设备";
+
+"devName"="设备名";
+"devAddr"="地  址";
+"devPort"="端  口";
+"devUser"="用户名";
+"devPwd"="密  码";
+
+
+"devNameNULL"="设备名不能为空";
+"devAddrNULL"="IP地址不能为空";
+"devPortNULL"="端口不能为空";
+
+"devAddOk"="添加成功";
+"startTime" = "开始";
+"endTime"="结束";
+
+
+"noRecords"="没有录像记录";
+
+"devName_info"="设备名称";
+
+"rtspinterrup"="连接中断";
+"startRecord"="开始录像...";
+"stopRecord"="停止录像...";
+"captureS"="抓拍成功";
+"captureF"="抓拍失败";
+"playOK"="播放完毕";
+"deleteDevice"="删除设备";
+"deleteDeviceOK"="删除成功";
+"deleteDeviceFail"="删除失败";
+"deleteDeviceFail_server"="服务器信息错误";
+
+
+
+"keyboardFirst"="上一个";
+"keyboardEnd"="下一个";
+"keyboardDone"="完成";
+
+"dateLang"="zh_cn";
+
+"startOEnd"="开始日期不能在结束日期之后";
+"endOStart"="结束日期不能在开始日期之前";
+
+"oldPwd"="旧密码";
+"newpwd"="新密码";
+"updateEmail"="修改邮箱";
+"updateReal"="修改姓名";
+"updpwd"="密码修改";
+"pwdCom"="密码确认";
+"nickUpd"="昵称修改";
+"nickEmpty"="昵称不能为空";
+"realEmpty"="真实姓名不能为空";
+"oldEmpty"="旧密码不能为空";
+"newEmpty"="新密码不能为空";
+"comEmpty"="确认密码不能为空";
+"oldError"="旧密码错误";
+"newError"="新密码不一致";
+"pwdLength"="密码长度不能小于6";
+"updpwding"="修改密码...";
+"updnicking"="修改昵称...";
+"updemailing"="修改邮箱...";
+"emailEmpty"="邮箱不能为空";
+"emailError"="邮箱格式错误";
+"emailBind"="用户邮箱已绑定，无法设置";
+"email"="邮箱";
+
+
+"deviceInfo"="当前设备个数";
+
+"noDevice"="当前没有添加任何设备，请添加设备";
+"devfresh"="正在刷新...";
+"releaseRefresh"="松开立即刷新";
+"pullto"="上拉可以刷新";
+"pulltomore"="上拉可以加载更多数据";
+"releasemore"="松开立即加载更多数据";
+"devDone"="设备加载完毕";
+"unFindStream"="找不到码流";
+"helpWeb"="http://www.freeip.com/index.php?r=site/AboutAppEn";
+"autoLogin"="自动登录";
+"savePhoto"="保存";
+"qrResult"="没有扫描到序列号";
+"qrcode_h"="qrcode_ch_h";
+"qrcode"="qrcode_ch";
+"noRecording"="没有图片或视频";
+"helpicon"="help_ch";
+
+"find_pwd"="找回密码";
+"next_find"="下一步";
+"UserInfoNotExits"="用户信息不存在";
+"NewPwd"="请输入新密码";
+"confirmNewPwd"="请确认新密码";
+"resend"="重新发送";
+"VertifySucc"="已发送验证码到邮箱";
+"VerifyAccount"="验证账户...";
+"VertifyExits"="用户名不存在";
+"VertifyEmail"="邮箱没有绑定";
+"vertifyCode"="验证码";
+"sendCode"="发送验证码...";
+
+
+"vertifyError"="验证码错误";
+"vertifyEmpty"="密码为空";
+"vertifyTimeout"="会话超时";
+"vertifyUser"="用户信息错误";
+"vertiEmpty"="验证码不能为空";
+"guessImg"="guess_ch";
+
+
+"alSend"="已发送至邮箱";
+
+"photos"="相册";
+"camera"="照相";
+"uploadDone"="上传成功";
+
+"savePhotos"="成功保存到相册";
+
+"oldPwdError"="旧密码错误";
+"networkstatus3G"="当前网络:移动网络";
+"networkstatusWIFI"="当前网络:WIFI";
+"networkstatusNO"="没有网络";
+"connectionDevice"="当前通道正在建立P2P连接";
+"reconnect"="重新连接设备";
+"devUpdOK"="修改成功";
+"editor"="编辑";
+"recorddirect"="录像";
+"updRtsp"="修改直连设备";
+"nSecondSend"="秒";
+"regThan64"="用户名长度不能大于64";
+"emailThan64" = "邮箱地址长度不能大于64";
+"nickThan64" = "昵称长度不能大于64";
+"pwdThan64"="密码长度不能大于64";
+"realThan64"="姓名长度不能大于64";
+
+
+
+
 

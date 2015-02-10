@@ -8,6 +8,13 @@
 
 #import <Foundation/Foundation.h>
 
+typedef void(^HttpUpdNick)(int nStatus);
+
+
 @interface UpdNickService : NSObject
+
+@property (nonatomic,copy) HttpUpdNick httpBlock;
+
+-(void)requestUpdNick:(NSString*)strReal;
 
 @end

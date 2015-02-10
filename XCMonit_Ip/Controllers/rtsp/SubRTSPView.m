@@ -6,53 +6,53 @@
 //  Copyright (c) 2012年 __MyCompanyName__. All rights reserved.
 //
 
-#import "SubCateViewController.h"
+#import "SubRTSPView.h"
 #define COLUMN 4
 
-@interface SubCateViewController ()
+@interface SubRTSPView ()
 
 @end
 
-@implementation SubCateViewController
+@implementation SubRTSPView
 
-@synthesize subCates=_subCates;
-@synthesize cateVC=_cateVC;
 
 - (void)dealloc
 {
-    [_subCates release];
-    [_cateVC release];
-    [super dealloc];
+
 }
 
-- (void)viewDidLoad
+-(id)init
 {
-    [super viewDidLoad];
-    // Do any additional setup after loading the view from its nib.
-    
-    self.view.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"tmall_bg_furley.png"]];
-    
+    self = [super init];
+    return self;
+}
+-(void)layoutSubviews
+{
+    [super layoutSubviews];
+    self.backgroundColor = RGB(52, 78, 147);
     // init cates show
-    int total = _nCount;
-#define ROWHEIHT 70    
-    int rows = (total / COLUMN) + ((total % COLUMN) > 0 ? 1 : 0);
-    CGRect viewFrame = self.view.frame;
-    viewFrame.size.height = rows*70;
-    self.view.frame = viewFrame;
-    UIScrollView *scrolView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 0, 320, 280)];
-    [self.view addSubview:scrolView];
-    for (int i=0; i<total; i++) {
+    NSInteger total = _nCount;
+#define ROWHEIHT 70
+    int rows = (int)(total / COLUMN) + ((total % COLUMN) > 0 ? 1 : 0);
+    CGRect viewFrame = self.frame;
+    viewFrame.size.height = rows*70+20;
+    self.frame = viewFrame;
+    UIScrollView *scrolView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 0, kScreenWidth, 280)];
+    [self addSubview:scrolView];
+    for (int i=0; i<total; i++)
+    {
         int row = i / COLUMN;
         int column = i % COLUMN;
         
-        UIView *view = [[[UIView alloc] initWithFrame:CGRectMake(80*column, ROWHEIHT*row, 80, ROWHEIHT)] autorelease];
+        UIView *view = [[UIView alloc] initWithFrame:CGRectMake((kScreenWidth/4)*column, ROWHEIHT*row, (kScreenWidth/4), ROWHEIHT)] ;
         view.backgroundColor = [UIColor clearColor];
         UIButton *btn = [UIButton buttonWithType:UIButtonTypeCustom];
         btn.frame = CGRectMake(15, 15, 50, 50);
-        btn.tag = i;
-        [btn addTarget:self.cateVC 
-                action:@selector(subCateBtnAction:) 
-      forControlEvents:UIControlEventTouchUpInside];
+        btn.layer.masksToBounds = YES;
+        btn.layer.cornerRadius = 25.0f;
+        
+        btn.tag = i+1;
+        [btn addTarget:self action:@selector(testInfo:) forControlEvents:UIControlEventTouchUpInside];
         NSString *strImg = [NSString stringWithFormat:@"%d",i+1];
         [btn setTitle:strImg forState:UIControlStateNormal];
         [btn setBackgroundColor:[UIColor whiteColor]];
@@ -60,42 +60,26 @@
         [view addSubview:btn];
         [scrolView addSubview:view];
     }
-    scrolView.contentSize = CGSizeMake(320,80*rows);
+    scrolView.contentSize = CGSizeMake(kScreenWidth,80*rows);
     scrolView.pagingEnabled=YES;
     [scrolView setScrollEnabled:YES];
 }
+-(id)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    return self;
+}
+
+
+-(void)testInfo:(UIButton*)sender
+{
+    NSInteger nChannel = [sender.titleLabel.text integerValue];
+    if (_delegate && [_delegate respondsToSelector:@selector(playRtspConnect:)]) {
+        [_delegate playRtspConnect:nChannel];
+    }
+}
 
 @end
-/*
- CGRect viewFrame = self.view.frame;
- viewFrame.size.height = 320;
- self.view.frame = viewFrame;
- UIScrollView *scrolView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 0, 320, 50)];
- [self.view addSubview:scrolView];
- for (int i=0; i<total; i++) {
- int row = i / COLUMN;
- int column = i % COLUMN;
- UIView *view = [[[UIView alloc] initWithFrame:CGRectMake(50*column, ROWHEIHT*row, 50, ROWHEIHT)] autorelease];
- view.backgroundColor = [UIColor clearColor];
- UIButton *btn = [UIButton buttonWithType:UIButtonTypeCustom];
- btn.frame = CGRectMake(2, 2, 45, 45);
- btn.tag = i;
- [btn addTarget:self.cateVC
- action:@selector(subCateBtnAction:)
- forControlEvents:UIControlEventTouchUpInside];
- NSString *strTitle = [NSString stringWithFormat:@"%d",i];
- [btn setTitle:strTitle forState:UIControlStateNormal];
- 
- [view addSubview:btn];
- 
- [scrolView addSubview:view];
- }
- scrolView.contentSize = CGSizeMake(320,640);
- scrolView.pagingEnabled=YES;
- [scrolView setScrollEnabled:YES];
- 
- **/
-
 
 
 

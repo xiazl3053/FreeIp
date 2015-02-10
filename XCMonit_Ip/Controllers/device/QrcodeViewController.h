@@ -7,7 +7,15 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "CustomViewController.h"
+#import "ZBarSDK.h"
 
-@interface QrcodeViewController : ViewController
+@interface QrcodeViewController : CustomViewController<ZBarReaderViewDelegate>
+
+
+//@property (strong, nonatomic) UILabel *label;
+//@property (strong, nonatomic) UIImageView *imageview;
+//@property (strong, nonatomic) UITextField *text;
+
 
 @end

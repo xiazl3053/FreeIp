@@ -84,7 +84,8 @@ static const NSString * CSToastActivityViewKey  = @"CSToastActivityViewKey";
     [self showToast:toast duration:interval position:position];  
 }
 
-- (void)showToast:(UIView *)toast {
+- (void)showToast:(UIView *)toast
+{
     [self showToast:toast duration:CSToastDefaultDuration position:CSToastDefaultPosition];
 }
 
@@ -92,7 +93,6 @@ static const NSString * CSToastActivityViewKey  = @"CSToastActivityViewKey";
     toast.center = [self centerPointForPosition:point withToast:toast];
     toast.alpha = 0.0;
     [self addSubview:toast];
-    
     [UIView animateWithDuration:CSToastFadeDuration
                           delay:0.0
                         options:UIViewAnimationOptionCurveEaseOut
@@ -122,9 +122,9 @@ static const NSString * CSToastActivityViewKey  = @"CSToastActivityViewKey";
     UIView *existingActivityView = (UIView *)objc_getAssociatedObject(self, &CSToastActivityViewKey);
     if (existingActivityView != nil) return;
     
-    UIView *activityView = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, CSToastActivityWidth, CSToastActivityHeight)] autorelease];
+    UIView *activityView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, CSToastActivityWidth, CSToastActivityHeight)] ;
     activityView.center = [self centerPointForPosition:position withToast:activityView];
-    activityView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:CSToastOpacity];
+    activityView.backgroundColor = [[UIColor clearColor] colorWithAlphaComponent:CSToastOpacity];
     activityView.alpha = 0.0;
     activityView.autoresizingMask = (UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin);
     activityView.layer.cornerRadius = CSToastCornerRadius;
@@ -136,14 +136,16 @@ static const NSString * CSToastActivityViewKey  = @"CSToastActivityViewKey";
         activityView.layer.shadowOffset = CSToastShadowOffset;
     }
     
-    UIActivityIndicatorView *activityIndicatorView = [[[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge] autorelease];
+    UIActivityIndicatorView *activityIndicatorView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
     activityIndicatorView.center = CGPointMake(activityView.bounds.size.width / 2, activityView.bounds.size.height / 2);
     [activityView addSubview:activityIndicatorView];
     [activityIndicatorView startAnimating];
     
     // associate ourselves with the activity view
     objc_setAssociatedObject (self, &CSToastActivityViewKey, activityView, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    
+    UILabel *lblInfo = [[UILabel alloc] initWithFrame:Rect(0, 0, 60, 60)];
+    [lblInfo setText:@"test"];
+    [lblInfo setTextColor:[UIColor whiteColor]];
     [self addSubview:activityView];
     
     [UIView animateWithDuration:CSToastFadeDuration
@@ -156,7 +158,8 @@ static const NSString * CSToastActivityViewKey  = @"CSToastActivityViewKey";
 
 - (void)hideToastActivity {
     UIView *existingActivityView = (UIView *)objc_getAssociatedObject(self, &CSToastActivityViewKey);
-    if (existingActivityView != nil) {
+    if (existingActivityView != nil)
+    {
         [UIView animateWithDuration:CSToastFadeDuration
                               delay:0.0
                             options:(UIViewAnimationOptionCurveEaseIn | UIViewAnimationOptionBeginFromCurrentState)
@@ -172,9 +175,11 @@ static const NSString * CSToastActivityViewKey  = @"CSToastActivityViewKey";
 #pragma mark - Private Methods
 
 - (CGPoint)centerPointForPosition:(id)point withToast:(UIView *)toast {
-    if([point isKindOfClass:[NSString class]]) {
+    if([point isKindOfClass:[NSString class]])
+    {
         // convert string literals @"top", @"bottom", @"center", or any point wrapped in an NSValue object into a CGPoint
-        if([point caseInsensitiveCompare:@"top"] == NSOrderedSame) {
+        if([point caseInsensitiveCompare:@"top"] == NSOrderedSame)
+        {
             return CGPointMake(self.bounds.size.width/2, (toast.frame.size.height / 2) + CSToastVerticalPadding);
         } else if([point caseInsensitiveCompare:@"bottom"] == NSOrderedSame) {
             return CGPointMake(self.bounds.size.width/2, (self.bounds.size.height - (toast.frame.size.height / 2)) - CSToastVerticalPadding);
@@ -185,7 +190,7 @@ static const NSString * CSToastActivityViewKey  = @"CSToastActivityViewKey";
         return [point CGPointValue];
     }
     
-    NSLog(@"Warning: Invalid position for toast.");
+    DLog(@"Warning: Invalid position for toast.");
     return [self centerPointForPosition:CSToastDefaultPosition withToast:toast];
 }
 
@@ -199,7 +204,7 @@ static const NSString * CSToastActivityViewKey  = @"CSToastActivityViewKey";
     UIImageView *imageView = nil;
     
     // create the parent view
-    UIView *wrapperView = [[[UIView alloc] init] autorelease];
+    UIView *wrapperView = [[UIView alloc] init];
     wrapperView.autoresizingMask = (UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin);
     wrapperView.layer.cornerRadius = CSToastCornerRadius;
     
@@ -213,7 +218,7 @@ static const NSString * CSToastActivityViewKey  = @"CSToastActivityViewKey";
     wrapperView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:CSToastOpacity];
     
     if(image != nil) {
-        imageView = [[[UIImageView alloc] initWithImage:image] autorelease];
+        imageView = [[UIImageView alloc] initWithImage:image];
         imageView.contentMode = UIViewContentModeScaleAspectFit;
         imageView.frame = CGRectMake(CSToastHorizontalPadding, CSToastVerticalPadding, CSToastImageViewWidth, CSToastImageViewHeight);
     }
@@ -230,9 +235,9 @@ static const NSString * CSToastActivityViewKey  = @"CSToastActivityViewKey";
     }
     
     if (title != nil) {
-        titleLabel = [[[UILabel alloc] init] autorelease];
+        titleLabel = [[UILabel alloc] init];
         titleLabel.numberOfLines = CSToastMaxTitleLines;
-        titleLabel.font = [UIFont boldSystemFontOfSize:CSToastFontSize];
+        titleLabel.font = [UIFont fontWithName:@"Helvetica" size:CSToastFontSize];
         titleLabel.textAlignment = NSTextAlignmentLeft;
         titleLabel.lineBreakMode = NSLineBreakByWordWrapping;
         titleLabel.textColor = [UIColor whiteColor];
@@ -247,9 +252,9 @@ static const NSString * CSToastActivityViewKey  = @"CSToastActivityViewKey";
     }
     
     if (message != nil) {
-        messageLabel = [[[UILabel alloc] init] autorelease];
+        messageLabel = [[UILabel alloc] init];
         messageLabel.numberOfLines = CSToastMaxMessageLines;
-        messageLabel.font = [UIFont systemFontOfSize:CSToastFontSize];
+        messageLabel.font = [UIFont fontWithName:@"Helvetica" size:CSToastFontSize];
         messageLabel.lineBreakMode = NSLineBreakByWordWrapping;
         messageLabel.textColor = [UIColor whiteColor];
         messageLabel.backgroundColor = [UIColor clearColor];

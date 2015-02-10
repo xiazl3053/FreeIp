@@ -25,6 +25,7 @@
  */
 - (void)addHeaderWithTarget:(id)target action:(SEL)action;
 
+
 /**
  *  移除下拉刷新头部控件
  */

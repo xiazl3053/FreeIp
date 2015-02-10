@@ -16,35 +16,103 @@
 #import "RecordDb.h"
 using namespace std;
 
-#define P2PSHAREDSERVICE  [P2PInitService sharedP2PInitService]
 #define HEART_SECOND   30
+
 bool RecvFile::ProcessFrameData(char* aFrameData, int aFrameDataLength)
 {
-    unsigned char* pUnData=(unsigned char*)aFrameData;
-    unsigned char* pBuf = (unsigned char*)malloc(256);
-    int nTemp = 256;
-    int nCurSize = 0,nRead = 0;
-    //每次读取256个字节
-    while (nCurSize!=aFrameDataLength)
+    if( aFrameDataLength <= 0 )
     {
-        nRead = ((aFrameDataLength - nCurSize) > nTemp) ? nTemp : (aFrameDataLength - nCurSize);
-        memcpy(pBuf, pUnData+nCurSize, nRead);
-        nCurSize +=nRead;
-        NSData *dataInfo = [[NSData alloc] initWithBytes:pBuf length:nRead];
-        @synchronized(aryVideo)
-        {
-            [aryVideo addObject:dataInfo];
-        }
-        dataInfo = nil;
+        return YES;
     }
-    free(pBuf);
+    unsigned char *unFrame = (unsigned char *)aFrameData;
+    
+//    DLog(@"%hhu--%hhu--%hhu--%hhu--%hhu--%d",unFrame[0],unFrame[1],unFrame[2],unFrame[3],unFrame[4],aFrameDataLength);
+    
+//    if (!aryData)
+//    {
+//        aryData = [NSMutableData data];
+//        [aryData appendBytes:aFrameData length:aFrameDataLength];
+//    }
+//    else
+//    {
+//        if (unFrame[0] != 0x00 || unFrame[1] != 0x00)
+//        {
+//            [aryData appendBytes:aFrameData length:aFrameDataLength];
+//            @synchronized(aryVideo)
+//            {
+//                [aryVideo addObject:aryData];
+//            }
+//        }
+//        else
+//        {
+//            @synchronized(aryVideo)
+//            {
+//                [aryVideo addObject:aryData];
+//            }
+//            aryData = nil;
+//            aryData = [NSMutableData data];
+//            [aryData appendBytes:aFrameData length:aFrameDataLength];
+//        }
+//    }
+//    if(unFrame[3] == 0x67 || unFrame[4] == 0x67)
+//    {
+//        aryData = [NSMutableData data];
+//        [aryData appendBytes:aFrameData length:aFrameDataLength];
+//    }
+//    else if(unFrame[3] == 0x61 || unFrame[4] == 0x61)
+//    {
+//        NSData *dataInfo = [NSData dataWithBytes:aFrameData length:aFrameDataLength];
+//        if(aryData)
+//        {
+//            @synchronized(aryVideo)
+//            {
+//                [aryVideo addObject:aryData];
+//            }
+//            aryData = nil;
+//        }
+//        @synchronized(aryVideo)
+//        {
+//            [aryVideo addObject:dataInfo];
+//        }
+//    }
+//    else
+//    {
+//        [aryData appendBytes:aFrameData length:aFrameDataLength];
+//    }
+    NSData *dataInfo = [NSData dataWithBytes:aFrameData length:aFrameDataLength];
+    @synchronized(aryVideo)
+    {
+        [aryVideo addObject:dataInfo];
+    }
+    dataInfo = nil;
     
     if (bRecord)
     {
-        [data appendBytes:pUnData length:aFrameDataLength];
+        if(bStart)
+        {
+            [fileHandle seekToEndOfFile];
+            [fileHandle writeData:[[NSData alloc] initWithBytes:aFrameData length:aFrameDataLength]];
+            if( aFrameData[3]==0x67 || aFrameData[4]==0x67 || aFrameData[3]==0x61 || aFrameData[4]==0x61)
+            {
+                nFrameNum ++;
+            }
+        }
+        else
+        {
+            if( aFrameData[3]==0x67 || aFrameData[4]==0x67 )
+            {
+                nFrameNum = 0;
+                bStart = YES;
+                DLog(@"检测到 I frame");
+                [fileHandle writeData:[[NSData alloc] initWithBytes:aFrameData length:aFrameDataLength]];
+                nFrameNum++;
+            }
+        }
+        
     }
     return true;
 }
+
 bool RecvFile::DeviceDisconnectNotify()
 {
     printf("device is disconnect\n");
@@ -57,13 +125,16 @@ bool RecvFile::DeviceDisconnectNotify()
     {
         bDevDisConn = YES;
         StopRecv();
-    }else
-    {
-        bDevDisConn = YES;
-        [[NSNotificationCenter defaultCenter] postNotificationName:NSCONNECT_P2P_FAIL_VC object:@"设备连接丢失"];
     }
+    DLog(@"发送");
+    [[NSNotificationCenter defaultCenter] postNotificationName:NSCONNECT_P2P_FAIL_VC object:XCLocalized(@"Disconnect")];
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:NSCONNECT_P2P_DISCONNECT object:[NSString stringWithFormat:@"%li",(long)nChannel]];
+    
     return true;
 }
+
+
 void RecvFile::StopRecv()
 {
     sendheartinfoflag = NO;
@@ -111,7 +182,65 @@ void RecvFile::StopRecv()
         delete relayconn;
         relayconn = NULL;
     }
+    stopRecord(0, 0, 25);
+    [aryVideo removeAllObjects];
+    aryVideo = nil;
 }
+
+void RecvFile::closeP2P()
+{
+    if (conn)
+    {
+        if(streamType == 0)
+        {
+            int ret = conn->StopRealStream(nChannel, nCode);
+            if(ret == 0)
+            {
+                printf("success stop real stream \n");
+            }
+            else
+                printf("error stop real stream \n");
+        }
+        else if(streamType == 1)
+        {
+            PlayRecordCtrlMsg msg;
+            msg.ctrl = PB_STOP;
+            conn->PlayBackRecordCtrl(&msg);
+        }
+        conn->Close();
+        delete conn;
+        conn = NULL;
+    }
+}
+
+void RecvFile::closeTran()
+{
+    if(relayconn)
+    {
+        if(streamType == 0)
+        {
+            int ret = relayconn->StopRealStream(nChannel, nCode);
+            if(ret == 0)
+            {
+                printf("success stop relay stream \n");
+            }
+        }
+        else if(streamType == 1)
+        {
+            PlayRecordCtrlMsg msg;
+            msg.ctrl = PB_STOP;
+            relayconn->PlayBackRecordCtrl(&msg);
+        }
+        if(relayconn!=NULL)
+        {
+            relayconn->Close();
+            delete relayconn;
+            relayconn = NULL;
+        }
+    }
+}
+
+
 void RecvFile::backword()
 {
     PlayRecordCtrlMsg msg;
@@ -163,7 +292,10 @@ BOOL RecvFile::testConnection()
 
 int RecvFile::initTranServer()
 {
-    mSdk->SendHeartBeat();
+    if (mSdk)
+    {
+        mSdk->SendHeartBeat();
+    }
     if(relayconn == NULL)
     {
         if(!bExit)
@@ -193,17 +325,23 @@ BOOL RecvFile::connectTranServer(int nCodeType)
             if(ret == 0)
             {
                 DLog(@"StartRelayStream success \n");
+                if(!aryVideo)
+                {
+                    aryVideo = [NSMutableArray array];
+                }
             }
             else if(ret < 0)
             {
                 DLog(@"StartRelayStream failed, ret=%d \n", ret);
-                StopRecv();
+                closeTran();
+                DLog(@"关闭转发");
                 return FALSE;
             }
         }
     }
     return TRUE;
 }
+
 
 BOOL RecvFile::tranServer(int nCodeType)
 {
@@ -212,19 +350,18 @@ BOOL RecvFile::tranServer(int nCodeType)
     if(ret == 0)
     {
         DLog(@"sdk relayconnect success");
-        if(this->connectTranServer(nCodeType))
+        if(this->connectTranServer(nCodeType))//如果失败，connectTranServer有关闭转发的动作
         {
-            _dispath = dispatch_queue_create("heart", 0);
-            this->sendHeart();
-        }else
+            
+        }
+        else
         {
-            sendheartinfoflag = FALSE;
-            bReturn = FALSE;
+            bReturn = NO;
         }
     }
     else
     {
-        DLog(@"relayconnect failed");
+        DLog(@"relayconnect init failed");
         sendheartinfoflag = FALSE;
         delete relayconn;
         relayconn = NULL;
@@ -235,21 +372,21 @@ BOOL RecvFile::tranServer(int nCodeType)
 //心跳线程
 BOOL RecvFile::sendHeart()
 {
-    dispatch_async(_dispath, ^
-    {
-        int nNumber = 0;
-        while(sendheartinfoflag)
-        {
-            while (sendheartinfoflag && nNumber< HEART_SECOND)
-            {
-                [NSThread sleepForTimeInterval:0.5];
-                nNumber++;
-            }
-            nNumber = 0;
-            mSdk->SendHeartBeat();
-        }
-        DLog(@"心跳销毁");
-    });
+//    dispatch_async(_dispath, ^
+//    {
+//        int nNumber = 0;
+//        while(sendheartinfoflag)
+//        {
+//            while (sendheartinfoflag && nNumber< HEART_SECOND)
+//            {
+//                [NSThread sleepForTimeInterval:0.5];
+//                nNumber++;
+//            }
+//            nNumber = 0;
+//            mSdk->SendHeartBeat();
+//        }
+//        DLog(@"心跳销毁");
+//    });
    return YES;
 }
 
@@ -265,9 +402,15 @@ int RecvFile::initP2PParam()
             conn = new Connection(this);
         }
     }
-    if (!bExit)
+    if (!bExit && mSdk)
     {
-        return mSdk->Connect((char*)peerName.c_str(), conn);
+        
+        if(mSdk->Connect((char*)peerName.c_str(), conn)==0)
+        {
+            DLog(@"P2P连接设备成功");
+            return 0;
+        }
+        DLog(@"P2P连接设备失败");
     }
     return -1;
 }
@@ -283,8 +426,10 @@ BOOL RecvFile::connectP2PStream(int nCodeType)
         }
         if(ret != 0)
         {
+            DLog(@"P2P无法接收码流");
             return FALSE;
         }
+        DLog(@"P2P开始接收码流");
     }
     else if(streamType == 1)
     {
@@ -298,6 +443,10 @@ BOOL RecvFile::connectP2PStream(int nCodeType)
             printf("PlayBackRecord failed \n");
             return FALSE;
         }
+    }
+    if(!aryVideo)
+    {
+        aryVideo = [NSMutableArray array];
     }
     return TRUE;
 }
@@ -339,22 +488,47 @@ BOOL RecvFile::startGcd(int _nType,int nCodeType)
     }
     return bReturn;
 }
-void RecvFile::stopRecord(CGFloat fEnd)
+
+BOOL RecvFile::threadP2P(int nCodeType)
+{
+    BOOL bReturn = FALSE;
+    int ret = this->initP2PParam();
+    if(ret == 0)
+    {
+        bReturn = this->connectP2PStream(nCodeType);
+    }
+    if(!bReturn)
+    {
+        this->deleteP2PConn();
+    }
+    return bReturn;
+}
+
+BOOL RecvFile::threadTran(int nCodeType)
+{
+    BOOL bReturn = this->tranServer(nCodeType);
+    if (bReturn)
+    {
+        return YES;
+    }
+    return NO;
+}
+
+void RecvFile::stopRecord(CGFloat fEnd,long lFrameNumber,int nBit)
 {
     if (!bRecord)
     {
         return ;
     }
-    end = fEnd;
-    if ([data writeToFile:strFile atomically:YES])
-    {
-        DLog(@"写入成功");
-    }
+    bRecord = NO;
+ //   end = fEnd-start;
+    [fileHandle closeFile];//新加入的
+    bStart = NO;
     BOOL success = [[NSURL fileURLWithPath:strFile] setResourceValue: [NSNumber numberWithBool: YES]
                                                         forKey: NSURLIsExcludedFromBackupKey error:nil];
     if(!success)
     {
-        NSLog(@"Error excluding文件");
+        DLog(@"Error excluding文件");
     }
     NSDate *senddate=[NSDate date];
     NSDateFormatter  *dateformatter=[[NSDateFormatter alloc] init];
@@ -368,22 +542,27 @@ void RecvFile::stopRecord(CGFloat fEnd)
     record.strStartTime = [NSString stringWithUTF8String:cStart];
     record.strEndTime = [NSString stringWithUTF8String:cEnd];
     record.strFile = [NSString stringWithUTF8String:cFileName];
-    
+    record.imgFile = [NSString stringWithUTF8String:cRecordPath];
+    record.strDevName = [NSString stringWithUTF8String:cDevName];
     NSDateFormatter *date=[[NSDateFormatter alloc] init];
     [date setDateFormat:@"YYYY-MM-dd HH-mm-ss"];
-    record.allTime = end-start;
+    record.allTime = 0;
+    DLog(@"记录:%li--P2P记录:%li",lFrameNumber,nFrameNum);
+    record.nFramesNum = nFrameNum;
+    record.nFrameBit = nBit;
+    DLog(@"fEnd:%f",end);
     [RecordDb insertRecord:record];
-    bRecord = NO;
     data = nil;
 }
-void RecvFile::startRecord(CGFloat fStart)
+void RecvFile::startRecord(CGFloat fStart,const char * cPath,const char *cRecordDevName)
 {
     start = 0;
     end = 0;
 //  创建文件  获取系统时间  序列号  peerName
     NSDate *senddate=[NSDate date];
     start = fStart;
-    //时间格式
+    DLog(@"start:%f",start);
+    //时间格式s
     NSDateFormatter  *dateformatter=[[NSDateFormatter alloc] init];
     [dateformatter setDateFormat:@"YYYY-MM-dd HH-mm-ss"];
     NSString *  morelocationString=[dateformatter stringFromDate:senddate];
@@ -393,8 +572,10 @@ void RecvFile::startRecord(CGFloat fStart)
     [fileformatter setDateFormat:@"YYYYMMddHHmmss"];
     NSString *filePath = [NSString stringWithFormat:@"%@.mp4",[fileformatter stringFromDate:senddate]];
     
+    sprintf(cRecordPath,"%s",cPath);
+    sprintf(cDevName,"%s",cRecordDevName);
     //创建一个目录
-    NSString *strDir = [kLibraryPath  stringByAppendingPathComponent:@"record"];
+    strDir = [kLibraryPath  stringByAppendingPathComponent:@"record"];
     BOOL bFlag = YES;
     if (![[NSFileManager defaultManager] fileExistsAtPath:strDir isDirectory:&bFlag])
     {
@@ -404,7 +585,7 @@ void RecvFile::startRecord(CGFloat fStart)
                                                                  forKey: NSURLIsExcludedFromBackupKey error:nil];
         if(!success)
         {
-            NSLog(@"Error excluding不备份文件夹");
+            DLog(@"Error excluding不备份文件夹");
         }
     }
     //视频文件保存路径
@@ -412,14 +593,15 @@ void RecvFile::startRecord(CGFloat fStart)
     //开始时间与文件名
     sprintf(cStart, "%s",[morelocationString UTF8String]);
     sprintf(cFileName,"%s",[filePath UTF8String]);
-    DLog(@"strFile:%@",strFile);
     if ([[NSFileManager defaultManager] createFileAtPath:strFile contents:nil attributes:nil])
     {
         DLog(@"创建文件成功:%@",strFile);
     }
+    fileHandle = [NSFileHandle fileHandleForWritingAtPath:strFile];
     data = [[NSMutableData alloc] init];
     bFirst = NO;
     bRecord = YES;
+    nFrameNum=0;
 }
 BOOL RecvFile::swichCode(int nType)
 {
@@ -429,13 +611,22 @@ BOOL RecvFile::swichCode(int nType)
         [aryVideo removeAllObjects];
     }
     int nRet = -1;
-    DLog(@"通道切换:%d--%d",nChannel,nType);
+    DLog(@"通道:%d-目标码流:%d",nChannel,nType);
     if (conn)
     {
         conn->StopRealStream(nChannel, nCode);
-        [NSThread sleepForTimeInterval:2.0];
-        nRet = conn->StartRealStream(nChannel, nType);
-        nCode = nType;
+        [NSThread sleepForTimeInterval:3.0];
+        if(conn)
+        {
+            DLog(@"conn 切换");
+            nRet = conn->StartRealStream(nChannel, nType);//0 -1
+            nCode = nType;
+        }
+        else
+        {
+            nRet = -1;
+            DLog(@"切换失败");
+        }
     }
     else if(relayconn)
     {
@@ -444,14 +635,39 @@ BOOL RecvFile::swichCode(int nType)
         nRet = relayconn->StartRealStream(nChannel, nType);
         nCode = nType;
     }
-    DLog(@"nRet:%d",nRet);
-    
-    if (!nRet) {
+    DLog(@"nRet:%d",nRet);//0是切换成功    
+    if (!nRet)
+    {
         return YES;
     }
     return NO;
 }
+int RecvFile::getRealType()
+{
+    if(conn)
+    {
+        return 1;
+    }
+    else
+    {
+        return 2;
+    }
+}
+void RecvFile::sendPtzControl(PtzControlMsg *ptzMsg)
+{
+    if(conn)
+    {
+        conn->PtzContol(ptzMsg);
+    }
+    else
+    {
+        if(relayconn)
+        {
+            relayconn->PtzContol(ptzMsg);
+        }
+    }
+}
 
 
-//  /var/mobile/Applications/CED00BC6-53A4-43F7-9307-8EFFBD6D0D8B/Library/450691550_2014-07-03-10-11-06.mp4
+
 

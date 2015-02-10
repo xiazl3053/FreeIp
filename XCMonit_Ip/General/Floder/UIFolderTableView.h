@@ -33,5 +33,6 @@ typedef void (^FolderOpenBlock)(UIView *subClassView, CFTimeInterval duration, C
                     openBlock:(FolderOpenBlock)openBlock 
                    closeBlock:(FolderCloseBlock)closeBlock
               completionBlock:(FolderCompletionBlock)completionBlock;
+- (void)performClose;
 
 @end

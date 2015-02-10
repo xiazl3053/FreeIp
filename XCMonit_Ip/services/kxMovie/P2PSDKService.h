@@ -9,8 +9,7 @@
 #ifndef __XCMonit_Ip__P2PSDKService__
 #define __XCMonit_Ip__P2PSDKService__
 #import <Foundation/Foundation.h>
-
-
+#import "P2PSDKClient.h"
 #import "P2PInitService.h"
 
 using namespace std;
@@ -22,22 +21,6 @@ bool daemonize()
     return false;
 #else
     
-//    pid_t pid;
-//    if ((pid = fork()) < 0)
-//    {
-//        // fork() failed
-//        printf("fork error \n");
-//        return false;
-//    }
-//    else if (pid != 0)
-//    {
-//        // parent process done
-//        exit(0);
-//    }
-//    // Nothing should be writing to stdout/stderr after this
-//    close(STDIN_FILENO);
-//    close(STDOUT_FILENO);
-    //close(STDERR_FILENO);
     return true;
 #endif
 }
@@ -76,19 +59,25 @@ public:
     BOOL connectP2PStream(int nCodeType);
     int initTranServer();
     void deleteP2PConn();
-    
-    void startRecord(CGFloat fStart);
-    void stopRecord(CGFloat fEnd);
+    void startRecord(CGFloat fStart,const char * cPath,const char *cDevName);
+    void stopRecord(CGFloat fEnd,long lFrameNumber,int nBit);
     //码流切换
     BOOL swichCode(int nType);
+    int getRealType();
     
+    BOOL threadP2P(int nCodeType);
+    BOOL threadTran(int nCodeType);
+    void closeTran();
+    void closeP2P();
+    long nFrameNum;
+    void sendPtzControl(PtzControlMsg *ptzMsg);
     
     
 public:
     int nChannel;
     int nCode;
-    
-    
+    BOOL bStart;
+    NSFileHandle * fileHandle;
     BOOL bRecord;
     BOOL sendheartinfoflag;
     P2PSDKClient* mSdk;
@@ -104,14 +93,16 @@ public:
     NSString *strFile;
     NSDate *startTime;
     NSDate *endTime;
-    
+    NSString *strDir;
     CGFloat start,end;
     BOOL bFirst;
     char cStart[32];
     char cEnd[32];
     char cFileName[512];
+    char cRecordPath[32];
+    char cDevName[32];
     NSString *testPath;
-
+    NSMutableData *aryData;
     dispatch_queue_t _dispath;
     BOOL bDevDisConn;
     BOOL bExit;

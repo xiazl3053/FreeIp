@@ -22,12 +22,12 @@
 // THE SOFTWARE.
 //
 
-#import "RSKExampleViewController.h"
+#import "RSkViewController.h"
 #import "RSKImageCropper.h"
 
 static const CGFloat kPhotoDiameter = 130.0f;
 
-@interface RSKExampleViewController () <RSKImageCropViewControllerDelegate,UIImagePickerControllerDelegate>
+@interface RSKViewController () <RSKImageCropViewControllerDelegate,UINavigationControllerDelegate>
 
 @property (strong, nonatomic) UIView *photoFrameView;
 @property (strong, nonatomic) UIButton *addPhotoButton;
@@ -37,7 +37,7 @@ static const CGFloat kPhotoDiameter = 130.0f;
 @property (nonatomic,strong) UIImagePickerController *camrePicker;
 @end
 
-@implementation RSKExampleViewController
+@implementation RSKViewController
 
 #pragma mark - Lifecycle
 
@@ -86,9 +86,7 @@ static const CGFloat kPhotoDiameter = 130.0f;
     [self.addPhotoBtn addTarget:self action:@selector(onAddCamre:) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:self.addPhotoBtn];
     
-    // ----------------
-    // Add constraints.
-    // ----------------
+    
     
     [self.view setNeedsUpdateConstraints];
 }

@@ -14,5 +14,7 @@
 @property (nonatomic,strong) UILabel *lblContext;
 
 -(void)setDevInfo:(NSString*)strInfo context:(NSString*)strContext;
+-(void)addView:(CGFloat)fWidth height:(CGFloat)fHeight;
+-(void)leftWidth:(CGFloat)fWidth;
 
 @end

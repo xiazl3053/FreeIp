@@ -106,7 +106,7 @@ static OSStatus renderCallback (void *inRefCon, AudioUnitRenderActionFlags	*ioAc
         return NO;
     
     _audioRoute = CFBridgingRelease(route);
-    NSLog(@"AudioRoute: %@", _audioRoute);        
+    DLog(@"AudioRoute: %@", _audioRoute);        
     return YES;
 }
 
@@ -203,8 +203,8 @@ static OSStatus renderCallback (void *inRefCon, AudioUnitRenderActionFlags	*ioAc
     _numBytesPerSample = _outputFormat.mBitsPerChannel / 8;
     _numOutputChannels = _outputFormat.mChannelsPerFrame;
     
-    NSLog(@"Current output bytes per sample: %ld", _numBytesPerSample);
-    NSLog(@"Current output num channels: %ld", _numOutputChannels);
+  //  DLog(@"Current output bytes per sample: %ld", _numBytesPerSample);
+ //   DLog(@"Current output num channels: %ld", _numOutputChannels);
             
     // Slap a render callback on the unit
     AURenderCallbackStruct callbackStruct;
@@ -240,7 +240,7 @@ static OSStatus renderCallback (void *inRefCon, AudioUnitRenderActionFlags	*ioAc
                    "Checking number of output channels"))
         return NO;
     
-    NSLog(@"We've got %lu output channels", newNumChannels);
+  //  DLog(@"We've got %lu output channels", newNumChannels);
     
     // Get the hardware sampling rate. This is settable, but here we're only reading.
     size = sizeof(_samplingRate);
@@ -251,7 +251,7 @@ static OSStatus renderCallback (void *inRefCon, AudioUnitRenderActionFlags	*ioAc
         
         return NO;
     
-    NSLog(@"Current sampling rate: %f", _samplingRate);
+    DLog(@"Current sampling rate: %f", _samplingRate);
     
     size = sizeof(_outputVolume);
     if (checkError(AudioSessionGetProperty(kAudioSessionProperty_CurrentHardwareOutputVolume,
@@ -260,7 +260,7 @@ static OSStatus renderCallback (void *inRefCon, AudioUnitRenderActionFlags	*ioAc
                    "Checking current hardware output volume"))
         return NO;
     
-    NSLog(@"Current output volume: %f", _outputVolume);    
+    DLog(@"Current output volume: %f", _outputVolume);    
     
     return YES;	
 }
@@ -435,13 +435,13 @@ static void sessionInterruptionListener(void *inClientData, UInt32 inInterruptio
     
 	if (inInterruption == kAudioSessionBeginInterruption) {
         
-		NSLog(@"Begin interuption");
+		DLog(@"Begin interuption");
         sm.playAfterSessionEndInterruption = sm.playing;
         [sm pause];
                 
 	} else if (inInterruption == kAudioSessionEndInterruption) {
 		
-        NSLog(@"End interuption");
+        DLog(@"End interuption");
         if (sm.playAfterSessionEndInterruption) {
             sm.playAfterSessionEndInterruption = NO;
             [sm play];

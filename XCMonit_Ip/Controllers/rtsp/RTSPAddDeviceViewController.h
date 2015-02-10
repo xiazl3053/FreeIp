@@ -8,6 +8,12 @@
 
 #import <UIKit/UIKit.h>
 #import "CustomViewController.h"
+@class RtspInfo;
+
 @interface RTSPAddDeviceViewController : CustomViewController
+
+-(id)initWithRtsp:(RtspInfo*)rtspInfo;
+
+-(void)setRtspInfo:(RtspInfo*)rtspInfo;
 
 @end

@@ -18,7 +18,7 @@ using namespace std;
 
 extern "C"
 {
-#include "libswresample/swresample.h"
+
 #include "libavformat/avformat.h"
 #include "libswscale/swscale.h"
 }
@@ -137,31 +137,31 @@ bool bIsCodeNeedExit;
             return @"";
             
         case kxMovieErrorOpenFile:
-            return NSLocalizedString(@"Unable to open file", nil);
+            return XCLocalized(@"Unable to open file");
             
         case kxMovieErrorStreamInfoNotFound:
-            return NSLocalizedString(@"Unable to find stream information", nil);
+            return XCLocalized(@"Unable to find stream information");
             
         case kxMovieErrorStreamNotFound:
-            return NSLocalizedString(@"Unable to find stream", nil);
+            return XCLocalized(@"Unable to find stream");
             
         case kxMovieErrorCodecNotFound:
-            return NSLocalizedString(@"Unable to find codec", nil);
+            return XCLocalized(@"Unable to find codec");
             
         case kxMovieErrorOpenCodec:
-            return NSLocalizedString(@"Unable to open codec", nil);
+            return XCLocalized(@"Unable to open codec");
             
         case kxMovieErrorAllocateFrame:
-            return NSLocalizedString(@"Unable to allocate frame", nil);
+            return XCLocalized(@"Unable to allocate frame");
             
         case kxMovieErroSetupScaler:
-            return NSLocalizedString(@"Unable to setup scaler", nil);
+            return XCLocalized(@"Unable to setup scaler");
             
         case kxMovieErroReSampler:
-            return NSLocalizedString(@"Unable to setup resampler", nil);
+            return XCLocalized(@"Unable to setup resampler");
             
         case kxMovieErroUnsupported:
-            return NSLocalizedString(@"The ability is not supported", nil);
+            return XCLocalized(@"The ability is not supported");
     }
     return nil;
 }

@@ -22,8 +22,18 @@
 #import "XCDecoder.h"
 #import "P2PInitService.h"
 #import "LoginViewController.h"
+#import "RTSPListViewController.h"
+#import "UserInfo.h"
+#import "UserInfoService.h"
+#import "UserAllInfoModel.h"
+#import "Toast+UIView.h"
+#import "UserInfo.h"
+
 #define REQUEST_DEVICE_NUMBER   10
 #define SELECTED_VIEW_CONTROLLER_TAG 98456345
+
+
+
 
 @interface IndexViewController ()<XCTabBarDelegate>
 
@@ -31,6 +41,11 @@
 @property (nonatomic,strong) XCTabBar *tabBar;
 @property (nonatomic,strong) XCDecoder *decoder;
 @property (nonatomic,strong) UIScrollView *scrollViewInfo;
+@property (nonatomic,strong) UserInfoService *userServie;
+@property (nonatomic,strong) HomeViewController *homeView;
+@property (nonatomic,strong) DeviceViewController *deviceView;
+@property (nonatomic,strong) RTSPListViewController *rtspView;
+@property (nonatomic,strong) MoreViewController *moreView;
 
 @end
 
@@ -48,36 +63,45 @@ DEFINE_SINGLETON_FOR_CLASS(IndexViewController);
 }
 -(void)initBody
 {
-    
-    HomeViewController *homeView = [[HomeViewController alloc] init];
-    XCTabInfo *tb1 = [[XCTabInfo alloc] initWithTabInfo:NSLocalizedString(@"home", "home") normal:@"home.png" high:@"home_h.png"];
-    tb1.viewController = homeView;
-    [self addChildViewController:homeView];
+    _homeView = [[HomeViewController alloc] init];
+    XCTabInfo *tb1 = [[XCTabInfo alloc] initWithTabInfo:XCLocalized(@"home") normal:@"home.png" high:@"home_h.png"];
+    tb1.viewController = _homeView;
+    [self addChildViewController:_homeView];
 
+    XCTabInfo *tb2 = [[XCTabInfo alloc] initWithTabInfo:XCLocalized(@"device") normal:@"set.png" high:@"set_h.png"];
+    _deviceView = [[DeviceViewController alloc] init];
+    tb2.viewController = _deviceView;
+    [_deviceView initData:0];
+    [self addChildViewController:_deviceView];
     
-    
-    XCTabInfo *tb2 = [[XCTabInfo alloc] initWithTabInfo:NSLocalizedString(@"device", "device") normal:@"set.png" high:@"set_h.png"];
-    DeviceViewController *deviceView = [[DeviceViewController alloc] init];
-    tb2.viewController = deviceView;
-    [deviceView initData:0];
-    [self addChildViewController:deviceView];
-
-    
-    
-    XCTabInfo *tb3 = [[XCTabInfo alloc] initWithTabInfo:NSLocalizedString(@"more", "more") normal:@"about.png" high:@"about_h.png"];
-    MoreViewController *moreView = [[MoreViewController alloc] init];
-    tb3.viewController = moreView;
-    [self addChildViewController:moreView];
-
-    
-    DLog(@"%f",self.view.frame.size.height);
-    NSArray *aryItem = [[NSArray alloc] initWithObjects:tb1,tb2,tb3, nil];
-    _tabBar = [[XCTabBar alloc] initWithItems:aryItem];
-    _tabBar.delegate = self;
-    [self.view addSubview:_tabBar];
-    [_tabBar setSelectIndex:0];
-
-    homeView.view.tag = SELECTED_VIEW_CONTROLLER_TAG;
+    if(![UserInfo sharedUserInfo].bGuess)
+    {
+        XCTabInfo *tb4 = [[XCTabInfo alloc] initWithTabInfo:XCLocalized(@"rtsp") normal:@"rtsp" high:@"rtsp_h"];
+        _rtspView = [[RTSPListViewController alloc] init];
+        tb4.viewController = _rtspView;
+        [self addChildViewController:_rtspView];
+        
+        
+        XCTabInfo *tb3 = [[XCTabInfo alloc] initWithTabInfo:XCLocalized(@"more") normal:@"about.png" high:@"about_h.png"];
+        _moreView = [[MoreViewController alloc] init];
+        tb3.viewController = _moreView;
+        [self addChildViewController:_moreView];
+        
+        NSArray *aryItem = [[NSArray alloc] initWithObjects:tb1,tb2,tb4,tb3, nil];
+        _tabBar = [[XCTabBar alloc] initWithItems:aryItem];
+        _tabBar.delegate = self;
+        [self.view addSubview:_tabBar];
+        [_tabBar setSelectIndex:0];
+    }
+    else
+    {
+        NSArray *aryItem = [[NSArray alloc] initWithObjects:tb1, nil];
+        _tabBar = [[XCTabBar alloc] initWithItems:aryItem];
+        _tabBar.delegate = self;
+        [self.view addSubview:_tabBar];
+        [_tabBar setSelectIndex:0];
+    }
+    _homeView.view.tag = SELECTED_VIEW_CONTROLLER_TAG;
 }
 - (void)selectIndex:(UIViewController *)viewController
 {
@@ -87,9 +111,10 @@ DEFINE_SINGLETON_FOR_CLASS(IndexViewController);
      ^{
          UIView *currentView = [__weakSelf.view viewWithTag:SELECTED_VIEW_CONTROLLER_TAG];
          [currentView removeFromSuperview];
-         __viewController.view.frame = CGRectMake(0,0,self.view.bounds.size.width, self.view.bounds.size.height-_tabBar.frame.size.height);
+         __viewController.view.frame = CGRectMake(0,0,kScreenWidth, kScreenHeight-_tabBar.frame.size.height+20);
          __viewController.view.tag = SELECTED_VIEW_CONTROLLER_TAG;
          [__weakSelf.view insertSubview:__viewController.view aboveSubview:__weakSelf.tabBar];
+//       [__weakSelf.view addSubview:__viewController.view];
     }];
 }
 #pragma mark 设置显示的viewController
@@ -110,17 +135,51 @@ DEFINE_SINGLETON_FOR_CLASS(IndexViewController);
     __weak P2PInitService *__P2PInit = p2pInit;
     dispatch_async(dispatch_get_global_queue(0, 0), ^{
         //替换
-        [__P2PInit getIPWithHostName:NSLocalizedString(@"p2pserver", "p2p server")];
+        [__P2PInit getIPWithHostName:XCLocalized(@"p2pserver")];
         DLog(@"解析IP:%@",__P2PInit.strAddress);
     });
     
     DLog(@"重新添加一次");
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(connectAgain) name:NS_APPLITION_ENTER_FOREG object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(enter_background) name:NS_APPLITION_ENTER_BACK object:nil];
+    
+    //加载用户数据
+    [self initData];
 }
+
+-(void)initData
+{
+    if (_userServie==nil)
+    {
+        _userServie = [[UserInfoService alloc] init];
+    }
+    __weak IndexViewController *weakSelf = self;
+    _userServie.httpBlock = ^(UserAllInfoModel *user,int nStatus)
+    {
+        switch (nStatus) {
+            case 1:
+            {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [UserInfo sharedUserInfo].userAllInfo = user;
+                });
+            }
+                break;
+            default:
+            {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [weakSelf.view makeToast:XCLocalized(@"userTimeout")];
+                });
+            }
+            break;
+        }
+    };
+    [_userServie requestUserInfo];
+}
+
 -(void)enter_background
 {
     [[P2PInitService sharedP2PInitService] setP2PSDKNull];
+    
 }
 -(void)connectAgain
 {
@@ -139,7 +198,7 @@ DEFINE_SINGLETON_FOR_CLASS(IndexViewController);
 -(void)viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
-
+    [UIApplication sharedApplication].idleTimerDisabled = NO;
 }
 
 - (void)didReceiveMemoryWarning
@@ -155,7 +214,7 @@ DEFINE_SINGLETON_FOR_CLASS(IndexViewController);
 #pragma mark 重力处理
 - (BOOL)shouldAutorotate NS_AVAILABLE_IOS(6_0)
 {
-    return YES;
+    return NO;
 }
 -(NSUInteger)supportedInterfaceOrientations
 {
@@ -173,8 +232,15 @@ DEFINE_SINGLETON_FOR_CLASS(IndexViewController);
     }
     for (UIView *view in self.view.subviews) {
         [view removeFromSuperview];
-        
     }
+    _tabBar = nil;
+    _homeView = nil;
+    _deviceView = nil;
+    _userServie = nil;
+    _decoder = nil;
+    _scrollViewInfo = nil;
+    _rtspView = nil;
+    _moreView = nil;
 }
 
 -(void)dealloc
@@ -182,15 +248,6 @@ DEFINE_SINGLETON_FOR_CLASS(IndexViewController);
     DLog(@"indexShare dealloc");
 }
 
-/*
-#pragma mark - Navigation
 
-// In a storyboard-based application, you will often want to do a little preparation before navigation
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
-{
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
-}
-*/
 
 @end

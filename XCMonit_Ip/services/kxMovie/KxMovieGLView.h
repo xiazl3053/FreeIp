@@ -13,23 +13,12 @@
 
 @class KxVideoFrame;
 @class XCDecoder;
-@class XCDecoderNew;
+
 @interface KxMovieGLView : UIView
 
 - (id) initWithFrame:(CGRect)frame
              decoder: (XCDecoder *) decoder;
 
-- (id) initWithFrame:(CGRect)frame
-             decoderNew:(XCDecoderNew *) decoder;
-
 - (void) render: (KxVideoFrame *) frame;
 
-- (id) initWithFrame:(CGRect)frame
-               width:(CGFloat)fWidth height:(CGFloat)fHeight size:(int)nSize;
-
--(UIImage*)snapshot:(UIView*)eaglview;
-
-
-@property (nonatomic,strong) NSString *strNO;
 @end
-

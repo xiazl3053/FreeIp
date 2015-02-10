@@ -15,24 +15,49 @@
 #import "Toast+UIView.h"
 #import "DevNameCell.h"
 #import "UpdDevNameViewController.h"
+#import "IndexViewController.h"
 #import "ProgressHUD.h"
+#import "DecodeJson.h"
+#import "MBProgressHUD.h"
+
 #define DEVICEINFOCELLID @"DEVICEINFOCELLID"
 
 @interface DevInfoViewController ()<UITableViewDelegate,UITableViewDataSource,UIAlertViewDelegate>
 {
     DeviceInfoModel *_devInfo;
 }
-
+@property (nonatomic,assign) BOOL bTrue;
 @property (nonatomic,strong) UITableView *tableView;
 @property (nonatomic,strong) NSArray *arrayHeader;
-
+@property (nonatomic,strong) UIImageView *imgView;
+@property (nonatomic,strong) UIButton *btnDel;
+@property (nonatomic,strong) DeleteDevService *delete;// = [[DeleteDevService alloc] init];
+@property (nonatomic,strong) MBProgressHUD *mbHUD;
 @end
 
 @implementation DevInfoViewController
 
+-(void)dealloc
+{
+    [_mbHUD removeFromSuperview];
+    _mbHUD = nil;
+    [_tableView removeFromSuperview];
+    _tableView = nil;
+    [_imgView removeFromSuperview];
+    _imgView = nil;
+    [_btnDel removeFromSuperview];
+    _btnDel = nil;
+    _delete = nil;
+    
+    _devInfo = nil;
+    
+    DLog(@"devInfo view dealloc");
+}
+
 -(void)setDeviceInfoModel:(DeviceInfoModel*)devInfo
 {
     _devInfo = devInfo;
+    
 }
 
 
@@ -48,22 +73,54 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    [self setNaviBarTitle:NSLocalizedString(@"devDetails","DeviceDetails")];
-    [self setNaviBarLeftBtn:nil];
+    [self setNaviBarTitle:XCLocalized(@"devDetails")];
     [self setNaviBarRightBtn:nil];
-    UIButton *btn = [CustomNaviBarView createImgNaviBarBtnByImgNormal:@"NaviBtn_Back"
-                                                         imgHighlight:@"NaviBtn_Back_H" target:self action:@selector(navBack)];
+    UIButton *btn = [UIButton buttonWithType:UIButtonTypeCustom];
+    [btn setImage:[UIImage imageNamed:@"NaviBtn_Back"] forState:UIControlStateNormal];
+    [btn setImage:[UIImage imageNamed:@"NaviBtn_Back"] forState:UIControlStateHighlighted];
+    [btn addTarget:self action:@selector(navBack) forControlEvents:UIControlEventTouchUpInside];
     [self setNaviBarLeftBtn:btn];
+    _delete = [[DeleteDevService alloc] init];
+    _imgView = [[UIImageView alloc] initWithFrame:Rect(0, [CustomNaviBarView barSize].height, kScreenWidth, 137)];
+    [self.view addSubview:_imgView];
+    _bTrue = YES;
+    [self.view setBackgroundColor:RGB(247, 247, 247)];
     
-    CGRect frame = CGRectMake(0, [CustomNaviBarView barSize].height, kScreenWidth, kScreenHeight);
-    _tableView = [[UITableView alloc] initWithFrame:frame style:UITableViewStyleGrouped];
+    if ([_devInfo.strDevType integerValue]<=2000)
+    {
+        [_imgView setImage:[UIImage imageNamed:@"ipc_big"]];
+    }
+    else
+    {
+        [_imgView setImage:[UIImage imageNamed:@"dvr_big"]];
+    }
+    
+    CGRect frame = CGRectMake(0, [CustomNaviBarView barSize].height+139, kScreenWidth, 44.5*4);
+    _tableView = [[UITableView alloc] initWithFrame:frame];
     _tableView.delegate = self;
     _tableView.dataSource = self;
-    //    _tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
-    _arrayHeader = [[NSArray alloc] initWithObjects:@"帮助",@"关于",nil];
+    _tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     [self.view addSubview:_tableView];
+    
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateDevName:) name:NSUPDATE_DEV_NAME_VC object:nil];
+    
     // Do any additional setup after loading the view.
+    _btnDel = [UIButton buttonWithType:UIButtonTypeCustom];
+    [_btnDel setTitle:XCLocalized(@"RecordDelete") forState:UIControlStateNormal];
+    [_btnDel setBackgroundImage:[UIImage imageNamed:@"delete_btn"] forState:UIControlStateNormal];
+    [_btnDel setBackgroundImage:[UIImage imageNamed:@"delete_btn_onpress"] forState:UIControlStateHighlighted];
+    
+    _btnDel.frame = Rect(kScreenWidth/2.0-276/2,[CustomNaviBarView barSize].height+149+44.5*4+20 , 276, 43);
+    [self.view addSubview:_btnDel];
+    
+    [_btnDel addTarget:self action:@selector(deleteAlert) forControlEvents:UIControlEventTouchUpInside];
+    
+    _mbHUD = [[MBProgressHUD alloc] initWithView:self.view];
+    [self.view addSubview:_mbHUD];
+    [self.view bringSubviewToFront:_mbHUD];
+
+    _mbHUD.labelText = XCLocalized(@"deleteDevice");
+    
 }
 -(void)updateDevName:(NSNotification*)notification
 {
@@ -94,90 +151,64 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    NSInteger integar = 0;
-    switch (section) {
-        case 0:
-            integar = [_arrayHeader count];
-            break;
-        case 1:
-            integar = 2;
-            break;
-        case 2:
-            integar = 1;
-            break;
-    }
-    return integar;
+    return 4;
 }
-
-
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    switch (indexPath.section)
+    static NSString *strDeviceId = @"XCDeviceIdentifier";
+    DeviceInfoCell *cell = [tableView dequeueReusableCellWithIdentifier:strDeviceId];
+    if (cell==nil)
+    {
+        cell = [[DeviceInfoCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:strDeviceId];
+    }
+    switch (indexPath.row)
     {
         case 0:
         {
-            switch (indexPath.row)
-            {
-                case 0:
-                {
-                    DevNameCell *cell = [_tableView dequeueReusableCellWithIdentifier:DEVICEINFOCELLID];
-                    if (cell==nil)
-                    {
-                        cell = [[DevNameCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:DEVICEINFOCELLID];
-                    }
-                    NSString *strImage = _devInfo.iDevOnline ? @"deviceOn" : @"deviceOff";
-                    [cell setDevInfo:strImage name:_devInfo.strDevName];
-                    return cell;
-                }
-                break;
-                case 1:
-                {
-                    
-                    NSString *strStatus = nil;
-                    if(_devInfo.iDevOnline ==0)
-                    {
-                        strStatus = NSLocalizedString(@"offline","offline");
-                    }else
-                    {
-                        strStatus = NSLocalizedString(@"online","online");
-                    }
-                    DeviceInfoCell *cell = [self createDeviceInfoCell:NSLocalizedString(@"statu","device status") context:strStatus];
-                    return cell;
-                }
-                break;
-            }
+            cell.lblDevInfo.text = XCLocalized(@"devName_info");
+            cell.lblContext.text = _devInfo.strDevName;
+            cell.lblContext.frame = CGRectMake(kScreenWidth-180, 44.5/2-10, 150, 20);
+            [cell addView:0 height:0];
+            [cell addView:20 height:43];
+            cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+            return cell;
         }
         break;
         case 1:
         {
-            DeviceInfoCell *cell = nil;
-            switch (indexPath.row)
+            
+            NSString *strStatus = nil;
+            if(_devInfo.iDevOnline ==0)
             {
-                case 0:
-                {
-                    cell = [self createDeviceInfoCell:NSLocalizedString(@"type","device type") context:_devInfo.strDevType];
-                    
-                }
-                break;
-                case 1:
-                {
-                    cell = [self createDeviceInfoCell:NSLocalizedString(@"devNO","devNO") context:_devInfo.strDevNO];
-                }
-                break;
-                   
+                strStatus = XCLocalized(@"offline");
+            }else
+            {
+                strStatus = XCLocalized(@"online");
             }
+            
+            cell.lblDevInfo.text = XCLocalized(@"statu");//9843512744925
+            cell.lblContext.text = strStatus;
+            [cell addView:20 height:43];
+            return cell;
+        }
+            break;
+        case 2:
+        {
+            int nType = [_devInfo.strDevType intValue];
+            
+            NSString *strType = [DecodeJson getDeviceTypeByType:nType];
+
+            cell.lblDevInfo.text = XCLocalized(@"type");
+            cell.lblContext.text = strType;
+            [cell addView:20 height:43];
             return cell;
         }
         break;
-        case 2:
+        case 3:
         {
-            UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:DEVICEINFOCELLID];
-            if (cell==nil) {
-                cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:DEVICEINFOCELLID];
-            }
-            [cell.textLabel setFont:[UIFont systemFontOfSize:16.0f]];
-            [cell.textLabel setTextAlignment:NSTextAlignmentCenter];
-            cell.textLabel.text = NSLocalizedString(@"devDel","devDel");
+            cell.lblDevInfo.text = XCLocalized(@"devNO");
+            cell.lblContext.text = _devInfo.strDevNO;
+            [cell addView:0 height:43];
             return cell;
         }
         break;
@@ -191,22 +222,15 @@
         cell = [[DeviceInfoCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:DEVICEINFOCELLID];
     }
     [cell setDevInfo:strInfo context:strContext];
+    
     return cell;
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    if (indexPath.section == 0 && indexPath.row == 0) {
-        return 51;
-    }
-    return 44;
+    return 44.5;
 }
 
-
--(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
-{
-    return 3;
-}
 #pragma mark 选择不同行的事件
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
@@ -223,55 +247,70 @@
         break;
         case 1:
         {
-
+            
         }
         break;
         case 2:
         {
-            //点击的是删除设备
-            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"delDeviceQuq", "delete device request") message:nil delegate:self cancelButtonTitle:NSLocalizedString(@"cancel", "cancel") otherButtonTitles:NSLocalizedString(@"confirm", "confirm"), nil];//confirm
-            alert.tag = 100;
-            [alert show];
+            
         }
         break;
 
     }
 }
+
+-(void)deleteAlert
+{
+    //点击的是删除设备
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:XCLocalized(@"delDeviceQuq") message:nil delegate:self cancelButtonTitle:XCLocalized(@"cancel") otherButtonTitles:XCLocalized(@"confirm"), nil];//confirm
+    alert.tag = 100;
+    [alert show];
+}
+
 -(void)clickDeleteDevice
 {
-    DeleteDevService *delete = [[DeleteDevService alloc] init];
+
     __weak DevInfoViewController *__weakSelf = self;
-    [ProgressHUD show:@"删除设备"];
-    delete.httpDelDevBlock = ^(int nStatus)
+    dispatch_async(dispatch_get_main_queue(),
+    ^{
+        [__weakSelf.mbHUD show:YES];
+    });
+    _delete.httpDelDevBlock = ^(int nStatus)
     {
-        [ProgressHUD dismiss];
         NSString *strMsg = nil;
         switch (nStatus)
         {
             case 1:
-                strMsg = @"删除成功";
+                strMsg = XCLocalized(@"deleteDeviceOK");
                 break;
             case 54:
-                strMsg = @"设备信息错误";
-                break;
-            case 56:
-                strMsg = @"设备序列号错误";
-                break ;
-            case -999:
-                strMsg = @"服务器异常";
+                strMsg = XCLocalized(@"deleteDeviceFail");
                 break;
             default:
-                strMsg = @"服务器错误";
+                strMsg = XCLocalized(@"deleteDeviceFail_server");
                 break;
         }
-        [__weakSelf.view makeToast:strMsg duration:3.0 position:@"center" title:@"删除设备"];
+        __weakSelf.bTrue = YES;
+        
+       dispatch_async(dispatch_get_main_queue(),
+       ^{
+           [__weakSelf.mbHUD hide:YES];
+       });
+        [__weakSelf.view makeToast:strMsg duration:2.0 position:@"center"];
         if (nStatus ==1)
         {
             [[NSNotificationCenter defaultCenter] postNotificationName:NSUPDATE_DEVICE_LIST_VC object:nil];
-            [__weakSelf navBack];
+            
+            dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, 1.6 * NSEC_PER_SEC);
+            dispatch_after(popTime, dispatch_get_main_queue(), ^(void)
+            {
+               [__weakSelf navBack];
+            });
+
         }
     };
-    [delete requestDelDevInfo:_devInfo.strDevNO auth:@""];
+    _bTrue = NO;
+    [_delete requestDelDevInfo:_devInfo.strDevNO auth:@""];
 }
 -(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
 {
@@ -289,6 +328,10 @@
 
 -(void)navBack
 {
+    if (!_bTrue)
+    {
+        return;
+    }
     [self dismissViewControllerAnimated:YES completion:^{}];
 }
 #pragma mark 重力处理

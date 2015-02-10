@@ -11,7 +11,6 @@
 @class DevModel;
 @class UserModel;
 
-
 @interface DeviceInfoDb : NSObject
 
 
@@ -21,7 +20,10 @@
 +(BOOL)insertUserInfo:(UserModel *)user;
 +(BOOL)insertDevInfo:(DevModel *)devModel;
 +(BOOL)deleteDevInfo:(DevModel*)devModel;
-
++(BOOL)querySavePwd;
++(BOOL)updateSavePwd:(NSInteger)nSave;
++(BOOL)queryLogin;
++(BOOL)updateLogin:(NSInteger)nLogin;
 
 
 @end

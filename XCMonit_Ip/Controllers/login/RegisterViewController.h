@@ -7,7 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
-
-@interface RegisterViewController : UIViewController
+#import "CustomViewController.h"
+@interface RegisterViewController : CustomViewController
 
 @end

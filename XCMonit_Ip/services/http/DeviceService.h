@@ -15,5 +15,5 @@ typedef void (^HttpDeviceBlock)(DeviceInfoModel *devInfo,NSInteger nCount);
 
 
 -(void)requestDeviceLimit:(int)nIndex count:(int)nCount;
-
+-(void)queryDeviceNumber;
 @end

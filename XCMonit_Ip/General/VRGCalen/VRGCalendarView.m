@@ -22,13 +22,22 @@
     NSDateComponents *comps = [gregorian components:NSYearCalendarUnit | NSMonthCalendarUnit |  NSDayCalendarUnit fromDate:self.currentMonth];
     [comps setDay:date];
     self.selectedDate = [gregorian dateFromComponents:comps];
-    
+    NSDate *nowDate = [NSDate date];
     int selectedDateYear = [selectedDate year];
     int selectedDateMonth = [selectedDate month];
-    int currentMonthYear = [currentMonth year];
-    int currentMonthMonth = [currentMonth month];
-    
+    int selectedDateDay = [selectedDate day];
+    int currentMonthYear = [nowDate year];
+    int currentMonthMonth = [nowDate month];
+    int currentMonthDay = [nowDate day];
 
+    if (selectedDateYear == currentMonthYear && selectedDateMonth>=currentMonthMonth)
+    {
+        if (selectedDateDay > currentMonthDay)
+        {
+            return;
+        }
+    }
+    
     if (selectedDateYear < currentMonthYear) {
         [self showPreviousMonth];
     } else if (selectedDateYear > currentMonthYear) {
@@ -40,7 +49,7 @@
     } else {
         [self setNeedsDisplay];
     }
-    if ([delegate respondsToSelector:@selector(calendarView:dateSelected:)]) [delegate calendarView:self dateSelected:self.selectedDate];
+    if ([delegate respondsToSelector:@selector(calendarView:dateSelected:)]) [delegate calendarView:self dateSelected:selectedDate];
     
 }
 
@@ -105,7 +114,7 @@
     
     [self setNeedsDisplay];
     
-    NSLog(@"currentMonth:%@",currentMonth);
+    DLog(@"currentMonth:%@",currentMonth);
     
     int lastBlock = [currentMonth firstWeekDayInMonth]+[currentMonth numDaysInMonth]-1;
     int numBlocks = [self numRows]*7;
@@ -291,6 +300,7 @@
     
     NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
     [formatter setDateFormat:@"MMMM yyyy"];
+    formatter.locale = [[NSLocale alloc] initWithLocaleIdentifier:XCLocalized(@"dateLang")];
     labelCurrentMonth.text = [formatter stringFromDate:self.currentMonth];
     [labelCurrentMonth sizeToFit];
     labelCurrentMonth.frameX = roundf(self.frame.size.width/2 - labelCurrentMonth.frameWidth/2);
@@ -335,17 +345,22 @@
     
     //Weekdays
     NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+    
+    dateFormatter.locale = [[NSLocale alloc] initWithLocaleIdentifier:XCLocalized(@"dateLang")];
     dateFormatter.dateFormat=@"EEE";
+    
     //always assume gregorian with monday first
     NSMutableArray *weekdays = [[NSMutableArray alloc] initWithArray:[dateFormatter shortWeekdaySymbols]];
-    [weekdays moveObjectFromIndex:0 toIndex:6];
+//    [weekdays moveObjectFromIndex:0 toIndex:6];
+
+    
     
     CGContextSetFillColorWithColor(context, 
                                    [UIColor colorWithHexString:@"0x383838"].CGColor);
     for (int i =0; i<[weekdays count]; i++) {
         NSString *weekdayValue = (NSString *)[weekdays objectAtIndex:i];
         UIFont *font = [UIFont fontWithName:@"HelveticaNeue" size:12];
-        [weekdayValue drawInRect:CGRectMake(i*(kVRGCalendarViewDayWidth+2), 40, kVRGCalendarViewDayWidth+2, 20) withFont:font lineBreakMode:UILineBreakModeClip alignment:UITextAlignmentCenter];
+        [weekdayValue drawInRect:CGRectMake(i*(kVRGCalendarViewDayWidth+2), 40, kVRGCalendarViewDayWidth+2, 20) withFont:font lineBreakMode:NSLineBreakByClipping alignment:NSTextAlignmentCenter];
     }
     
     int numRows = [self numRows];
@@ -404,7 +419,7 @@
                                    [UIColor colorWithHexString:@"0x383838"].CGColor);
     
     
-    //NSLog(@"currentMonth month = %i, first weekday in month = %i",[self.currentMonth month],[self.currentMonth firstWeekDayInMonth]);
+    //DLog(@"currentMonth month = %i, first weekday in month = %i",[self.currentMonth month],[self.currentMonth firstWeekDayInMonth]);
     
     int numBlocks = numRows*7;
     NSDate *previousMonth = [self.currentMonth offsetMonth:-1];
@@ -438,7 +453,7 @@
     NSDate *todayDate = [NSDate date];
     int todayBlock = -1;
     
-//    NSLog(@"currentMonth month = %i day = %i, todaydate day = %i",[currentMonth month],[currentMonth day],[todayDate month]);
+//    DLog(@"currentMonth month = %i day = %i, todaydate day = %i",[currentMonth month],[currentMonth day],[todayDate month]);
     
     if ([todayDate month] == [currentMonth month] && [todayDate year] == [currentMonth year]) {
         todayBlock = [todayDate day] + firstWeekDay - 1;
@@ -492,7 +507,7 @@
                                            [UIColor whiteColor].CGColor);
         }
         
-        [date drawInRect:CGRectMake(targetX+2, targetY+10, kVRGCalendarViewDayWidth, kVRGCalendarViewDayHeight) withFont:[UIFont fontWithName:@"HelveticaNeue-Bold" size:17] lineBreakMode:UILineBreakModeClip alignment:UITextAlignmentCenter];
+        [date drawInRect:CGRectMake(targetX+2, targetY+10, kVRGCalendarViewDayWidth, kVRGCalendarViewDayHeight) withFont:[UIFont fontWithName:@"HelveticaNeue-Bold" size:17] lineBreakMode:NSLineBreakByClipping alignment:NSTextAlignmentCenter];//
     }
     
     //    CGContextClosePath(context);
@@ -567,7 +582,7 @@
         labelCurrentMonth.backgroundColor=[UIColor whiteColor];
         labelCurrentMonth.font = [UIFont fontWithName:@"HelveticaNeue-Bold" size:17];
         labelCurrentMonth.textColor = [UIColor colorWithHexString:@"0x383838"];
-        labelCurrentMonth.textAlignment = UITextAlignmentCenter;
+        labelCurrentMonth.textAlignment = NSTextAlignmentCenter;
         
         [self performSelector:@selector(reset) withObject:nil afterDelay:0.1]; //so delegate can be set after init and still get called on init
         //        [self reset];
@@ -575,8 +590,8 @@
     return self;
 }
 
--(void)dealloc {
-    
+-(void)dealloc
+{
     self.delegate=nil;
     self.currentMonth=nil;
     self.labelCurrentMonth=nil;

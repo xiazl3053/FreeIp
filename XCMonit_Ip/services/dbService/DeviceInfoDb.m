@@ -11,7 +11,7 @@
 #import "DevModel.h"
 #import "UserModel.h"
 #import "UtilsMacro.h"
-
+#import "FMDatabaseQueue.h"
 
 @implementation DeviceInfoDb
 
@@ -23,6 +23,7 @@
         DLog(@"open fail");
     }
     [db executeUpdate:@"CREATE TABLE IF NOT EXISTS userInfo (id integer primary key asc autoincrement, user text, pwd text)"];
+    [db executeUpdate:@"CREATE TABLE IF NOT EXISTS UserSave (id integer primary key asc autoincrement,save integer,login integer)"];
     return db;
 }
 +(FMDatabase *)initDatabaseDev
@@ -37,6 +38,92 @@
     return db;
 }
 
++(FMDatabase *)initDatabaseUserInfo
+{
+    FMDatabase *db= [FMDatabase databaseWithPath:kDatabasePath];
+    if(![db open])
+    {
+        DLog(@"open fail");
+    }
+    [db executeUpdate:@"CREATE TABLE IF NOT EXISTS UserSave (id integer primary key asc autoincrement,save integer,login integer)"];
+
+    return db;
+}
+
++(FMDatabase *)initdataUserRecord
+{
+    FMDatabase *db= [FMDatabase databaseWithPath:kDatabaseUserRecord];
+    if(![db open])
+    {
+        DLog(@"open fail");
+    }
+    [db executeUpdate:@"CREATE TABLE IF NOT EXISTS user_record (id integer primary key asc autoincrement,u_id integer)"];
+    return db;
+}
+
+
++(BOOL)querySavePwd
+{
+    FMDatabase *db= [DeviceInfoDb initDatabaseUserInfo];
+    BOOL bReturn = NO;
+    NSString *strSql = @"select * from UserSave where id = 1";
+    FMResultSet *rs=[db executeQuery:strSql];
+    if([rs next])
+    {
+        NSInteger nCount = [[rs stringForColumn:@"save"] integerValue];
+        if (nCount)
+        {
+            bReturn = YES;
+        }
+    }
+    else
+    {
+        NSString *strSql1 = @"insert into UserSave (save,login) values (0,0)";
+        [db executeUpdate:strSql1];
+        bReturn = NO;
+    }
+    return bReturn;
+}
+
++(BOOL)updateSavePwd:(NSInteger)nSave
+{
+    FMDatabase *db= [DeviceInfoDb initDatabaseUserInfo];
+    NSString *strSql = @"update UserSave set save = ? where id = 1";
+    BOOL bFlag = [db executeUpdate:strSql,[[NSNumber alloc] initWithInteger:nSave]];
+
+    return bFlag;
+}
+
++(BOOL)updateLogin:(NSInteger)nLogin
+{
+    FMDatabase *db= [DeviceInfoDb initDatabaseUserInfo];
+    NSString *strSql = @"update UserSave set login = ?  where id = 1";
+    BOOL bFlag = [db executeUpdate:strSql,[[NSNumber alloc] initWithInteger:nLogin]];
+    return  bFlag;
+}
+
++(BOOL)queryLogin
+{
+    FMDatabase *db= [DeviceInfoDb initDatabaseUserInfo];
+    BOOL bReturn = NO;
+    NSString *strSql = @"select * from UserSave where id = 1";
+    FMResultSet *rs=[db executeQuery:strSql];
+    if([rs next])
+    {
+        NSInteger nCount = [[rs stringForColumn:@"login"] integerValue];
+        if (nCount)
+        {
+            bReturn = YES;
+        }
+    }
+    else
+    {
+        NSString *strSql1 = @"insert into UserSave (save,login) values (0,0)";
+        [db executeUpdate:strSql1];
+        bReturn = NO;
+    }
+    return bReturn;
+}
 
 +(NSArray *)queryAllDevInfo
 {
@@ -53,31 +140,82 @@
 
 +(NSArray *)queryUserInfo
 {
-    NSMutableArray *array = [[NSMutableArray alloc] init];
-    FMDatabase *db= [DeviceInfoDb initDatabaseUser];
-    FMResultSet *rs=[db executeQuery:@"SELECT * FROM userInfo"];
-    while ([rs next]){
-        UserModel *userModel = [[UserModel alloc] initWithUser:[rs stringForColumn:@"user"]
-                                                           pwd:[rs stringForColumn:@"pwd"]];
-        userModel.nId = [[rs stringForColumn:@"id"] integerValue];
-        [array addObject:userModel];
+    NSMutableArray *array = [NSMutableArray array];
+    FMDatabase *db= [DeviceInfoDb initdataUserRecord];
+    
+    FMResultSet *rs = [db executeQuery:@"select * from User_Record"];
+    FMDatabase *dbUser = [DeviceInfoDb initDatabaseUser];
+    if (rs.next)
+    {
+        int nId = [[rs stringForColumn:@"u_id"] intValue];
+        
+        FMResultSet *rs1 = nil;
+        
+        if (nId==0)
+        {
+            rs1=[dbUser executeQuery:@"SELECT * FROM userInfo where id = 1"];
+        }
+        else if(nId==-1)
+        {
+            rs1=[dbUser executeQuery:@"SELECT * FROM userInfo order by id desc"];
+        }
+        else
+        {
+             rs1=[dbUser executeQuery:@"SELECT * FROM userInfo where id = ?",[NSNumber numberWithInt:nId]];
+        }
+        if(rs1.next)
+        {
+            UserModel *userModel = [[UserModel alloc] initWithUser:[rs1 stringForColumn:@"user"]
+                                                               pwd:[rs1 stringForColumn:@"pwd"]];
+            userModel.nId = [[rs stringForColumn:@"id"] integerValue];
+            [array addObject:userModel];
+        }
     }
+    else
+    {
+        [db executeUpdate:@"insert into User_Record (u_id) values (0)"];
+        
+        FMResultSet *rs1=[dbUser executeQuery:@"SELECT * FROM userInfo where id = 1"];
+        if(rs1.next)
+        {
+            UserModel *userModel = [[UserModel alloc] initWithUser:[rs1 stringForColumn:@"user"]
+                                                               pwd:[rs1 stringForColumn:@"pwd"]];
+            userModel.nId = [[rs stringForColumn:@"id"] integerValue];
+            [array addObject:userModel];
+        }
+    }
+    [dbUser close];
+    [rs close];
+    [db close];
     return array;
 }
 +(BOOL)insertUserInfo:(UserModel *)user
 {
     BOOL bReturn = YES;
-    NSArray *array = [DeviceInfoDb queryUserInfo];
-    FMDatabase *db= [FMDatabase databaseWithPath:kDatabasePath];
-    [db open];
-    if (array.count>0) {
-        NSString *strSql = [[NSString alloc] initWithFormat:@"update userInfo set user = ?, pwd = ?"];
-        bReturn = [db executeUpdate:strSql,user.strUser,user.strPwd];
-
-    }else{
-        NSString *strSql = [[NSString alloc] initWithFormat:@"insert into userInfo (user,pwd) values (?,?)"];
-        bReturn = [db executeUpdate:strSql,user.strUser,user.strPwd];
+    
+    FMDatabase *db= [DeviceInfoDb initDatabaseUser];
+    
+    FMDatabase *dbRecord= [DeviceInfoDb initdataUserRecord];
+    
+    FMResultSet *frs = [db executeQuery:@"select * from userInfo where user = ?",user.strUser];
+    if (frs.next)
+    {
+        //修改
+        [db executeUpdate:@"update userInfo set pwd = ? where user = ?",user.strPwd,user.strUser];
+        //然后
+        int nU_id = [[frs stringForColumn:@"id"] intValue];
+        bReturn = [dbRecord executeUpdate:@"update User_Record set u_id = ?",[NSNumber numberWithInt:nU_id]];
     }
+    else
+    {
+        //添加
+        [db executeUpdate:@"insert into userInfo (user,pwd) values (?,?)",user.strUser,user.strPwd];
+        
+        bReturn = [dbRecord executeUpdate:@"update User_Record set u_id = ?",[NSNumber numberWithInt:-1]];
+    }
+    [frs close];
+    [dbRecord close];
+    [db close];
     
     return  bReturn;
 }

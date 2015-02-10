@@ -12,8 +12,11 @@
 @interface IndexViewController : UIViewController
 
 
+
 DEFINE_SINGLETON_FOR_HEADER(IndexViewController);
 -(void)closeIndexView;
 -(void)setInit;
 -(void)setIndexViewController:(int)nIndex;
+
+-(void)initData;
 @end

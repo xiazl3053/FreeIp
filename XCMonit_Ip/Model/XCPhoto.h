@@ -10,4 +10,8 @@
 
 @interface XCPhoto : NSObject
 
+@property (nonatomic,assign) NSInteger nId;
+@property (nonatomic,strong) UIImage *imgName;
+@property (nonatomic,strong) NSString *strPath;
+
 @end

@@ -18,6 +18,7 @@
 
 #import "GTMBase64.h"
 #import "GTMDefines.h"
+#import <CommonCrypto/CommonDigest.h>
 
 static const char *kBase64EncodeChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 static const char *kWebSafeBase64EncodeChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
@@ -284,8 +285,8 @@ GTM_INLINE NSUInteger GuessDecodedLength(NSUInteger srcLen) {
                                charset:kBase64EncodeChars
                                 padded:YES];
   if (converted) {
-    result = [[[NSString alloc] initWithData:converted
-                                    encoding:NSASCIIStringEncoding] autorelease];
+    result = [[NSString alloc] initWithData:converted
+                                    encoding:NSASCIIStringEncoding];
   }
   return result;
 }
@@ -297,8 +298,8 @@ GTM_INLINE NSUInteger GuessDecodedLength(NSUInteger srcLen) {
                                charset:kBase64EncodeChars
                                 padded:YES];
   if (converted) {
-    result = [[[NSString alloc] initWithData:converted
-                                    encoding:NSASCIIStringEncoding] autorelease];
+    result = [[NSString alloc] initWithData:converted
+                                    encoding:NSASCIIStringEncoding];
   }
   return result;
 }
@@ -363,8 +364,8 @@ GTM_INLINE NSUInteger GuessDecodedLength(NSUInteger srcLen) {
                                charset:kWebSafeBase64EncodeChars
                                 padded:padded];
   if (converted) {
-    result = [[[NSString alloc] initWithData:converted
-                                    encoding:NSASCIIStringEncoding] autorelease];
+    result = [[NSString alloc] initWithData:converted
+                                    encoding:NSASCIIStringEncoding];
   }
   return result;
 }
@@ -378,8 +379,8 @@ GTM_INLINE NSUInteger GuessDecodedLength(NSUInteger srcLen) {
                                charset:kWebSafeBase64EncodeChars
                                 padded:padded];
   if (converted) {
-    result = [[[NSString alloc] initWithData:converted
-                                    encoding:NSASCIIStringEncoding] autorelease];
+    result = [[NSString alloc] initWithData:converted
+                                    encoding:NSASCIIStringEncoding];
   }
   return result;
 }
@@ -401,7 +402,7 @@ GTM_INLINE NSUInteger GuessDecodedLength(NSUInteger srcLen) {
 {
     const char *cStr = [inPutText UTF8String];
     unsigned char digest[16];
-    CC_MD5( cStr, strlen(cStr), digest );
+    CC_MD5( cStr, (CC_LONG)strlen(cStr), digest );
     
     NSData * base64 = [[NSData alloc]initWithBytes:digest length:16];
     base64 = [GTMBase64 encodeData:base64];
@@ -412,26 +413,26 @@ GTM_INLINE NSUInteger GuessDecodedLength(NSUInteger srcLen) {
 + (NSString*)encodeBase64String:(NSString * )input {
     NSData *data = [input dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES];
     data = [GTMBase64 encodeData:data];
-    NSString *base64String = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];
+    NSString *base64String = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
     return base64String;
 }
 
 + (NSString*)decodeBase64String:(NSString * )input {
     NSData *data = [input dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES];
     data = [GTMBase64 decodeData:data];
-    NSString *base64String = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];
+    NSString *base64String = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
     return base64String;
 }
 
 + (NSString*)encodeBase64Data:(NSData *)data {
     data = [GTMBase64 encodeData:data];
-    NSString *base64String = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];
+    NSString *base64String = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
     return base64String;
 }
 
 + (NSString*)decodeBase64Data:(NSData *)data {
     data = [GTMBase64 decodeData:data];
-    NSString *base64String = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];
+    NSString *base64String = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
     return base64String;
 }
 

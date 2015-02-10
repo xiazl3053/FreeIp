@@ -7,7 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
-
-@interface UpdNikNameViewController : UIViewController
+#import "CustomViewController.h"
+@interface UpdNikNameViewController : CustomViewController
 
 @end

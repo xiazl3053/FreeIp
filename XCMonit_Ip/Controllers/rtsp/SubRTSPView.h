@@ -7,13 +7,16 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "CateViewController.h"
+@protocol SubRTSPDelegate <NSObject>
 
-@interface SubCateViewController : UIViewController
+@optional
+-(void)playRtspConnect:(NSInteger)nChannel;
 
-@property (strong, nonatomic) NSArray *subCates;
-@property (strong, nonatomic) CateViewController *cateVC;
+@end
+
+@interface SubRTSPView : UIView
 
 @property (nonatomic,assign) NSInteger nCount;
+@property (nonatomic,assign) id<SubRTSPDelegate> delegate;
 
 @end

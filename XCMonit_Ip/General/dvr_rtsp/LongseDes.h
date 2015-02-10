@@ -50,8 +50,8 @@ typedef enum
 void PP_Des(const char * p_data, const char * p_key, const char * p_output, PP_DES_MODE mode);
 
 
-void PP_DES_Encode(char *outData, char *inData, char *key, int len);
-void PP_DES_Decode(char *outData, char *inData, char *key, int len);
+void DES_Encode(char *outData, char *inData, char *key, int len);
+void DES_Decode(char *outData, char *inData, char *key, int len);
 
 
 #endif //#ifndef _DES_H_

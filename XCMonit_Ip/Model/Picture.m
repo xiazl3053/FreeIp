@@ -8,6 +8,22 @@
 
 #import "Picture.h"
 
-@implementation Picture
+@implementation PictureModel
+
+
+-(id)initWithItems:(NSArray*)items
+{
+    self = [super init];
+    
+    if (self)
+    {
+        _nId = [items[0] integerValue];
+        _strDevName = items[1];
+        _strTime = items[2];
+        _strFile = items[3];
+    }
+    
+    return self;
+}
 
 @end

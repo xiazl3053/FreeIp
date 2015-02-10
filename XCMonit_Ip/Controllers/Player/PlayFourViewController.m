@@ -20,13 +20,20 @@
 #import <OpenGLES/EAGL.h>
 #import <OpenGLES/ES2/gl.h>
 #import <OpenGLES/ES2/glext.h>
+#import "Picture.h"
+#import "UserInfo.h"
+#import "PhoneDb.h"
+#import "PTZView.h"
+
+#define kVideoFrame  (kScreenWidth/2 - 1)
 
 
 @interface PlayControlModel : NSObject
 @property (nonatomic,strong) XCDecoderNew *decode;
-//@property (nonatomic,strong) KxMovieGLView *glView;
+@property (nonatomic,strong) NSMutableArray *videoFrame;
 @property (nonatomic,strong) UIImageView *glView;
 @property (nonatomic,assign) NSInteger nPlayIndex;
+@property (nonatomic,assign) BOOL bDecoding;
 
 @end
 
@@ -49,7 +56,7 @@
 @implementation PlayControllerView
 @end
 
-@interface PlayFourViewController ()<VideoViewDelegate>
+@interface PlayFourViewController ()<VideoViewDelegate,UIScrollViewDelegate,PTZViewDelegate>
 {
     UIView    *_topHUD;
     UIView    *_downHUD;
@@ -62,8 +69,22 @@
     UILabel   *_lblName;
     UIButton  *_doneButton;
     UIButton  *_recordBtn;
+    VideoView *_currentView;
+    UISwipeGestureRecognizer *rightRecogn;
+    UISwipeGestureRecognizer *leftRegcogn;
     //UIView nIndex bPlay
+    BOOL bScreen;
+    dispatch_queue_t _dispatchQueue;
+    
+    UIImageView *bgTopImg;
+    UIImageView *bgDownImg;
+    BOOL bExit;
+    int nArray[32];
 }
+
+@property (nonatomic,strong) PTZView *view_Ptz;
+@property (nonatomic,strong) UIButton *btnPtz;
+@property (nonatomic,strong) UIPageControl *pageControl;
 @property (nonatomic,strong) NSMutableArray *array;
 @property (nonatomic,strong) UILabel  *borderLabel;
 @property (nonatomic,strong) UIScrollView *scroll;
@@ -73,7 +94,7 @@
 @property (nonatomic,assign) BOOL bPlay;
 @property (nonatomic,strong) DeviceInfoModel *devModel;
 @property (nonatomic,assign) int nDevChannel;
-
+@property (nonatomic,strong) UIView *switchView;
 @end
 
 @implementation PlayFourViewController
@@ -120,6 +141,125 @@
     
     return  self;
 }
+
+#pragma mark P2P SDK检测到设备中断触发
+-(void)P2PSDKDisConnect:(NSNotification*)notify
+{
+    NSString *strKey = (NSString*)[notify object];
+    PlayControlModel *playModel = [_decoderInfo valueForKey:strKey];
+    PlayControllerView *playView = [_array objectAtIndex:playModel.nPlayIndex];
+    __weak PlayControllerView *__playView = playView;
+    int nChannel = [strKey intValue];
+    int nPlayIndex = (int)playModel.nPlayIndex;
+    //如果有正在录像的  需要停止
+    __weak PlayFourViewController *__weakSelf = self;
+    __block NSString *__strKey = strKey;
+    NSString *strInfo = XCLocalized(@"Disconnect");
+    __block NSString *_strInfo = strInfo;
+
+    dispatch_group_t group = dispatch_group_create();
+    
+    dispatch_group_async(group,dispatch_get_global_queue(0, 0),
+    ^{
+        [__weakSelf closePlayForKey:__strKey];
+    });
+    dispatch_group_async(group,dispatch_get_main_queue(),
+    ^{
+       DLog(@"输出错误:%@",_strInfo);
+       [__playView.mainView makeToast:_strInfo];
+       [__weakSelf updateClickView];
+    });
+    
+    dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
+
+    nArray[nChannel]++;
+    DLog(@"第%d个通道",nChannel);
+    if (nArray[nChannel]<=3 && !bExit)
+    {
+        DLog(@"第%d次重连",nArray[nChannel]);
+        dispatch_group_async(group,dispatch_get_main_queue(),
+        ^{
+            [__weakSelf startNewWindow:nPlayIndex channel:strKey];
+        });
+    }
+    
+}
+
+#pragma mark 连接设备失败触发，包含ffmpeg与p2p连接设备两种动作
+-(void)connectP2PFail:(NSNotification*)notify
+{
+    XCDecoderNew *decoder = [notify object];
+    __weak XCDecoderNew *weakDecode = decoder;
+    NSString *strKey = [NSString stringWithFormat:@"%d",decoder.nChannel];
+    PlayControlModel *playModel = [_decoderInfo valueForKey:strKey];
+    PlayControllerView *playView = [_array objectAtIndex:playModel.nPlayIndex];
+    __weak PlayControllerView *__playView = playView;
+    int nChannel = [strKey intValue];
+    int nPlayIndex = (int)playModel.nPlayIndex;
+    //如果有正在录像的  需要停止
+    __weak PlayFourViewController *__weakSelf = self;
+    __block NSString *__strKey = strKey;
+    NSString *strInfo = [weakDecode.strError copy];
+    __block NSString *_strInfo = strInfo;
+    dispatch_group_t group = dispatch_group_create();
+    
+    dispatch_group_async(group,dispatch_get_global_queue(0, 0), ^{
+        [__weakSelf closePlayForKey:__strKey];
+    });
+    dispatch_group_async(group,dispatch_get_main_queue(),
+    ^{
+         DLog(@"输出错误:%@",_strInfo);
+         [__playView.mainView makeToast:_strInfo];
+         [__weakSelf updateClickView];
+    });
+    
+    dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
+    nArray[nChannel]++;
+    DLog(@"第%d个通道",nChannel);
+    if (nArray[nChannel]<=3 && !bExit)
+    {
+        DLog(@"第%d次重连",nArray[nChannel]);
+        
+        dispatch_group_async(group,dispatch_get_main_queue(),
+        ^{
+             [__weakSelf startNewWindow:nPlayIndex channel:strKey];
+        });
+    }
+}
+
+#pragma mark 后台推送
+-(void)backModel
+{
+    //释放SDK
+    __weak PlayFourViewController *weakSelf = self;
+    dispatch_group_t group = dispatch_group_create();
+    dispatch_group_async(group, dispatch_get_global_queue(0, 0), ^{
+        [weakSelf stopVideo];
+    });
+    
+    dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
+    
+    DLog(@"GG");
+    
+    group = nil;
+}
+
+#pragma mark 加载推送
+-(void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(connectP2PFail:) name:NSCONNECT_P2P_DVR_FAIL_VC object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(P2PSDKDisConnect:) name:NSCONNECT_P2P_DISCONNECT object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(backModel) name:NS_APPLITION_ENTER_BACK object:nil];
+}
+#pragma mark 关闭推送
+-(void)viewWillDisappear:(BOOL)animated
+{
+    [super viewWillDisappear:animated];
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];
@@ -132,23 +272,21 @@
     _borderLabel.layer.borderColor = [[UIColor greenColor] CGColor];
     [self.view addSubview:_borderLabel];
     [_borderLabel setFrame:((PlayControllerView*)[_array objectAtIndex:0]).mainRect];
+    bExit = NO;
+    _dispatchQueue = dispatch_queue_create("decoder", DISPATCH_QUEUE_SERIAL);
 }
-
-
-
 
 #pragma mark view显示
 -(void)viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
     [UIApplication sharedApplication].idleTimerDisabled = YES;
-
+    
     PlayControlModel *playModel = [[PlayControlModel alloc] init];
     
     playModel.nPlayIndex = 0;
     ((PlayControllerView*)[_array objectAtIndex:nIndex]).bPlay = YES;
     ((PlayControllerView*)[_array objectAtIndex:nIndex]).strKey = @"0";
-    
     [_decoderInfo setValue:playModel forKey:@"0"];
     
     __weak PlayFourViewController *weakSelf = self;
@@ -159,165 +297,430 @@
     __weak PlayControllerView *__playView = playView;
     dispatch_async(dispatch_get_main_queue(),
     ^{
-        [__playView.mainView makeToastActivity];
+         [__playView.mainView makeToastActivity];
     });
     
     dispatch_async(dispatch_get_global_queue(0, 0),
-    ^{
-        [weakSelf startPlayWithNO:__strNO channel:@"0"];
-    });
+   ^{
+       [weakSelf startPlayWithNO:__strNO channel:@"0"];
+   });
 }
--(void)startPlayWithNO:(NSString*)strNO channel:(NSString*)strKey
+
+#pragma mark 界面设置
+-(void)initToolBar
 {
-    PlayControlModel *playModel = [_decoderInfo valueForKey:strKey];
-    if (!playModel)
+    
+    [self.view setBackgroundColor:RGB(250, 250, 250)];
+    
+    [self initTopView];
+    
+    [self initVideoView];
+    
+    [self initScrollView];
+    
+    [self initButtomView];
+    
+    [self.view setUserInteractionEnabled:YES];
+    
+    rightRecogn = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipeFrom:)];
+    [rightRecogn setDirection:UISwipeGestureRecognizerDirectionRight];
+    
+    
+    leftRegcogn = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipeFrom:)];
+    [leftRegcogn setDirection:UISwipeGestureRecognizerDirectionLeft];
+    
+}
+
+
+#pragma mark 顶部导航栏初始化
+-(void)initTopView
+{
+    _topHUD = [[UIView alloc] initWithFrame:CGRectMake(0,0,kScreenWidth,50)];
+    _topHUD.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+    [self.view addSubview:_topHUD];
+    
+    _topHUD.alpha = 1;
+    
+    UILabel *sLine1 = [[UILabel alloc] initWithFrame:CGRectMake(0, 49.6, kScreenWidth, 0.2)];
+    sLine1.backgroundColor = [UIColor colorWithRed:198/255.0
+                                             green:198/255.0
+                                              blue:198/255.0
+                                             alpha:1.0];
+    UILabel *sLine2 = [[UILabel alloc] initWithFrame:CGRectMake(0, 49.8, kScreenWidth, 0.2)] ;
+    sLine2.backgroundColor = [UIColor whiteColor];
+    
+    sLine1.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleBottomMargin;
+    sLine2.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleBottomMargin;
+    
+    [_topHUD addSubview:sLine1];
+    [_topHUD addSubview:sLine2];
+    
+    _lblName = [[UILabel alloc] initWithFrame:Rect(30,15,kScreenWidth-60,20)];
+    [_lblName setTextAlignment:NSTextAlignmentCenter];
+    [_lblName setText:_devModel.strDevName];
+    [_lblName setFont:[UIFont fontWithName:@"Helvetica" size:15.0f]];
+    [_lblName setTextColor:[UIColor blackColor]];
+    [_topHUD addSubview:_lblName];
+    
+    _doneButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    _doneButton.frame = CGRectMake(5,3,44,44);
+    [_doneButton setImage:[UIImage imageNamed:@"NaviBtn_Back"] forState:UIControlStateNormal];
+    [_doneButton setImage:[UIImage imageNamed:@"NaviBtn_Back_H"] forState:UIControlStateHighlighted];
+    _doneButton.titleLabel.font = [UIFont fontWithName:@"Helvetica" size:18];
+    _doneButton.showsTouchWhenHighlighted = YES;
+    [_doneButton addTarget:self action:@selector(doneDidTouch:)
+          forControlEvents:UIControlEventTouchUpInside];
+    [_topHUD addSubview:_doneButton];
+    //横屏背景
+    bgTopImg = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"ptz_bg"]];
+    bgDownImg = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"ptz_bg"]];
+    
+    _btnPtz = [UIButton buttonWithType:UIButtonTypeCustom];
+    [_btnPtz setImage:[UIImage imageNamed:@"ptz_control"] forState:UIControlStateNormal];
+    
+    
+    _view_Ptz = [[PTZView alloc] initWithFrame:Rect(0, 0, 164, 114)];
+    [self.view addSubview:_view_Ptz];
+    _view_Ptz.hidden = YES;
+    _view_Ptz.delegate = self;
+    
+    [_btnPtz addTarget:self action:@selector(showPtzView) forControlEvents:UIControlEventTouchUpInside];
+}
+
+
+#pragma mark 视频矿初始化
+-(void)initVideoView
+{
+    
+    VideoView *_mainView1 = [[VideoView alloc] initWithFrame:Rect(0,51, kVideoFrame, kVideoFrame)];
+    
+    VideoView *_mainView2 = [[VideoView alloc] initWithFrame:Rect(kVideoFrame+2,51, kVideoFrame, kVideoFrame)];
+    
+    VideoView *_mainView3 = [[VideoView alloc] initWithFrame:Rect(0,_mainView2.frame.origin.y+_mainView2.frame.size.height+1, kVideoFrame, kVideoFrame)];
+    
+    VideoView *_mainView4 = [[VideoView alloc] initWithFrame:Rect(kVideoFrame+2,_mainView3.frame.origin.y,kVideoFrame,kVideoFrame)];
+    
+    if (isPhone4)
     {
-        playModel = [[PlayControlModel alloc] init];
-        [_decoderInfo setValue:playModel forKey:strKey];
+        _mainView1.frame = Rect(0,45, kVideoFrame, 120);
+        _mainView2.frame = Rect(kVideoFrame+2,45, kVideoFrame, 120);
+        _mainView3.frame = Rect(0,_mainView2.frame.origin.y+_mainView2.frame.size.height+1, kVideoFrame, 120);
+        _mainView4.frame = Rect(kVideoFrame+2,_mainView3.frame.origin.y, kVideoFrame, 120);
     }
-    playModel.decode = [[XCDecoderNew alloc] initWithFormat:KxVideoFrameFormatRGB];
-    //多屏播放控制器
-    __weak PlayFourViewController *weakSelf = self;
-    //序列号
-    __weak NSString *__strNO = strNO;
-    //解码器
-    __weak XCDecoderNew *weakdecode = playModel.decode;
-    //通道字符串
-    __block NSString *__strChannel = strKey;
-    dispatch_async(dispatch_get_global_queue(0, 0),
-    ^{
-        [weakdecode startConnectWithChan:__strNO channel:[__strChannel intValue]];
-    });
-    _bPlay = YES;
-    dispatch_async(dispatch_get_global_queue(0, 0),
-    ^{
-        while (!weakdecode.frameWidth)
-        {
-            [NSThread sleepForTimeInterval:0.2f];
-            if (!weakSelf.bPlay)
-            {
-                return ;
-            }
-        }
-        [weakdecode startPlay];
-        dispatch_async(dispatch_get_global_queue(0, 0),
-        ^{
-            [weakSelf initGlViewWithNO:__strNO channel:__strChannel];
-            [weakSelf playMovieWithChannel:__strChannel];
-        });
-    });
-}
-
--(void)initGlViewWithNO:(NSString *)strNO channel:(NSString*)strKey
-{
-    PlayControlModel *playModel = [_decoderInfo valueForKey:strKey];
-    PlayControllerView *playView = (PlayControllerView*)[_array objectAtIndex:(int)playModel.nPlayIndex];
-    playView.strKey = strKey;
     
-    playModel.glView = [[UIImageView alloc] initWithFrame:playView.mainView.bounds];
     
-    playModel.glView.contentMode = UIViewContentModeScaleAspectFit;
+    [self.view insertSubview:_mainView1 atIndex:0];
+    _mainView1.delegate = self;
+    _mainView1.nCursel = 0;
+    [self.view insertSubview:_mainView2 atIndex:0];
+    _mainView2.nCursel = 1;
+    _mainView2.delegate = self;
     
-    playModel.glView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleBottomMargin;
-    [playView.mainView insertSubview:playModel.glView atIndex:0];
+    [self.view insertSubview:_mainView3 atIndex:0];
+    _mainView3.nCursel =2;
+    _mainView3.delegate = self;
+    [self.view insertSubview:_mainView4 atIndex:0];
+    _mainView4.nCursel = 3;
+    _mainView4.delegate = self;
     
-    __weak PlayControllerView *__weakPlay = playView;
-    __weak PlayControlModel *_playModel = playModel;
-    __weak PlayControllerView *_playView = playView;
-    dispatch_async(dispatch_get_main_queue(),
-    ^{
-        [_playView.mainView addSubview:_playModel.glView];
-        [__weakPlay.mainView hideToastActivity];
-    });
+    _mainView4.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleBottomMargin;
+    _mainView1.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleBottomMargin;
+    _mainView3.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleBottomMargin;
+    _mainView2.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleBottomMargin;
+    
+    PlayControllerView *play1 = [[PlayControllerView alloc] init];
+    PlayControllerView *play2 = [[PlayControllerView alloc] init];
+    PlayControllerView *play3 = [[PlayControllerView alloc] init];
+    PlayControllerView *play4 = [[PlayControllerView alloc] init];
+    
+    play1.mainRect = _mainView1.frame;
+    play2.mainRect = _mainView2.frame;
+    play3.mainRect = _mainView3.frame;
+    play4.mainRect = _mainView4.frame;
+    
+    play1.mainView = _mainView1;
+    play2.mainView = _mainView2;
+    play3.mainView = _mainView3;
+    play4.mainView = _mainView4;
+    
+    _array = [NSMutableArray array];
+    
+    [_array addObject:play1];
+    [_array addObject:play2];
+    [_array addObject:play3];
+    [_array addObject:play4];
     
 }
--(void)playMovieWithChannel:(NSString*)strKey
+#pragma mark 滚动条初始化
+-(void)initScrollView
 {
-    PlayControlModel *playInfo = [_decoderInfo valueForKey:strKey];
-    if(playInfo.decode.playing)
+    VideoView *mainView = ((PlayControllerView *)[_array objectAtIndex:3]).mainView;
+    CGFloat fHeight = mainView.frame.origin.y+mainView.frame.size.height;
+    //滚动条
+    _scroll = [[UIScrollView alloc] initWithFrame:Rect(0, fHeight+2, kScreenWidth, kScreenHeight-fHeight-70+HEIGHT_MENU_VIEW(20, 0))];
+    [self.view addSubview:_scroll];
+    nOldIndex = -1;
+    CGFloat btnWidth = kScreenWidth / 4 ;
+    CGFloat btnHeight = _scroll.frame.size.height / 2 ;
+    int nWidth = 50;
+    CGFloat btnOrgWidth=(btnWidth-nWidth)/2;
+    CGFloat btnOrgHeight = (btnHeight-nWidth)/2;
+    int nNumber,nRow;
+    if(isPhone4)
     {
-        NSMutableArray *array = [playInfo.decode getVideoArray];
-        
-        KxVideoFrame *frame ;
-        if(array.count>0)
+        //4个通道   4s以下s
+        nNumber = _nDevChannel <= 4 ? 1 : _nDevChannel/4;
+        nRow = _nDevChannel <= 4 ? _nDevChannel : 4;
+        for (int i=0; i<nNumber;i++)
         {
-            @synchronized(array)
+            UIView *view = [[UIView alloc] initWithFrame:Rect(i*kScreenWidth, 36, kScreenWidth, _scroll.frame.size.height)];
+            for (int j=0; j<nRow; j++)
             {
-                if (array.count > 0)
-                {
-                    frame = array[0];
-                    [array removeObjectAtIndex:0];
-                }
+                UIView *sonView = [[UIView alloc] initWithFrame:Rect(j*btnWidth, 0, btnWidth, btnHeight)];
+                UIButton *btn = [UIButton buttonWithType:UIButtonTypeCustom];
+                btn.frame = Rect((btnWidth-45)/2, (btnHeight-45)/2, 45, 45);
+                NSString *strInfo = [NSString stringWithFormat:@"%d",i*4+j+1];
+                [btn setTitle:strInfo forState:UIControlStateNormal];
+                btn.tag = 1000 + j;
+                
+                [btn setBackgroundImage:[UIImage imageNamed:@"dvr_n"] forState:UIControlStateNormal];
+                [btn setBackgroundImage:[UIImage imageNamed:@"dvr_h"] forState:UIControlStateHighlighted];
+                
+                [btn setTitleColor:RGB(102, 102, 102) forState:UIControlStateNormal];
+                
+                [btn addTarget:self action:@selector(connect_channelPlay:) forControlEvents:UIControlEventTouchUpInside];
+                [sonView addSubview:btn];
+                [view addSubview:sonView];
             }
-            if (frame)
-            {
-                KxVideoFrameRGB *rgbFrame = (KxVideoFrameRGB *)frame;
-                __weak PlayControlModel *__playInfo = playInfo;
-                UIImage *rgbImage = rgbFrame.asImage;
-                __weak UIImage *_rgbImage = rgbImage;
-                dispatch_async(dispatch_get_main_queue(),
-                ^{
-                    [__playInfo.glView setImage:nil];
-                    [__playInfo.glView setImage:_rgbImage];
-                });
-               rgbImage = nil;
-               frame = nil;
-            }
+            [_scroll addSubview:view];
         }
-        array = nil;
-        [NSThread sleepForTimeInterval:0.01f];
-        float nTime = playInfo.decode.fFPS * 12;
-        dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, 1.0/nTime * NSEC_PER_SEC);
-        __weak PlayFourViewController *weakSelf = self;
-        __block NSString* __strKey = strKey;
-        dispatch_after(popTime, dispatch_get_global_queue(0, 0), ^(void)
-       {
-           [weakSelf playMovieWithChannel:__strKey];
-       });
-        
+    }
+    else
+    {
+        //8个通道 iphone5以上型号
+        nNumber = _nDevChannel <= 8 ? 1 : _nDevChannel/8;
+        nRow = _nDevChannel <= 8 ? _nDevChannel : 8;
+        for (int i=0; i<nNumber;i++)
+        {
+            UIView *view = [[UIView alloc] initWithFrame:Rect(i*kScreenWidth, 6, kScreenWidth, _scroll.frame.size.height)];
+            for (int j=0; j<nRow; j++)
+            {
+                
+                UIButton *btn = [UIButton buttonWithType:UIButtonTypeCustom];
+                btn.frame = Rect(j%4*btnWidth+btnOrgWidth, (j%8)-4>=0 ? (btnHeight+btnOrgHeight) : btnOrgHeight, nWidth, nWidth);
+                
+                NSString *strInfo = [NSString stringWithFormat:@"%d",i*8+j+1];
+                [btn setTitle:strInfo forState:UIControlStateNormal];
+                btn.tag = 1000 + j;
+                
+                [btn setBackgroundImage:[UIImage imageNamed:@"dvr_n"] forState:UIControlStateNormal];
+                
+                [btn setBackgroundImage:[UIImage imageNamed:@"dvr_h"] forState:UIControlStateHighlighted];
+                
+                [btn setTitleColor:RGB(102, 102, 102) forState:UIControlStateNormal];
+                
+                [btn addTarget:self action:@selector(connect_channelPlay:) forControlEvents:UIControlEventTouchUpInside];
+                
+                [view addSubview:btn];
+            }
+            [_scroll addSubview:view];
+        }
+    }
+    
+    _scroll.delegate = self;
+    _scroll.contentSize = CGSizeMake(kScreenWidth*nNumber,kScreenHeight-fHeight-70+HEIGHT_MENU_VIEW(20, 0));
+    _scroll.pagingEnabled=YES;
+    _scroll.scrollEnabled = NO;
+    _scroll.showsHorizontalScrollIndicator = NO;
+    [_scroll setScrollEnabled:YES];
+    
+    if(nNumber>1)
+    {
+        UIPageControl *pageControl = [[UIPageControl alloc] init];
+        pageControl.center = CGPointMake(kScreenWidth * 0.5, kScreenHeight-39);
+        pageControl.bounds = CGRectMake(0, 0, 150, 30);
+        pageControl.numberOfPages = nNumber; // 一共显示多少个圆点（多少页）
+        // 设置非选中页的圆点颜色
+        pageControl.pageIndicatorTintColor = RGB(221, 221, 221);
+        // 设置选中页的圆点颜色
+        pageControl.currentPageIndicatorTintColor = RGB(15, 173, 225);
+        // 禁止默认的点击功能
+        pageControl.enabled = NO;
+        [self.view addSubview:pageControl];
+        _pageControl = pageControl;
+    }
+}
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView
+{
+    int page = _scroll.contentOffset.x / _scroll.frame.size.width;
+    // 设置页码
+    if(_pageControl)
+    {
+        _pageControl.currentPage = page;
     }
 }
 
-//view显示时加载
--(void)viewWillAppear:(BOOL)animated
+#pragma mark 底部工具栏
+-(void)initButtomView
 {
-    [super viewWillAppear:animated];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(connectP2PFail:) name:NSCONNECT_P2P_DVR_FAIL_VC object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(backModel) name:NS_APPLITION_ENTER_BACK object:nil];
-}
-
--(void)viewWillDisappear:(BOOL)animated
-{
-    [super viewWillDisappear:animated];
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [self.view removeGestureRecognizer:doubleGesture];
-//    [self.view removeGestureRecognizer:tapGesture];
-}
-
-#pragma mark 播放错误显示
--(void)connectP2PFail:(NSNotification*)notify
-{
-    XCDecoderNew *decoder = [notify object];
-    __weak XCDecoderNew *weakDecode = decoder;
-    NSString *strKey = [NSString stringWithFormat:@"%d",decoder.nChannel];
-    PlayControlModel *playModel = [_decoderInfo valueForKey:strKey];
-    PlayControllerView *playView = [_array objectAtIndex:playModel.nPlayIndex];
-    __weak PlayControllerView *__playView = playView;
+    _downHUD = [[UIView alloc] initWithFrame:CGRectMake(0, kScreenHeight-50,kScreenWidth, 50)];
+    _downHUD.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+    [self.view addSubview:_downHUD];
+    _downHUD.alpha = 1.0f;
     
-    dispatch_async(dispatch_get_main_queue(),
-    ^{
-        NSString *strInfo = [NSString stringWithFormat:@"%@",weakDecode.strError];
-        [__playView.mainView makeToast:strInfo];
-    });
-    [self closePlayForKey:strKey];
+    UILabel *sLine3 = [[UILabel alloc] initWithFrame:CGRectMake(0, 0.1, kScreenWidth, 0.2)];
+    sLine3.backgroundColor = [UIColor colorWithRed:198/255.0
+                                             green:198/255.0
+                                              blue:198/255.0
+                                             alpha:1.0];
+    
+    UILabel *sLine4 = [[UILabel alloc] initWithFrame:CGRectMake(0, 0.3, kScreenWidth, 0.2)] ;
+    sLine4.backgroundColor = [UIColor whiteColor];
+    sLine3.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleBottomMargin;
+    sLine4.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleBottomMargin;
+    
+    [_downHUD addSubview:sLine3];
+    [_downHUD addSubview:sLine4];
+    sLine3.tag = 10013;
+    sLine4.tag = 10014;
+    
+    UIButton *stopBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+    [stopBtn setImage:[UIImage imageNamed:@"stop"] forState:UIControlStateNormal];
+    [stopBtn setImage:[UIImage imageNamed:@"stop_h"] forState:UIControlStateHighlighted];
+    [stopBtn addTarget:self action:@selector(stopCurVideo) forControlEvents:UIControlEventTouchUpInside];
+    stopBtn.tag = 1002;
+    stopBtn.imageView.contentMode = UIViewContentModeScaleAspectFit;
+    
+    UIButton *shotoBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+    [shotoBtn setImage:[UIImage imageNamed:@"shotopic"] forState:UIControlStateNormal];
+    [shotoBtn setImage:[UIImage imageNamed:@"shotopic_h"] forState:UIControlStateHighlighted];
+    [shotoBtn addTarget:self action:@selector(shotoPic) forControlEvents:UIControlEventTouchUpInside];
+    
+    shotoBtn.tag = 1003;
+    _recordBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+    [_recordBtn setImage:[UIImage imageNamed:@"record"] forState:UIControlStateNormal];
+    [_recordBtn addTarget:self action:@selector(recordVideo) forControlEvents:UIControlEventTouchUpInside];
+    [_recordBtn setImage:[UIImage imageNamed:@"record_sel"] forState:UIControlStateSelected];
+    [_recordBtn setImage:[UIImage imageNamed:@"record_select"] forState:UIControlStateHighlighted];
+    _recordBtn.tag = 1004;
+    
+    
+    [_downHUD addSubview:stopBtn];
+    [_downHUD addSubview:shotoBtn];
+    [_downHUD addSubview:_recordBtn];
+    
+    stopBtn.frame =  Rect(30, 1, 60, 49);
+    [_recordBtn setFrame:Rect(90,1, 60, 49)];
+    shotoBtn.frame =  Rect(150, 1, 60, 49);
+    
+    ((UIButton*)[_downHUD viewWithTag:1002]).enabled = NO;
+    ((UIButton*)[_downHUD viewWithTag:1003]).enabled = NO;
+    _recordBtn.enabled = NO;
+    //    switchBtn.enabled = NO;
 }
 
-#pragma mark
--(void)backModel
+
+#pragma mark 横屏
+-(void)setVerticalFrame
 {
-    //释放SDK
-    [self stopVideo];
+    CGFloat width,height;
+    width = kScreenHeight;
+    height = kScreenWidth;
+    
+    _topHUD.frame = Rect(0, 0, width,50);
+    
+    [_topHUD insertSubview:bgTopImg atIndex:0];
+    [bgTopImg setFrame:_topHUD.bounds];
+    
+    [_lblName setTextColor:[UIColor whiteColor]];
+    
+    _lblName.frame = Rect(50, 15, width - 160, 20);
+    [_lblName setTextAlignment:NSTextAlignmentLeft];
+    
+    _currentView.frame = Rect(0, 0, width, height);
+    
+    _switchView.frame = Rect((width - 240)/2+180, height-(44+60), 60, 60);
+    //    (width - 240)/2
+    _downHUD.frame = Rect(0, height-50, width, 50);
+    [_downHUD viewWithTag:1002].frame =  Rect(width-180, 0, 60, 48);
+    [_downHUD viewWithTag:1003].frame = Rect(width-120,  0, 60, 48);
+    [_downHUD viewWithTag:1004].frame =  Rect(width-60, 0, 60, 48);
+    
+    [(UIButton*)[_downHUD viewWithTag:1002] setImage:[UIImage imageNamed:@"full_stop"] forState:UIControlStateNormal];
+    [(UIButton*)[_downHUD viewWithTag:1002] setImage:[UIImage imageNamed:@"full_stop"] forState:UIControlStateHighlighted];
+    [(UIButton*)[_downHUD viewWithTag:1003] setImage:[UIImage imageNamed:@"full_snap"] forState:UIControlStateNormal];
+    [(UIButton*)[_downHUD viewWithTag:1004] setImage:[UIImage imageNamed:@"full_record"] forState:UIControlStateNormal];
+    
+    [_downHUD insertSubview:bgDownImg atIndex:0];
+    [bgDownImg setFrame:_downHUD.bounds];
+    
+    [_btnPtz setFrame:Rect(width-60, 0, 60, 49)];
+    [_topHUD addSubview:_btnPtz];
+    
+    _view_Ptz.frame = Rect(width-164, height/2-57,164, 114);
+    
+    [_downHUD viewWithTag:10013].backgroundColor = RGB(198, 198, 198);;
+    [_downHUD viewWithTag:10014].backgroundColor = [UIColor whiteColor];
+    
+    [_currentView addGestureRecognizer:leftRegcogn];
+    [_currentView addGestureRecognizer:rightRecogn];
+    
 }
+
+#pragma mark 竖屏
+-(void)setHorizontalFrame
+{
+    //删除移屏手势
+    [_currentView removeGestureRecognizer:leftRegcogn];
+    [_currentView removeGestureRecognizer:rightRecogn];
+    
+    [_btnPtz removeFromSuperview];
+    _view_Ptz.hidden = YES;
+    
+    [_lblName setTextColor:[UIColor blackColor]];
+    [_lblName setTextAlignment:NSTextAlignmentCenter];
+    _lblName.frame = Rect(80,15,kScreenWidth-160,20);
+    
+    [bgTopImg removeFromSuperview];
+    [bgDownImg removeFromSuperview];
+    
+    _switchView.frame = Rect(210, kScreenHeight-(44+60), 60, 60);
+    _downHUD.frame = CGRectMake(0, kScreenHeight-50,kScreenWidth, 50);
+    
+    [_downHUD viewWithTag:1002].frame =  Rect(kScreenWidth/2-90 , 0, 60, 48);
+    [_downHUD viewWithTag:1003].frame = Rect(kScreenWidth/2-30,  0, 60, 48);
+    [_downHUD viewWithTag:1004].frame =  Rect(kScreenWidth/2+30, 0, 60, 48);
+    
+    
+    [(UIButton*)[_downHUD viewWithTag:1002] setImage:[UIImage imageNamed:@"stop"] forState:UIControlStateNormal];
+    [(UIButton*)[_downHUD viewWithTag:1002] setImage:[UIImage imageNamed:@"stop_h"] forState:UIControlStateHighlighted];
+    [(UIButton*)[_downHUD viewWithTag:1003] setImage:[UIImage imageNamed:@"shotopic"] forState:UIControlStateNormal];
+    [(UIButton*)[_downHUD viewWithTag:1004] setImage:[UIImage imageNamed:@"record"] forState:UIControlStateNormal];
+    
+    _topHUD.alpha = 1.0f;
+    _downHUD.alpha = 1.0f;
+    [_downHUD viewWithTag:10013].backgroundColor = RGB(198, 198, 198);
+    [_downHUD viewWithTag:10014].backgroundColor = [UIColor grayColor];
+    
+    for (int i=0; i<4; i++)
+    {
+        
+        [((PlayControllerView*)[_array objectAtIndex:i]).mainView setFrame:((PlayControllerView*)[_array objectAtIndex:i]).mainRect];
+    }
+}
+
+
+
+
+#pragma mark 点击视频框
+-(void)updateClickView
+{
+    [self clickView:((PlayControllerView*)[_array objectAtIndex:nIndex]).mainView];
+}
+
+
+//
+
 
 
 #pragma mark 停止选择的视频
@@ -327,7 +730,18 @@
     PlayControlModel *playModel = [_decoderInfo objectForKey:playView.strKey];
     if (playModel)
     {
-        [self closePlayForKey:playView.strKey];
+ //       [self closePlayForKey:playView.strKey];
+        __weak PlayFourViewController *__weakSelf = self;
+        dispatch_group_t group = dispatch_group_create();
+        dispatch_group_async(group, dispatch_get_global_queue(0, 0),
+        ^{
+                [__weakSelf closePlayForKey:playView.strKey];
+        });
+        dispatch_group_notify(group,dispatch_get_main_queue(),
+        ^{
+            [__weakSelf updateClickView];
+        });
+        group = nil;
     }
 }
 
@@ -336,56 +750,92 @@
 {
     _bPlay = NO;
     __weak PlayFourViewController *weakSelf =self;
-    dispatch_async(dispatch_get_global_queue(0, 0), ^{
-        for (NSString *strKey in [weakSelf.decoderInfo allKeys])
+    for (NSString *strKey in [_decoderInfo allKeys])
+    {
+        dispatch_async(dispatch_get_global_queue(0, 0),
+        ^{
+              [weakSelf closePlayForKey:strKey];
+        });
+    }
+}
+
+-(void)stopAllRecord
+{
+    _bPlay = NO;
+    __weak PlayFourViewController *weakSelf =self;
+    for (NSString *strKey in [weakSelf.decoderInfo allKeys])
+    {
+        PlayControlModel *playModel = [_decoderInfo valueForKey:strKey];
+        DLog(@"key:%@",strKey);
+        if(playModel)
         {
-            [weakSelf closePlayForKey:strKey];
-            [NSThread sleepForTimeInterval:0.5f];
+            PlayControllerView *playView = (PlayControllerView*)[_array objectAtIndex:playModel.nPlayIndex];
+            if (playView.bRecord)
+            {
+                DLog(@"停止录像");
+                [playModel.decode recordStop];
+                playView.bRecord = NO;
+            }
         }
-    });
+    }
 }
 
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
+    //收到内存不足警告，停止一路视频
 }
 
 -(void)dealloc
 {
     [UIApplication sharedApplication].idleTimerDisabled = NO;
 }
-#pragma mark 禁止重力感应
--(BOOL)shouldAutorotate
+#pragma mark 重力处理
+- (BOOL)shouldAutorotate
 {
     return NO;
 }
+-(NSUInteger)supportedInterfaceOrientations
+{
+    return UIInterfaceOrientationMaskPortrait;
+}
 
 //抓拍
+
 -(void)shotoPic
 {
-  //  [CaptureService captureToPhotoAlbum:_glView];
+    ((UIButton*)[_downHUD viewWithTag:1003]).enabled = NO;
     PlayControllerView *playView = [_array objectAtIndex:nIndex];
     DLog(@"nIndex:%d",nIndex);
     PlayControlModel *playModel = [_decoderInfo objectForKey:playView.strKey];
     if (playModel)
     {
-        BOOL bReturn = [self captureToPhotoAlbumNew:playModel.glView];
+        BOOL bReturn = [CaptureService captureToPhotoRGB:playModel.glView devName:_devModel.strDevName];
         __weak PlayControllerView *__playView = playView;
         if (bReturn)
         {
             dispatch_async(dispatch_get_main_queue(),
             ^{
-                [__playView.mainView makeToast:@"抓拍成功"];
+                [__playView.mainView makeToast:XCLocalized(@"captureS") duration:1.0 position:@"center"];
             });
         }
         else
         {
            dispatch_async(dispatch_get_main_queue(),
            ^{
-               [__playView.mainView makeToast:@"抓拍失败"];
+               [__playView.mainView makeToast:XCLocalized(@"captureF") duration:1.0 position:@"center"];
            });
         }
     }
+    [self performSelector:@selector(shotoPicEnableYES) withObject:nil afterDelay:1.5];
+}
+
+-(void)shotoPicEnableYES
+{
+    __weak UIButton* btnRecord = (UIButton*)[_downHUD viewWithTag:1003];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        btnRecord.enabled = YES;
+    });
 }
 
 #pragma mark 录像操作
@@ -396,15 +846,37 @@
     if (playView.bRecord)
     {
         [self stopRecord:nIndex];
+        __weak PlayControllerView *__play = playView;
+        dispatch_async(dispatch_get_main_queue(),
+        ^{
+            [__play.mainView makeToast:XCLocalized(@"stopRecord") duration:1.0 position:@"center"];
+        });
     }
     else
     {
+        _recordBtn.enabled = NO;
         playView.bRecord = YES;
         PlayControlModel *playModel = [_decoderInfo objectForKey:playView.strKey];
-        [playModel.decode recordStart];
+        
+        NSString *strPath = [CaptureService captureRecordRGB:playModel.glView];
+        
+        [playModel.decode recordStart:strPath name:_devModel.strDevName];
+        
         _recordBtn.selected = YES;
+        __weak PlayControllerView *__play = playView;
+        dispatch_async(dispatch_get_main_queue(),
+        ^{
+            [__play.mainView makeToast:XCLocalized(@"startRecord") duration:1.0 position:@"center"];
+        });
+        [self performSelector:@selector(recordVideoEnableYes) withObject:nil afterDelay:1.5];
     }
-    
+}
+-(void)recordVideoEnableYes
+{
+    __weak UIButton *btnRecord = _recordBtn;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        btnRecord.enabled = YES;
+    });
 }
 //与开启录像操作对应
 -(void)stopRecord:(int)nSelectIndex
@@ -415,32 +887,49 @@
     PlayControlModel *playModel = [_decoderInfo objectForKey:playView.strKey];
     [playModel.decode recordStop];
 }
-#pragma mark 请求通道播放
--(void)channelPlay:(UIButton*)sender
+
+
+
+-(void)connect_channelPlay:(UIButton*)sender
 {
-    int nChannel = sender.tag-1000;
-    
+    int nChannel = (int)[sender.titleLabel.text integerValue]-1;
+    [self channelPlay:nChannel];
+}
+
+#pragma mark 请求通道播放
+-(void)channelPlay:(int)nChannel
+{
     NSString *strChannel = [NSString stringWithFormat:@"%d",nChannel];
-    DLog(@"第%@个通道请求播放",strChannel);
     __weak PlayFourViewController *weakSelf = self;
     __block NSString *__strChannel = strChannel;
     //先检测该屏幕
     PlayControllerView *playView = (PlayControllerView*)[_array objectAtIndex:(int)nIndex];
-    if ([playView.strKey isEqualToString:strChannel] && playView.bPlay)
+    if ([playView.strKey isEqualToString:strChannel] && playView.bPlay)//请求通道正在当前的视频框播放，不做任何操作，可以提示
     {
         return ;
     }
-    if (playView.bPlay)
+    PlayControlModel *_oldModel = [_decoderInfo objectForKey:playView.strKey];
+    if (playView.bPlay)//如果通道正在播放
     {
-        __weak PlayControllerView *__weakPlay = playView;
-        dispatch_async(dispatch_get_global_queue(0, 0),
-        ^{
-            DLog(@"关闭通道:%@",__weakPlay.strKey);
-            [weakSelf closePlayForKey:__weakPlay.strKey];
-        });
-        while (playView.bPlay)
+        if(_oldModel.decode.fFPS!=0)
         {
-            [NSThread sleepForTimeInterval:0.3f];
+            //停止视频
+            //不使用独立的异步去处理
+            __block NSString *__strKey = playView.strKey;
+            dispatch_sync(dispatch_get_global_queue(0, 0),
+            ^{
+                [weakSelf closePlayForKey:__strKey];
+            });
+            
+        }
+        else
+        {
+            //提示当前视频框正在连接通道
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [weakSelf.view makeToast:XCLocalized(@"connectionDevice")];
+            });
+            
+            return ;
         }
     }
     PlayControlModel *playCon = [_decoderInfo valueForKey:strChannel];
@@ -452,18 +941,16 @@
         PlayControllerView *playConOld = (PlayControllerView*)[_array objectAtIndex:playCon.nPlayIndex] ;
         playConOld.bPlay = NO;
         playConOld.strKey = @"";
-    
+        
         PlayControllerView *playView = ((PlayControllerView*)[_array objectAtIndex:nIndex]);
         playCon.nPlayIndex = nIndex;
         playView.bPlay = YES;
         playView.strKey = strChannel;
-        
         __weak PlayControllerView *__playView = playView;
         __weak PlayControlModel *__playModel = playCon;
-        
+
         dispatch_async(dispatch_get_main_queue(),
         ^{
-            
             [__playView.mainView insertSubview:__playModel.glView atIndex:0];
             [__playModel.glView setFrame:__playView.mainView.bounds];
         });
@@ -471,81 +958,114 @@
     }
     else
     {
-        PlayControlModel *playModelNew = [[PlayControlModel alloc] init];
-        playModelNew.nPlayIndex = nIndex;
-        PlayControllerView *playViewNew = (PlayControllerView *)[_array objectAtIndex:nIndex];
-        
-        playViewNew.bPlay = YES;
-        playViewNew.strKey = strChannel;
-        
-        [_decoderInfo setValue:playModelNew forKey:strChannel];
-        __weak NSString *__strNO = _strNO;
-        
-        __weak PlayControllerView *__playView = playViewNew;
-        dispatch_async(dispatch_get_main_queue(),
-        ^{
-             [__playView.mainView makeToastActivity];
-        });
-        dispatch_async(dispatch_get_global_queue(0, 0),
-        ^{
-            [weakSelf startPlayWithNO:__strNO channel:__strChannel];
+        //在空的视频框连接一个通道
+        __weak PlayFourViewController *__self = self;
+        __block int __nIndex = nIndex;
+        dispatch_async(dispatch_get_global_queue(0, 0), ^{
+            [__self startNewWindow:__nIndex channel:__strChannel];
         });
     }
+}
+
+-(void)startNewWindow:(int)nPlayIndex channel:(NSString*)strChannel
+{
+    PlayControlModel *playModelNew = [[PlayControlModel alloc] init];
+    DLog(@"新通道:%d",nPlayIndex);
+    playModelNew.nPlayIndex = nPlayIndex;
+    PlayControllerView *playViewNew = (PlayControllerView *)[_array objectAtIndex:playModelNew.nPlayIndex];
+    
+    playViewNew.bPlay = YES;
+    playViewNew.strKey = strChannel;
+    
+    [_decoderInfo setValue:playModelNew forKey:strChannel];
+    __weak NSString *__strNO = _strNO;
+    __block NSString *__strChannel = strChannel;
+    __weak PlayControllerView *__playView = playViewNew;
+    dispatch_async(dispatch_get_main_queue(),
+    ^{
+        [__playView.mainView makeToastActivity];
+    });
+    __weak PlayFourViewController *weakSelf = self;
+    dispatch_async(dispatch_get_global_queue(0, 0),
+    ^{
+          [weakSelf startPlayWithNO:__strNO channel:__strChannel];
+    });
     
 }
+
 #pragma mark 关闭视频
 -(void)closePlayForKey:(NSString *)strKey
 {
-    __block NSString *strKeyCopy = strKey;
-    __weak PlayFourViewController *__weakSelf = self;
-    dispatch_async(dispatch_get_global_queue(0, 0),
-    ^{
-        PlayControlModel *playModel = [__weakSelf.decoderInfo valueForKey:strKeyCopy];
-        if(playModel)
+    PlayControlModel *playModel = [_decoderInfo valueForKey:strKey];
+    DLog(@"key:%@",strKey);
+    if(playModel)
+    {
+        PlayControllerView *playView = (PlayControllerView*)[_array objectAtIndex:playModel.nPlayIndex];
+        if (playView.bRecord)
         {
-            PlayControllerView *playView = (PlayControllerView*)[__weakSelf.array objectAtIndex:playModel.nPlayIndex];
-            [playModel.decode releaseDecode];
-            __weak PlayControllerView *__playView = playView;
-            __weak UIImageView *__glView = playModel.glView;
-            dispatch_async(dispatch_get_main_queue(),^{
-                [__glView removeFromSuperview];
-                [__playView.mainView hideToastActivity];
-            });
-            playModel.decode = nil;
-            playModel.glView = nil;
-            playView.bPlay = NO;
-            [__weakSelf.decoderInfo removeObjectForKey:strKeyCopy];
-            playView.strKey = nil;
+            DLog(@"停止录像");
+            [playModel.decode recordStop];
+            playView.bRecord = NO;
         }
-    });
+        playView.bPlay = NO;
+        [playModel.decode releaseDecode];
+        __weak PlayControllerView *__playView = playView;
+        __weak UIImageView *__glView = playModel.glView;
+        dispatch_async(dispatch_get_main_queue(),^{
+            [__glView removeFromSuperview];
+            [__playView.mainView hideToastActivity];
+        });
+        [NSThread sleepForTimeInterval:0.3f];
+        playModel.decode = nil;
+        playModel.glView = nil;
+        [_decoderInfo removeObjectForKey:strKey];
+        playView.strKey = nil;
+        DLog(@"关闭一路");
+    }
 }
 
 -(void)clickView:(id)sender
 {
     VideoView *view = (VideoView*)sender;
     [_borderLabel setFrame:view.frame];
-    nIndex = view.nCursel;
+    nIndex = (int)view.nCursel;
     PlayControllerView *playView = [_array objectAtIndex:nIndex];
-    if(playView.bPlay)
+    PlayControlModel *playModel = [_decoderInfo objectForKey:playView.strKey];//[playView.strKey ]
+    if(![UserInfo sharedUserInfo].bGuess && playView.bPlay && playModel && playModel.glView)
     {
-        _recordBtn.enabled = YES;
-        _recordBtn.selected = playView.bRecord ? YES : NO;
         ((UIButton*)[_downHUD viewWithTag:1002]).enabled = YES;
         ((UIButton*)[_downHUD viewWithTag:1003]).enabled = YES;
+        _recordBtn.enabled = YES;
+        _recordBtn.selected = playView.bRecord ? YES : NO;
+        ((UIButton*)[_downHUD viewWithTag:1005]).enabled = YES;
     }
     else
     {
         ((UIButton*)[_downHUD viewWithTag:1002]).enabled = NO;
         ((UIButton*)[_downHUD viewWithTag:1003]).enabled = NO;
         _recordBtn.enabled = NO;
+        ((UIButton*)[_downHUD viewWithTag:1005]).enabled = NO;
     }
     
+    if (bScreen)
+    {
+        if (!playView.bPlay)
+        {
+            _downHUD.alpha = 1;
+            _topHUD.alpha = 1;
+        }
+        else
+        {
+           _downHUD.alpha = _downHUD.alpha ? 0 : 1;
+           _topHUD.alpha = _topHUD.alpha ? 0 : 1;
+        }
+    }
 
 }
 -(void)doubleClickVideo:(id)sender
 {
     VideoView *view = (VideoView*)sender;
-    int nTemp = view.nCursel;
+    int nTemp = (int)view.nCursel;
     PlayControllerView* playView = [_array objectAtIndex:nTemp];
     PlayControlModel *playModel = [_decoderInfo objectForKey:playView.strKey];
     if (playView.bPlay)
@@ -559,26 +1079,24 @@
         }
         if (!bFull)
         {
-            __weak PlayControllerView *_playView = playView;
-            __weak PlayControlModel *_playModel = playModel;
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [_playView.mainView setFrame:Rect(0, 70, kScreenWidth, kScreenWidth)];
-                [_playModel.glView removeFromSuperview];
-                [_playView.mainView insertSubview:_playModel.glView atIndex:0];
-            });
+            
         }
         else
         {
             __weak PlayControllerView *_playView = playView;
             __weak PlayControlModel *_playModel = playModel;
             __weak PlayFourViewController *_weakSelf = self;
-            dispatch_async(dispatch_get_main_queue(), ^{
+            dispatch_async(dispatch_get_main_queue(),
+            ^{
                 [_playView.mainView setFrame:_playView.mainRect];
                 [_playModel.glView removeFromSuperview];
                 [_playView.mainView insertSubview:_playModel.glView atIndex:0];
                 [_weakSelf.borderLabel setFrame:view.frame];
             });
         }
+        
+        _currentView = playView.mainView;
+        [self fullPlayMode];
         _borderLabel.hidden = !bFull;
         bFull = !bFull;
     }
@@ -600,193 +1118,69 @@
                 [_playView.mainView insertSubview:_playModel.glView atIndex:0];
                 [_weakSelf.borderLabel setFrame:view.frame];
             });
+            [self fullPlayMode];
             _borderLabel.hidden = !bFull;
             bFull = !bFull;
         }
     }
 }
 
-#pragma mark 顶部导航栏初始化
--(void)initTopView
+-(void)setOrientation1:(id)sender
 {
-    _topHUD = [[UIView alloc] initWithFrame:CGRectMake(0,0,kScreenHeight,44)];
-    _topHUD.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-    [self.view addSubview:_topHUD];
-    _topHUD.alpha = 1;
-    [_topHUD setBackgroundColor:[UIColor whiteColor]];
-
-    UIView *lineView = [[UIView alloc] initWithFrame:Rect(0, 43, kScreenWidth, 1)];
-    [lineView setBackgroundColor:[UIColor grayColor]];
-    [_topHUD addSubview:lineView];
-    
-    _lblName = [[UILabel alloc] initWithFrame:Rect(30,10,kScreenWidth-60,15)];
-    [_lblName setTextAlignment:NSTextAlignmentCenter];
-    [_lblName setText:_strNO];
-    [_lblName setFont:[UIFont systemFontOfSize:15.0f]];
-    [_lblName setTextColor:[UIColor blackColor]];
-    [_topHUD addSubview:_lblName];
-    
-    _doneButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    _doneButton.frame = CGRectMake(5,0,40,40);
-    [_doneButton setImage:[UIImage imageNamed:@"NaviBtn_Back"] forState:UIControlStateNormal];
-    [_doneButton setImage:[UIImage imageNamed:@"NaviBtn_Back_H"] forState:UIControlStateHighlighted];
-    _doneButton.titleLabel.font = [UIFont systemFontOfSize:18];
-    _doneButton.showsTouchWhenHighlighted = YES;
-    [_doneButton addTarget:self action:@selector(doneDidTouch:)
-          forControlEvents:UIControlEventTouchUpInside];
-    [_topHUD addSubview:_doneButton];
+    DLog(@"111111111111");
 }
-#pragma mark 视频矿初始化
--(void)initVideoView
-{
-    VideoView *_mainView1 = [[VideoView alloc] initWithFrame:Rect(1,70, kScreenWidth/2-2, kScreenWidth/2-2)];
-    [self.view addSubview:_mainView1];
-    _mainView1.delegate = self;
-    _mainView1.nCursel = 0;
-    
-    VideoView *_mainView2 = [[VideoView alloc] initWithFrame:Rect(kScreenWidth/2,70, kScreenWidth/2-2, kScreenWidth/2-2)];
-    [self.view addSubview:_mainView2];
-    _mainView2.nCursel = 1;
-    _mainView2.delegate = self;
-    
-    VideoView *_mainView3 = [[VideoView alloc] initWithFrame:Rect(1,_mainView2.frame.origin.y+_mainView2.frame.size.height+1, kScreenWidth/2-2, kScreenWidth/2-2)];
-    [self.view addSubview:_mainView3];
-    _mainView3.nCursel =2;
-    _mainView3.delegate = self;
-    
-    VideoView *_mainView4 = [[VideoView alloc] initWithFrame:Rect(kScreenWidth/2,_mainView3.frame.origin.y,kScreenWidth/2-2,kScreenWidth/2-2)];
-    [self.view addSubview:_mainView4];
-    _mainView4.nCursel = 3;
-    _mainView4.delegate = self;
-    
-    PlayControllerView *play1 = [[PlayControllerView alloc] init];
-    PlayControllerView *play2 = [[PlayControllerView alloc] init];
-    PlayControllerView *play3 = [[PlayControllerView alloc] init];
-    PlayControllerView *play4 = [[PlayControllerView alloc] init];
-    
-    play1.mainRect = _mainView1.frame;
-    play2.mainRect = _mainView2.frame;
-    play3.mainRect = _mainView3.frame;
-    play4.mainRect = _mainView4.frame;
 
-    play1.mainView = _mainView1;
-    play2.mainView = _mainView2;
-    play3.mainView = _mainView3;
-    play4.mainView = _mainView4;
-    
-    _array = [NSMutableArray array];
-    
-    [_array addObject:play1];
-    [_array addObject:play2];
-    [_array addObject:play3];
-    [_array addObject:play4];
-    
-}
-#pragma mark 滚动条初始化
--(void)initScrollView
+
+#pragma mark 全屏与四屏切换，设置frame与bounds
+-(void)fullPlayMode
 {
-    VideoView *mainView = ((PlayControllerView *)[_array objectAtIndex:3]).mainView;
-    //滚动条
-    _scroll = [[UIScrollView alloc] initWithFrame:Rect(0, mainView.frame.origin.y+mainView.frame.size.height+20, kScreenWidth, 150)];
-    [self.view addSubview:_scroll];
-    nOldIndex = -1;
-    
-    int nNumber = _nDevChannel <= 8 ? 1 : _nDevChannel/8;
-    int nRow = _nDevChannel <= 8 ? _nDevChannel : 8;
-    for (int i=0; i<nNumber;i++)
+    if (!bScreen)//NO状态表示当前竖屏，需要转换成横屏
     {
-        UIView *view = [[UIView alloc] initWithFrame:Rect(i*320, 0, 320, 130)];
-        for (int j=0; j<nRow; j++) {
-            UIButton *btn = [UIButton buttonWithType:UIButtonTypeCustom];
-            btn.frame = Rect((j%4)*73+28, j/4*50+5, 45, 45);
-            NSString *strInfo = [NSString stringWithFormat:@"%d",i*8+j+1];
-            [btn setTitle:strInfo forState:UIControlStateNormal];
-            btn.tag = 1000 + j;
-            [btn setBackgroundColor:[UIColor whiteColor]];
-            [btn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-            [btn setTitleColor:[UIColor blueColor] forState:UIControlStateHighlighted];
-            [btn setBackgroundImage:[UIImage imageNamed:@"channel"] forState:UIControlStateNormal];
-            [btn setBackgroundImage:[UIImage imageNamed:@"channel_h"] forState:UIControlStateHighlighted];
-            
-            
-            [btn addTarget:self action:@selector(channelPlay:) forControlEvents:UIControlEventTouchUpInside];
-            [view addSubview:btn];
-        }
-        [_scroll addSubview:view];
-        //
+        CGFloat duration = [UIApplication sharedApplication].statusBarOrientationAnimationDuration;
+        [[UIDevice currentDevice] setValue: [NSNumber numberWithInteger:UIDeviceOrientationLandscapeRight] forKey:@"orientation"];
+        [UIViewController attemptRotationToDeviceOrientation];
+        [UIView beginAnimations:nil context:nil];
+        [UIView setAnimationDuration:duration];
+        CGRect frame = [UIScreen mainScreen].bounds;
+        CGPoint center = CGPointMake(frame.origin.x + ceil(frame.size.width/2), frame.origin.y + ceil(frame.size.height/2));
+        self.view.center = center;
+        self.view.transform = [self transformView];
+        self.view.bounds = Rect(0, 0, frame.size.height, frame.size.width);
+        [UIView commitAnimations];
+        bScreen = !bScreen;
     }
-    _scroll.contentSize = CGSizeMake(320*nNumber,80);
-    _scroll.pagingEnabled=YES;
-    [_scroll setBackgroundColor:[UIColor whiteColor]];
-    [_scroll setScrollEnabled:YES];
+    else
+    {
+        [self setHorizontal];
+        bScreen = !bScreen;
+    }
 }
 
-#pragma mark 底部工具栏
--(void)initButtomView
+-(void)setHorizontal
 {
-    _downHUD = [[UIView alloc] initWithFrame:CGRectMake(0, kScreenHeight-50+HEIGHT_MENU_VIEW(20, 0),kScreenWidth, 50)];
-    _downHUD.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-    [self.view addSubview:_downHUD];
-    [_downHUD setBackgroundColor:RGB(255, 255, 255)];
-    //[CustomNaviBarView createImgNaviBarBtnByImgNormal:@"realplay" imgHighlight:nil target:self action:@selector(playVideo)]
-    
-    UIView *lineView = [[UIView alloc] initWithFrame:Rect(0, 1, kScreenWidth, 1)];
-    [lineView setBackgroundColor:[UIColor grayColor]];
-    [_downHUD addSubview:lineView];
-    
-    UIButton *stopBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-    [stopBtn setImage:[UIImage imageNamed:@"stop"] forState:UIControlStateNormal];
-    [stopBtn setImage:[UIImage imageNamed:@"stop_h"] forState:UIControlStateHighlighted];
-    [stopBtn addTarget:self action:@selector(stopCurVideo) forControlEvents:UIControlEventTouchUpInside];
-    stopBtn.tag = 1002;
-    
-    UIButton *shotoBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-    [shotoBtn setImage:[UIImage imageNamed:@"shotopic"] forState:UIControlStateNormal];
-    [shotoBtn setImage:[UIImage imageNamed:@"shotopic_h"] forState:UIControlStateHighlighted];
-    [shotoBtn addTarget:self action:@selector(shotoPic) forControlEvents:UIControlEventTouchUpInside];
-    
-    shotoBtn.tag = 1003;
-    _recordBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-    [_recordBtn setImage:[UIImage imageNamed:@"record"] forState:UIControlStateNormal];
-    [_recordBtn addTarget:self action:@selector(recordVideo) forControlEvents:UIControlEventTouchUpInside];
-    [_recordBtn setImage:[UIImage imageNamed:@"record_sel"] forState:UIControlStateSelected];
-    [_recordBtn setImage:[UIImage imageNamed:@"record_select"] forState:UIControlStateHighlighted];
-    
-    _recordBtn.tag = 1004;
-    
-    [_downHUD addSubview:stopBtn];
-    [_downHUD addSubview:shotoBtn];
-    [_downHUD addSubview:_recordBtn];
-    
-    [_recordBtn setFrame:Rect(207,2, 45, 45)];
-    stopBtn.frame =  Rect(87, 2, 45, 45);
-    shotoBtn.frame =  Rect(147, 2, 45, 45);
-    
+    [[UIDevice currentDevice] setValue: [NSNumber numberWithInteger:UIDeviceOrientationPortrait] forKey:@"orientation"];
+    CGFloat duration = [UIApplication sharedApplication].statusBarOrientationAnimationDuration;
+    [UIView beginAnimations:nil context:nil];
+    [UIView setAnimationDuration:duration];
+    CGRect frame = [UIScreen mainScreen].bounds;
+    CGPoint center = CGPointMake(frame.origin.x + ceil(frame.size.width/2), frame.origin.y + ceil(frame.size.height/2));
+    self.view.center = center;
+    self.view.transform = [self transformView];
+    self.view.bounds = CGRectMake(0, 0, kScreenWidth, kScreenHeight);
+    [UIView commitAnimations];
 }
-
--(void)initToolBar
-{
-    
-    [self.view setBackgroundColor:[UIColor whiteColor]];
-
-    [self initTopView];
-    
-    [self initVideoView];
-    
-    [self initScrollView];
-    
-    [self initButtomView];
-    
-    [self.view setUserInteractionEnabled:YES];
-}
-
-
 
 - (void)doneDidTouch: (id) sender
 {
-    [self stopVideo];
+    bExit = YES;
+    __weak PlayFourViewController *__weakSelf = self;
+    if (bScreen)
+    {
+        [self setHorizontal];
+    }
     [self dismissViewControllerAnimated:YES completion:
      ^{
+         [__weakSelf stopVideo];
         [[UIApplication sharedApplication] setStatusBarHidden:NO];
         [[UIApplication sharedApplication] setStatusBarOrientation:UIInterfaceOrientationPortrait];
     }];
@@ -797,182 +1191,297 @@
 {
     return YES;
 }
-#pragma mark 抓拍
 
--(UIImage *)glToUIImage:(UIView *)glView
+-(CGAffineTransform)transformView
 {
-    NSInteger width = glView.frame.size.width;
-    NSInteger height = glView.frame.size.height;
-    NSInteger myDataLength = width * height * 4;
-    
-    GLubyte *buffer = (GLubyte *) malloc(myDataLength);
-    
-    glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
-    
-    GLubyte *buffer2 = (GLubyte *) malloc(myDataLength);
-    for(int y = 0; y <height; y++)
+    if (!bScreen)
     {
-        for(int x = 0; x <width * 4; x++)
+        return CGAffineTransformMakeRotation(M_PI/2);
+    }
+    else
+    {
+        return CGAffineTransformIdentity;
+    }
+}
+
+
+#pragma mark 加入重力支持
+-(void)viewDidLayoutSubviews
+{
+    [super viewDidLayoutSubviews];
+    if (!bScreen)//bScreen 旋转前判断状态：NO 表示  竖屏   YES 表示横屏      在LayoutSubviews之后与前一结论相反
+    {
+        //翻转为竖屏时
+        [self setHorizontalFrame];
+    }else
+    {
+        //翻转为横屏时
+        [self setVerticalFrame];
+    }
+}
+
+-(void)switchBTNVideoCodeInfo:(id)sender
+{
+    UIButton *btn = (UIButton *)sender;
+    int nType = 0;
+    if(btn.tag==1005)
+    {
+        nType= 1;
+        UIButton *btnSender = (UIButton*)[_downHUD viewWithTag:1006];
+        btnSender.enabled = YES;
+    }
+    else if(btn.tag == 1006)
+    {
+        nType = 2;
+        UIButton *btnSender = (UIButton*)[_downHUD viewWithTag:1005];
+        btnSender.enabled = YES;
+    }
+//    [self switchVideoCode:nType];
+    btn.enabled = NO;
+}
+
+#pragma mark 全屏手势操作
+- (void)handleSwipeFrom:(UISwipeGestureRecognizer *)recognizer
+{
+    if (recognizer.direction==UISwipeGestureRecognizerDirectionLeft)
+    {
+        [self switchFullVideo:YES];
+    }
+    else if (recognizer.direction==UISwipeGestureRecognizerDirectionRight)
+    {
+        [self switchFullVideo:NO];
+    }
+    _topHUD.alpha = 1.0f;
+    _downHUD.alpha = 1.0f;
+}
+
+#pragma mark 全屏与四屏画面切换
+-(void)switchFullVideo:(BOOL)bFlag
+{
+    
+    int nTemp = bFlag ? 1 : -1;
+    while (YES)
+    {
+        if (nIndex+nTemp == 4 || nIndex+nTemp < 0)
         {
-            buffer2[(height-1 - y) * width * 4 + x] = buffer[y * 4 * width + x];
+            break;
         }
+        PlayControllerView *playView = (PlayControllerView *)[_array objectAtIndex:nIndex+nTemp];
+        if (playView.bPlay)
+        {
+        
+            PlayControllerView *playOldView = (PlayControllerView *)[_array objectAtIndex:nIndex];
+            playOldView.mainView.hidden = YES;
+      
+            //移除手势
+            [playOldView.mainView removeGestureRecognizer:leftRegcogn];
+            [playOldView.mainView removeGestureRecognizer:rightRecogn];
+      
+            //设置当前frame位置
+            _currentView = playView.mainView ;
+            [playView.mainView setHidden:NO];
+            [self clickView:playView.mainView];
+            CGFloat width,height;
+            if (IOS_SYSTEM_8) {
+                width = kScreenWidth;
+                height = kScreenHeight;
+            }
+            else
+            {
+                width = kScreenHeight;
+                height = kScreenWidth;
+            }
+            //设置全屏位置
+            [playView.mainView setFrame:Rect(0, 0, width, height)];
+            //添加手势
+            [_currentView addGestureRecognizer:leftRegcogn];
+            [_currentView addGestureRecognizer:rightRecogn];
+            //变换选中
+            break;
+        }
+        bFlag ? nTemp++ : nTemp--;
     }
-    // make data provider with data.
-    CGDataProviderRef provider = CGDataProviderCreateWithData(NULL, buffer2, myDataLength, NULL);
-    // prep the ingredients
-    int bitsPerComponent = 8;
-    int bitsPerPixel = 32;
-    int bytesPerRow = 4 * width;
-    CGColorSpaceRef colorSpaceRef = CGColorSpaceCreateDeviceRGB();
-    CGBitmapInfo bitmapInfo = kCGBitmapByteOrderDefault;
-    CGColorRenderingIntent renderingIntent = kCGRenderingIntentDefault;
-    
-    // make the cgimage
-    CGImageRef imageRef = CGImageCreate(width, height, bitsPerComponent, bitsPerPixel, bytesPerRow, colorSpaceRef, bitmapInfo, provider, NULL, NO, renderingIntent);
-    
-    // then make the uiimage from that
-    UIImage *myImage = [UIImage imageWithCGImage:imageRef];
-    return myImage;
 }
 
-
-
-
--(BOOL)captureToPhotoAlbum:(UIView *)_glView
+#pragma mark 显示ptz
+-(void)showPtzView
 {
-    UIImage *image = [self snapshot:_glView];//修改方式
-    
-    NSDate *senddate=[NSDate date];
-    
-    //创建一个目录  //shoto
-    NSString *strDir = [kLibraryPath stringByAppendingPathComponent:@"shoto"];
-    if(![[NSFileManager defaultManager] fileExistsAtPath:strDir])
-    {
-        [[NSFileManager defaultManager] createDirectoryAtPath:strDir withIntermediateDirectories:NO attributes:nil error:nil];
-        [[NSURL fileURLWithPath:strDir] setResourceValue: [NSNumber numberWithBool: YES]
-                                                  forKey: NSURLIsExcludedFromBackupKey error:nil];
-    }
-    NSDateFormatter *fileformatter=[[NSDateFormatter alloc] init];
-    [fileformatter setDateFormat:@"YYYY-MM-dd"];
-    //每天的记录创建一个
-    NSString *strDirYear = [strDir stringByAppendingPathComponent:[fileformatter stringFromDate:senddate]];
-    [fileformatter setDateFormat:@"YYYYMMddHHmmss"];
-    if (![[NSFileManager defaultManager] fileExistsAtPath:strDirYear]) {
-        [[NSFileManager defaultManager] createDirectoryAtPath:strDirYear withIntermediateDirectories:NO attributes:nil error:nil];
-        [[NSURL fileURLWithPath:strDirYear] setResourceValue: [NSNumber numberWithBool: YES]
-                                                      forKey: NSURLIsExcludedFromBackupKey error:nil];
-    }
-    
-    NSString *fileName = [NSString stringWithFormat:@"%@.jpg",[fileformatter stringFromDate:senddate]];
-    NSString *strPath = [strDirYear stringByAppendingPathComponent:fileName];
-    
-    BOOL result = [UIImageJPEGRepresentation(image,0.8f) writeToFile:strPath atomically:YES];
-    
-    BOOL success = [[NSURL fileURLWithPath:strPath] setResourceValue: [NSNumber numberWithBool: YES]
-                                                              forKey: NSURLIsExcludedFromBackupKey error:nil];
-    if (result&&success)
-    {
-        DLog(@"抓拍");
-        return  YES;
-    }
-    else
-    {
-        return NO;
-    }
+    _view_Ptz.hidden = !_view_Ptz.hidden;
 }
-
-- (UIImage*)snapshot:(UIView*)eaglview
-{
-
-    NSInteger x = 0, y = 0, width = eaglview.frame.size.width, height = eaglview.frame.size.height;
-    NSInteger dataLength = width * height * 4;
-    GLubyte *data = (GLubyte*)malloc(dataLength * sizeof(GLubyte));
-    
-    glPixelStorei(GL_PACK_ALIGNMENT, 4);
-    glReadPixels(x, y, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data);
-    CGDataProviderRef ref = CGDataProviderCreateWithData(NULL, data, dataLength, NULL);
-    CGColorSpaceRef colorspace = CGColorSpaceCreateDeviceRGB();
-    CGImageRef iref = CGImageCreate(width, height, 8, 32, width * 4, colorspace, kCGBitmapByteOrder32Big | kCGImageAlphaPremultipliedLast,
-                                    ref, NULL, true, kCGRenderingIntentDefault);
-    NSInteger widthInPoints, heightInPoints;
-    if (NULL != UIGraphicsBeginImageContextWithOptions) {
-        CGFloat scale = eaglview.contentScaleFactor;
-        widthInPoints = width / scale;
-        heightInPoints = height / scale;
-        UIGraphicsBeginImageContextWithOptions(CGSizeMake(widthInPoints, heightInPoints), NO, scale);
-    }
-    else {
-        widthInPoints = width;
-        heightInPoints = height;
-        UIGraphicsBeginImageContext(CGSizeMake(widthInPoints, heightInPoints));
-    }
-    CGContextRef cgcontext = UIGraphicsGetCurrentContext();
-    CGContextSetBlendMode(cgcontext, kCGBlendModeCopy);
-    CGContextDrawImage(cgcontext, CGRectMake(0.0, 0.0, widthInPoints, heightInPoints), iref);
-    UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
-    UIGraphicsEndImageContext();
-    // Clean up
-    free(data);
-    CFRelease(ref);
-    CFRelease(colorspace);
-    CGImageRelease(iref);
-    return image;
-}
-
-
--(BOOL)captureToPhotoAlbumNew:(UIImageView *)imageView
-{
-    UIImage *image = imageView.image;//修改方式
-    
-    NSDate *senddate=[NSDate date];
-    
-    //创建一个目录  //shoto
-    NSString *strDir = [kLibraryPath stringByAppendingPathComponent:@"shoto"];
-    if(![[NSFileManager defaultManager] fileExistsAtPath:strDir])
-    {
-        [[NSFileManager defaultManager] createDirectoryAtPath:strDir withIntermediateDirectories:NO attributes:nil error:nil];
-        [[NSURL fileURLWithPath:strDir] setResourceValue: [NSNumber numberWithBool: YES]
-                                                  forKey: NSURLIsExcludedFromBackupKey error:nil];
-    }
-    NSDateFormatter *fileformatter=[[NSDateFormatter alloc] init];
-    [fileformatter setDateFormat:@"YYYY-MM-dd"];
-    //每天的记录创建一个
-    NSString *strDirYear = [strDir stringByAppendingPathComponent:[fileformatter stringFromDate:senddate]];
-    [fileformatter setDateFormat:@"YYYYMMddHHmmss"];
-    if (![[NSFileManager defaultManager] fileExistsAtPath:strDirYear]) {
-        [[NSFileManager defaultManager] createDirectoryAtPath:strDirYear withIntermediateDirectories:NO attributes:nil error:nil];
-        [[NSURL fileURLWithPath:strDirYear] setResourceValue: [NSNumber numberWithBool: YES]
-                                                      forKey: NSURLIsExcludedFromBackupKey error:nil];
-    }
-    
-    NSString *fileName = [NSString stringWithFormat:@"%@.jpg",[fileformatter stringFromDate:senddate]];
-    NSString *strPath = [strDirYear stringByAppendingPathComponent:fileName];
-    
-    BOOL result = [UIImageJPEGRepresentation(image,0.8f) writeToFile:strPath atomically:YES];
-    
-    BOOL success = [[NSURL fileURLWithPath:strPath] setResourceValue: [NSNumber numberWithBool: YES]
-                                                              forKey: NSURLIsExcludedFromBackupKey error:nil];
-    if (result&&success)
-    {
-        DLog(@"抓拍");
-        return  YES;
-    }
-    else
-    {
-        return NO;
-    }
-}
--(void)switchVideoCodeInfo:(id)sender
+#pragma mark ptz操作委托
+-(void)ptzView:(int)ptzCmd
 {
     PlayControllerView *playView = [_array objectAtIndex:nIndex];
-    if (playView.bPlay)
+    PlayControlModel *playModel = [_decoderInfo objectForKey:playView.strKey];
+    if (playModel && playModel.decode)
     {
-        PlayControlModel *playModel = [_decoderInfo objectForKey:playView.strKey];
-        if (playModel)
-        {
-            playModel.decode.playing = NO;
-            [playModel.decode switchP2PCode:2];
-        }
+        DLog(@"发送指令:nPtzCmd:%d",ptzCmd);
+        [playModel.decode sendPtzCmd:ptzCmd];
     }
 }
+
+#pragma mark 对应一个空的视频框，连接该视频
+-(void)startPlayWithNO:(NSString*)strNO channel:(NSString*)strKey
+{
+    PlayControlModel *playModel = [_decoderInfo valueForKey:strKey];
+    if (!playModel)//如果不存在，创建对象，进行连接
+    {
+        playModel = [[PlayControlModel alloc] init];
+        [_decoderInfo setValue:playModel forKey:strKey];
+    }
+    playModel.decode = [[XCDecoderNew alloc] initWithFormat:KxVideoFrameFormatRGB];
+    
+    //多屏播放控制器
+    __weak PlayFourViewController *weakSelf = self;
+    //序列号
+    __weak NSString *__strNO = strNO;
+    //解码器
+    __weak XCDecoderNew *weakdecode = playModel.decode;
+    //通道字符串
+    __block NSString *__strChannel = strKey;
+    dispatch_async(dispatch_get_global_queue(0, 0),
+    ^{
+          [weakdecode startConnectWithChan:__strNO channel:[__strChannel intValue]];
+    });
+    _bPlay = YES;
+    dispatch_async(dispatch_get_global_queue(0, 0),
+    ^{
+        while (!weakdecode.fFPS)
+        {
+            [NSThread sleepForTimeInterval:0.2f];
+            if (!weakSelf.bPlay)
+            {
+                return ;
+            }
+        }
+        [weakSelf startNewPlay:__strChannel];
+        [weakSelf initGlViewWithNO:__strNO channel:__strChannel];
+    });
+}
+
+#pragma mark 初始化显示
+-(void)initGlViewWithNO:(NSString *)strNO channel:(NSString*)strKey
+{
+    PlayControlModel *playModel = [_decoderInfo valueForKey:strKey];
+    PlayControllerView *playView = (PlayControllerView*)[_array objectAtIndex:(int)playModel.nPlayIndex];
+    playView.strKey = strKey;
+    
+    playModel.glView = [[UIImageView alloc] initWithFrame:playView.mainView.bounds];
+    
+    playModel.glView.contentMode = UIViewContentModeScaleToFill;
+    
+    playModel.glView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleBottomMargin;
+    
+    __weak PlayControllerView *__weakPlay = playView;
+    __weak PlayControlModel *_playModel = playModel;
+    __weak PlayControllerView *_playView = playView;
+    __weak PlayFourViewController *_weakSelf = self;
+    dispatch_async(dispatch_get_main_queue(),
+    ^{
+        [_playView.mainView insertSubview:_playModel.glView atIndex:0];
+        [__weakPlay.mainView hideToastActivity];
+        [_weakSelf updateClickView];
+    });
+}
+
+#pragma mark 新增方法  startPlay
+-(void)startNewPlay:(NSString *)strKey
+{
+    PlayControlModel *playInfo = [_decoderInfo valueForKey:strKey];
+    playInfo.decode.playing = YES;
+    playInfo.videoFrame = [NSMutableArray array];
+    
+    __weak PlayFourViewController *__weakSelf = self;
+    __block NSString *__strKey = strKey;
+    dispatch_async(dispatch_get_global_queue(0, 0),
+    ^{
+        [__weakSelf playMovieWithChannel:__strKey];
+    });
+}
+#pragma mark 解码触发
+-(void)asyncDecoder:(NSString*)strKey
+{
+    PlayControlModel *playInfo = [_decoderInfo valueForKey:strKey];
+    if (playInfo.bDecoding || !playInfo.decode.playing) {
+        return;
+    }
+    playInfo.bDecoding = YES;
+    __weak PlayControlModel *__playInfo = playInfo;
+    dispatch_async(dispatch_get_global_queue(0, 0),
+    ^{
+           BOOL good = YES;
+           while (good && __playInfo.decode.playing)
+           {
+               good = NO;
+               @autoreleasepool
+               {
+                   NSArray *frames = [__playInfo.decode decodeFrames];
+                   if(frames.count>0)
+                   {
+                       @synchronized(__playInfo.videoFrame)
+                       {
+                           for (KxMovieFrame *frame in frames)
+                           {
+                               if (frame.type == KxMovieFrameTypeVideo)
+                               {
+                                   [__playInfo.videoFrame addObject:frame];
+                               }
+                           }
+                       }
+                   }
+                   frames = nil;
+               }
+           }
+           __playInfo.bDecoding = NO;
+    });
+    
+}
+
+#pragma mark 持续播放视频的操作
+
+-(void)playMovieWithChannel:(NSString*)strKey
+{
+    PlayControlModel *playInfo = [_decoderInfo valueForKey:strKey];
+    if(playInfo.decode.playing)//判断解码器状态
+    {
+        CGFloat interval = 0;
+        KxVideoFrame *frame = nil;
+        @synchronized(playInfo.videoFrame)
+        {
+            if(playInfo.videoFrame.count>0)
+            {
+                frame = playInfo.videoFrame[0];
+                [playInfo.videoFrame removeObjectAtIndex:0];
+            }
+        }
+        if (frame)
+        {
+            KxVideoFrameRGB *rgbFrame = (KxVideoFrameRGB *)frame;
+            __weak PlayControlModel *__playInfo = playInfo;
+            UIImage *rgbImage = rgbFrame.asImage;
+            __weak UIImage *__rgbImage = rgbImage;
+            dispatch_sync(dispatch_get_main_queue(),
+            ^{
+                 [__playInfo.glView setImage:__rgbImage];
+            });
+            interval = frame.duration*0.4;
+            rgbFrame = nil;
+            frame = nil;
+        }
+        __weak PlayFourViewController *weakSelf = self;
+        __block NSString* __strKey = strKey;
+        if (playInfo.videoFrame.count==0)//解码,如果已有不够
+        {
+            [self asyncDecoder:strKey];
+        }
+        dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, 0.02 * NSEC_PER_SEC);
+        dispatch_after(popTime, dispatch_get_global_queue(0, 0), ^(void)//播放线程重用
+        {
+            [weakSelf playMovieWithChannel:__strKey];
+        });
+    }
+}
+
+
+
 @end

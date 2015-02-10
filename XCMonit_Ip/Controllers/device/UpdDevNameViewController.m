@@ -24,6 +24,16 @@
 
 @implementation UpdDevNameViewController
 
+-(void)dealloc
+{
+    _updNameService = nil;
+    _strNo = nil;
+    _strName = nil;
+    [_txtView removeFromSuperview];
+    _txtView = nil;
+    DLog(@"updDevice Name dealloc");
+}
+
 - (instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -36,20 +46,20 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    [self setNaviBarTitle:NSLocalizedString(@"updDevName", "updDevName")];
+    [self setNaviBarTitle:XCLocalized(@"updDevName")];
     
-    UIButton *left = [CustomNaviBarView createNormalNaviBarBtnByTitle:NSLocalizedString(@"cancel", "cancel") target:self action:@selector(navBack)];
+    UIButton *left = [CustomNaviBarView createNormalNaviBarBtnByTitle:XCLocalized(@"cancel") target:self action:@selector(navBack)];
     [self setNaviBarLeftBtn:left];
-    UIButton *right = [CustomNaviBarView createNormalNaviBarBtnByTitle:NSLocalizedString(@"save", "save") target:self action:@selector(updateDevName)];
+    UIButton *right = [CustomNaviBarView createNormalNaviBarBtnByTitle:XCLocalized(@"save") target:self action:@selector(updateDevName)];
     [self setNaviBarRightBtn:right];
     UILabel *lblContent = [[UILabel alloc] initWithFrame:Rect(10, [CustomNaviBarView barSize].height+10, 300, 16)];
     [self.view addSubview:lblContent];
-    [lblContent setFont:[UIFont systemFontOfSize:14.0f]];
-    [lblContent setText:NSLocalizedString(@"cameraName", "cameraName")];
-    _txtView = [[UITextView alloc] initWithFrame:Rect(10,lblContent.frame.origin.y+30, 300, 160)];
+    [lblContent setFont:[UIFont fontWithName:@"Helvetica" size:14.0f]];
+    [lblContent setText:XCLocalized(@"cameraName")];
+    _txtView = [[UITextView alloc] initWithFrame:Rect(10,lblContent.frame.origin.y+30, kScreenWidth-20, 160)];
     [self.view addSubview:_txtView];
     [_txtView setBackgroundColor:RGB(244, 244, 244)];
-    [_txtView setFont:[UIFont systemFontOfSize:14.0f]];
+    [_txtView setFont:[UIFont fontWithName:@"Helvetica" size:14.0f]];
     
 }
 -(void)navBack
@@ -61,14 +71,15 @@
     NSString *strInfo = [_txtView text];
     if ([strInfo isEqualToString:@""])
     {
-        [self.view makeToast:NSLocalizedString(@"cameranull", nil)];
+        [self.view makeToast:XCLocalized(@"cameranull")];
         return ;
     }
-    if ([strInfo length]>50) {
-        [self.view makeToast:NSLocalizedString(@"cameraLess", nil)];
+    if ([strInfo length]>kUSER_INFO_MAX_LENGTH)
+    {
+        [self.view makeToast:XCLocalized(@"cameraLess")];
         return ;
     }
-    [ProgressHUD show:NSLocalizedString(@"Modify", nil)];
+    [ProgressHUD show:XCLocalized(@"Modify")];
     if(_updNameService==nil)
     {
         _updNameService = [[UpdNameService alloc] init];
@@ -81,44 +92,46 @@
         switch (nStauts)
         {
             case 1:
-                strMsg = NSLocalizedString(@"updateOK", nil);
+                strMsg = XCLocalized(@"updateOK");
                 break;
             case 74:
-                strMsg = NSLocalizedString(@"ServerException", nil);
+                strMsg = XCLocalized(@"ServerException");
                 break;
             default:
-                strMsg = NSLocalizedString(@"updateTimeOut", nil);
+                strMsg = XCLocalized(@"updateTimeOut");
                 break;
         }
-        [__weakSelf.view makeToast:strMsg duration:3.0 position:@"center" title:NSLocalizedString(@"Modify", nil)];
+        [__weakSelf.view makeToast:strMsg duration:3.0 position:@"center" title:XCLocalized(@"Modify")];
         if (nStauts ==1)
         {
             [[NSNotificationCenter defaultCenter] postNotificationName:NSUPDATE_DEVICE_LIST_VC object:nil];
             [[NSNotificationCenter defaultCenter] postNotificationName:NSUPDATE_DEV_NAME_VC object:__weakSelf.strName];
-            [__weakSelf navBack];
+            dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, 2.0 * NSEC_PER_SEC);
+            dispatch_after(popTime, dispatch_get_main_queue(), ^(void)
+                   {
+                       [__weakSelf navBack];
+                   });
         }
     };
     _strName = strInfo;
     [_updNameService requestUpdName:_strNo name:_strName];
 }
+
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
+}
+
+#pragma mark 重力处理
+- (BOOL)shouldAutorotate
+{
+    return NO;
 }
 -(NSUInteger)supportedInterfaceOrientations
 {
     return UIInterfaceOrientationMaskPortrait;
 }
-/*
-#pragma mark - Navigation
 
-// In a storyboard-based application, you will often want to do a little preparation before navigation
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
-{
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
-}
-*/
 -(void)setDevInfo:(NSString*)strNo
 {
     _strNo = strNo;

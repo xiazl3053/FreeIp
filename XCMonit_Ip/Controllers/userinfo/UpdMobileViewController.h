@@ -7,7 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
-
-@interface UpdMobileViewController : UIViewController
+#import "CustomViewController.h"
+@interface UpdMobileViewController : CustomViewController
 
 @end

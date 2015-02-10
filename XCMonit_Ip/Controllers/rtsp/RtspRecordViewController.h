@@ -7,7 +7,10 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "CustomViewController.h"
+@interface RtspRecordViewController : CustomViewController<UITableViewDataSource,UITableViewDelegate>
 
-@interface RtspRecordViewController : UIViewController
+-(id)initWithPath:(NSString*)strPath name:(NSString*)strDevName;
+
 
 @end

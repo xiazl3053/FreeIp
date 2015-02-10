@@ -10,26 +10,26 @@
 
 int g_index;
 
-static inline char PP_Itoc(char num)
-{
-    num = num & 0xf;
-    num = (num<10) ? num+'0' : num-10+'A';
-    return num;
-}
+//static inline char PP_Itoc(char num)
+//{
+//    num = num & 0xf;
+//    num = (num<10) ? num+'0' : num-10+'A';
+//    return num;
+//}sa
 
-static void PP_PrintBit(char *data, int len)
-{
-    int i;
-    char tmp;
-
-    DES_LOG("<-%3d->   ",g_index++);
-    for(i=0;i<len;i++){
-        tmp = data[i];
-        DES_LOG("%c%c ",PP_Itoc(tmp>>4),PP_Itoc(tmp));
-        if((i+1)%4==0 && i!=0) DES_LOG("    ");
-    }
-    DES_LOG("\n");
-}
+//static void PP_PrintBit(char *data, int len)
+//{
+//    int i;
+//    char tmp;
+//
+//    DES_LOG("<-%3d->   ",g_index++);
+//    for(i=0;i<len;i++){
+//        tmp = data[i];
+//        DES_LOG("%c%c ",PP_Itoc(tmp>>4),PP_Itoc(tmp));
+//        if((i+1)%4==0 && i!=0) DES_LOG("    ");
+//    }
+//    DES_LOG("\n");
+//}
 
 
 // 初始置换

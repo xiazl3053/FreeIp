@@ -8,10 +8,13 @@
 
 #import <UIKit/UIKit.h>
 
+typedef void(^ImageLoad)(UIImage *image);
+
 @interface UserImageCell : UITableViewCell
 
 @property (nonatomic,strong) UILabel *lblDevInfo;
 @property (nonatomic,strong) UIImageView *imgView;
+@property (nonatomic,copy) ImageLoad imageLoad;
 
 -(void)setImageInfo:(NSString*)strImage;
 

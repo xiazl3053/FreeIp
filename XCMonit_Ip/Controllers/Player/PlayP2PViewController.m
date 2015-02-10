@@ -16,28 +16,23 @@
 #import "ProgressHUD.h"
 #import "Toast+UIView.h"
 #import "CaptureService.h"
-#import <QuartzCore/QuartzCore.h>
-#import <OpenGLES/EAGLDrawable.h>
-#import <OpenGLES/EAGL.h>
-#import <OpenGLES/ES2/gl.h>
-#import <OpenGLES/ES2/glext.h>
+#import "UserInfo.h"
+#import "PTZView.h"
+
 
 #define MAX_FRAME  6
 #define MIN_FRAME  1
+#define  kMAXBUFFEREDDURATION_IPC 0.05
+#define  kMINBUFFEREDDURATION_IPC 0.02
 
-#define VIDEO_LOW  NSLocalizedString(@"videoLow", nil)
-#define VIDEO_HIGH  NSLocalizedString(@"videoHight", nil)
 
-
-@interface PlayP2PViewController()
+@interface PlayP2PViewController()<PTZViewDelegate>
 {
     dispatch_queue_t _dispatchQueue;
     BOOL                bFirst;
     UIActivityIndicatorView  *viewActivity;
-    
     UIView              *_topHUD;
     UIView              *_downHUD;
-    UIToolbar           *_topBar;
     UIButton            *_doneButton;
     UITapGestureRecognizer *_doubleRecognizer;
     UITapGestureRecognizer *_tapGestureRecognizer;
@@ -53,7 +48,6 @@
     
     UILabel *_progressLabel;
     
-    UIButton *_recordBtn ;
     
     int nPlayStatus;
     NSUInteger _nFormat;
@@ -65,24 +59,85 @@
     BOOL _buffered;
     int nWidth ;
     int nHeight ;
-    
+    BOOL bScreen;
     UILabel *_lblName;
     CGFloat _movieDuration;
     CGFloat _startDuration;
     UIButton *btnSwitch;
+    
+    UIImageView *downViewBg;
+    UIImageView *topViewBg;
+    
+    UIView *full_TopView;
+    UIView *full_DownView;
+    
+    UIButton *btnPlayHd;
+    UIButton *btnPlayBd;
+    
+    UIButton *btnPtz;
+    
+    UIImageView *line1;
+    UIImageView *line2;
+    UIImageView *line3;
+    UIImageView *line4;
+    
+    NSInteger nCount;
+    BOOL bExit;
+    
+    
 }
+@property (nonatomic,assign) NSInteger nCodeType;
 @property (nonatomic) BOOL decoding;
 @property (nonatomic,strong) XCDecoder *decoder;
 @property (nonatomic,strong) NSString *strNO;
-@property (nonatomic,strong) UILabel *lblPlayer;
 @property (readwrite) BOOL playing;
 @property (nonatomic,strong) NSString *strName;
 @property (nonatomic,strong) KxMovieGLView *glView;
-@property (nonatomic,strong) UIView *switchView;
-@property (nonatomic,strong) NSMutableArray      *videoFrames;;
+@property (nonatomic,strong) NSMutableArray *videoFrames;
+@property (nonatomic,strong) UIButton *btnPlay;
+@property (nonatomic,strong) UIButton *btnHD;
+@property (nonatomic,strong) UIButton *btnBD;
+@property (nonatomic,strong) UIButton *btnPhoto;
+@property (nonatomic,strong) UIButton *btnRecord;
+@property (nonatomic,strong) UIImageView *imgView;
+@property (nonatomic,strong) PTZView *view_Ptz;
+
+
 @end
 
 @implementation PlayP2PViewController
+
+-(void)dealloc
+{
+    [_videoFrames removeAllObjects];
+    [_tapGestureRecognizer removeTarget:self action:@selector(handleTapNew:)];//修改成新的
+    [_doubleRecognizer removeTarget:self action:@selector(handleTapNew:)];//修改成新的
+    
+    [_view_Ptz removeFromSuperview];
+    [_btnPhoto removeFromSuperview];
+    [_btnRecord removeFromSuperview];
+    
+    [_btnBD removeFromSuperview];
+    [_btnHD removeFromSuperview];
+    
+    [_glView removeFromSuperview];
+    [_downHUD removeFromSuperview];
+    [_topHUD removeFromSuperview];
+    [_lblName removeFromSuperview];
+    [_btnPlay removeFromSuperview];
+
+    
+    _videoFrames = nil;
+    _decoder = nil;
+    _glView = nil;
+    _dispatchQueue = nil;
+    _doneButton = nil;
+    _topHUD = nil;
+    _downHUD = nil;
+    _strNO = nil;
+    _strName = nil;
+    
+}
 
 -(id)initWithNO:(NSString*)nsNO;
 {
@@ -95,7 +150,8 @@
 -(id)initWithNO:(NSString*)nsNO name:(NSString*)strName format:(NSUInteger)nFormat
 {
     self = [super init];
-    if (self) {
+    if (self)
+    {
         self.strNO = [nsNO copy];
         _nFormat = nFormat;
         _strName = [strName copy];
@@ -120,14 +176,13 @@
     [super viewDidLoad];
     [[UIApplication sharedApplication] setStatusBarHidden:YES];//隐藏status bar
     [self initToolBar];
-    _tapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
+    _tapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTapNew:)];
     _tapGestureRecognizer.numberOfTapsRequired = 1; // 单击
-    _doubleRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
+    _doubleRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTapNew:)];
     _doubleRecognizer.numberOfTapsRequired = 2; // 双击
     [_tapGestureRecognizer requireGestureRecognizerToFail:_doubleRecognizer];
-    [self.view addGestureRecognizer:_tapGestureRecognizer];
-    [self.view addGestureRecognizer:_doubleRecognizer];
-    [self.view setUserInteractionEnabled:YES];
+    bExit = NO;
+    nCount = 0;
 }
 -(void)viewDidAppear:(BOOL)animated
 {
@@ -143,17 +198,19 @@
     nWidth = 0;
     nHeight = 0;
     [self playVideo];
+    
 }
 
 - (void) setupUserInteraction
 {
+    
 //    _glView.userInteractionEnabled = YES;
 //    [_glView addGestureRecognizer:_tapGestureRecognizer];
 //    [_glView addGestureRecognizer:_doubleRecognizer];
 //    [self.view setUserInteractionEnabled:YES];
 //    [self.view addGestureRecognizer:_tapGestureRecognizer];
 //    [self.view addGestureRecognizer:_doubleRecognizer];
-
+    
 }
 
 
@@ -166,14 +223,43 @@
 -(void)enter_background
 {
     [_decoder destorySDK];
-    [self stopVideo];
+    dispatch_group_t group = dispatch_group_create();
+    __weak PlayP2PViewController *weakSelf = self;
+    dispatch_group_async(group, dispatch_get_global_queue(0, 0), ^{
+        [weakSelf stopVideo];
+    });
+    dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
     
+    DLog(@"GG");
+    
+    group = nil;
+
 }
 -(void)viewWillDisappear:(BOOL)animated
 {
     [super viewWillDisappear:animated];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [ProgressHUD dismiss];
+}
+
+-(void)handleTapNew:(UITapGestureRecognizer*)tapGesture
+{
+    if (tapGesture.state == UIGestureRecognizerStateEnded)
+    {
+        CGPoint point = [tapGesture locationInView:self.view];
+        if (point.y < 40 || point.y > _downHUD.frame.origin.y)
+        {
+            return ;
+        }
+        if (tapGesture == _tapGestureRecognizer)
+        {
+            [self showHUD: _hiddenHUD];
+        }
+        else if (tapGesture == _doubleRecognizer)
+        {
+
+        }
+    }
 }
 
 -(void)handleTap:(UITapGestureRecognizer*)tapGesture
@@ -187,30 +273,58 @@
         }
         if (tapGesture == _tapGestureRecognizer)
         {
-            
-            [self showHUD: _hiddenHUD];
-            
+            if(bScreen)//横屏状态
+            {
+                [self showHUD: _hiddenHUD];
+            }
         }
         else if (tapGesture == _doubleRecognizer)
         {
-            bIsFull = !bIsFull;
-            if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationPortrait)
+            if (!bScreen)
             {
-                [self setHorizontalFrame];
+                [[UIDevice currentDevice] setValue: [NSNumber numberWithInteger:UIDeviceOrientationLandscapeRight] forKey:@"orientation"];
+                [UIViewController attemptRotationToDeviceOrientation];
+                CGFloat duration = [UIApplication sharedApplication].statusBarOrientationAnimationDuration;
+                [UIView beginAnimations:nil context:nil];
+                [UIView setAnimationDuration:duration];
+                CGRect frame = [UIScreen mainScreen].bounds;
+                CGPoint center = CGPointMake(frame.origin.x + ceil(frame.size.width/2), frame.origin.y + ceil(frame.size.height/2));
+                self.view.center = center;
+                self.view.transform = [self transformView];
+                self.view.bounds = Rect(0, 0, frame.size.height, frame.size.width);
+                [UIView commitAnimations];
+                bScreen = !bScreen;
             }
             else
             {
-                [self setVerticalFrame];
+                [self setHorizontal];
+                bScreen = !bScreen;
+                DLog(@"%zd",self.interfaceOrientation);
             }
         }
     }
 }
+
+-(void)setHorizontal
+{
+//    [[UIApplication sharedApplication] setStatusBarOrientation:UIInterfaceOrientationPortrait animated:YES];
+    CGFloat duration = [UIApplication sharedApplication].statusBarOrientationAnimationDuration;
+    [[UIDevice currentDevice] setValue: [NSNumber numberWithInteger:UIDeviceOrientationPortrait] forKey:@"orientation"];
+    [UIViewController attemptRotationToDeviceOrientation];
+    [UIView beginAnimations:nil context:nil];
+    [UIView setAnimationDuration:duration];
+    CGRect frame = [UIScreen mainScreen].bounds;
+    CGPoint center = CGPointMake(frame.origin.x + ceil(frame.size.width/2), frame.origin.y + ceil(frame.size.height/2));
+    self.view.center = center;
+    self.view.transform = [self transformView];
+    self.view.bounds = CGRectMake(0, 0, frame.size.width, frame.size.height);
+    [UIView commitAnimations];
+}
+
+
 - (void) showHUD: (BOOL) show
 {
-    if (!_switchView.hidden) {
-        _switchView.hidden = YES;
-        return;
-    }
+
     _hiddenHUD = !show;
 
     [self showToolBar];
@@ -218,42 +332,41 @@
 
 -(void)showToolBar
 {
-    _topHUD.alpha = _hiddenHUD ? 0 :1;
-    _downHUD.alpha = _hiddenHUD ? 0 : 1;
+    _topHUD.alpha = _hiddenHUD ? 0 :0.8f;
+    _downHUD.alpha = _hiddenHUD ? 0 : 0.8f;
 }
 -(void)initToolBar
 {
-    _topHUD = [[UIView alloc] initWithFrame:CGRectMake(0,0,kScreenWidth,44)];
+    _topHUD = [[UIView alloc] initWithFrame:CGRectMake(0,0,kScreenWidth,49)];
     _topHUD.autoresizingMask = UIViewAutoresizingFlexibleWidth;
     [self.view addSubview:_topHUD];
     _topHUD.alpha = 1;
-    [_topHUD setBackgroundColor:[UIColor clearColor]];
     
-    UIView *alphView = [[UIView alloc] initWithFrame:_topHUD.bounds];
-    alphView.tag = 1010;
-    [alphView setBackgroundColor:RGB(255,255,255)];
-    [alphView setAlpha:0.5f];
-    [_topHUD addSubview:alphView];
-    [_topHUD setUserInteractionEnabled:YES];
-    alphView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    UILabel *sLine1 = [[UILabel alloc] initWithFrame:CGRectMake(0, _topHUD.frame.size.height-0.2, kScreenWidth, 0.1)];
+    sLine1.backgroundColor = [UIColor colorWithRed:198/255.0
+                                             green:198/255.0
+                                              blue:198/255.0
+                                             alpha:1.0];
+    UILabel *sLine2 = [[UILabel alloc] initWithFrame:CGRectMake(0, _topHUD.frame.size.height-0.1, kScreenWidth, 0.1)] ;
+    sLine2.backgroundColor = [UIColor whiteColor];
+    sLine1.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleBottomMargin;
+    sLine2.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleBottomMargin;
+    [_topHUD addSubview:sLine1];
+    [_topHUD addSubview:sLine2];
     
-    UIView *lineView = [[UIView alloc] initWithFrame:Rect(0, 43, kScreenWidth, 1)];
-    [lineView setBackgroundColor:[UIColor grayColor]];
-    [_topHUD addSubview:lineView];
-    lineView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleBottomMargin;
     
-    _lblName = [[UILabel alloc] initWithFrame:Rect(30,20,kScreenWidth-60,15)];
+    _lblName = [[UILabel alloc] initWithFrame:Rect(30,15,kScreenWidth-60,20)];
     [_lblName setTextAlignment:NSTextAlignmentCenter];
     [_lblName setText:_strName];
-    [_lblName setFont:[UIFont systemFontOfSize:15.0f]];
+    [_lblName setFont:[UIFont fontWithName:@"Helvetica" size:15.0f]];
     [_lblName setTextColor:[UIColor blackColor]];
     [_topHUD addSubview:_lblName];
     
     _doneButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    _doneButton.frame = CGRectMake(5,0,40,40);
+    _doneButton.frame = CGRectMake(5,2.5,44,44);
     [_doneButton setImage:[UIImage imageNamed:@"NaviBtn_Back"] forState:UIControlStateNormal];
     [_doneButton setImage:[UIImage imageNamed:@"NaviBtn_Back_H"] forState:UIControlStateHighlighted];
-    _doneButton.titleLabel.font = [UIFont systemFontOfSize:18];
+    _doneButton.titleLabel.font = [UIFont fontWithName:@"Helvetica" size:18];
     _doneButton.showsTouchWhenHighlighted = YES;
     [_doneButton addTarget:self action:@selector(doneDidTouch:)
           forControlEvents:UIControlEventTouchUpInside];
@@ -262,8 +375,7 @@
     _progressLabel = [[UILabel alloc] initWithFrame:Rect(0, 0, 60, 20)];
     [_progressLabel setTextAlignment:NSTextAlignmentCenter];
     [_progressLabel setTextColor:[UIColor redColor]];
-    [_progressLabel setFont:[UIFont systemFontOfSize:15.0f]];
-    [_progressLabel setBackgroundColor:[UIColor blackColor]];
+    [_progressLabel setFont:[UIFont fontWithName:@"Helvetica" size:15.0f]];
     [_progressLabel setAlpha:0.6f];
     
     _downHUD = [[UIView alloc] initWithFrame:Rect(0, kScreenHeight-50+HEIGHT_MENU_VIEW(20, 0),kScreenWidth, 50)];
@@ -272,118 +384,177 @@
     _downHUD.alpha = 1;
     [_downHUD setBackgroundColor:[UIColor clearColor]];
     
-    UIView *alphDownView = [[UIView alloc] initWithFrame:_downHUD.bounds];
-    alphDownView.tag = 1010;
-    [alphDownView setBackgroundColor:RGB(255,255,255)];
-    [alphDownView setAlpha:0.5f];
-    [_downHUD addSubview:alphDownView];
-    alphDownView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    UILabel *sLine3 = [[UILabel alloc] initWithFrame:CGRectMake(0, 0.4, kScreenWidth, 0.1)];
+    sLine3.backgroundColor = [UIColor colorWithRed:198/255.0
+                                             green:198/255.0
+                                              blue:198/255.0
+                                             alpha:1.0];
+    UILabel *sLine4 = [[UILabel alloc] initWithFrame:CGRectMake(0, 0.5, kScreenWidth, 0.1)] ;
+    sLine4.backgroundColor = [UIColor whiteColor];
+    sLine3.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleBottomMargin;
+    sLine4.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleBottomMargin;
+    [_downHUD addSubview:sLine3];
+    [_downHUD addSubview:sLine4];
     
-    UIView *lineViewDown = [[UIView alloc] initWithFrame:Rect(0, 1, kScreenWidth, 1)];
-    [lineViewDown setBackgroundColor:[UIColor grayColor]];
-    [_downHUD addSubview:lineViewDown];
-    lineViewDown.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleBottomMargin;
     
+    _btnPlay = [UIButton buttonWithType:UIButtonTypeCustom];
+    [_btnPlay setImage:[UIImage imageNamed:@"realplay"] forState:UIControlStateNormal];
+    [_btnPlay addTarget:self action:@selector(playWithAction:) forControlEvents:UIControlEventTouchUpInside];
+    [_btnPlay setImage:[UIImage imageNamed:@"stop"] forState:UIControlStateSelected];
+    _btnPlay.tag = 1001;
     
-    UIButton *playBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-    [playBtn setImage:[UIImage imageNamed:@"realplay"] forState:UIControlStateNormal];
-    [playBtn addTarget:self action:@selector(playVideo) forControlEvents:UIControlEventTouchUpInside];
-    playBtn.tag = 1001;
-    UIButton *stopBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-    [stopBtn setImage:[UIImage imageNamed:@"stop"] forState:UIControlStateNormal];
-    [stopBtn addTarget:self action:@selector(stopVideo) forControlEvents:UIControlEventTouchUpInside];
-    stopBtn.tag = 1002;
-    UIButton *shotoBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-    [shotoBtn setImage:[UIImage imageNamed:@"shotopic"] forState:UIControlStateNormal];
-    [shotoBtn addTarget:self action:@selector(shotoPic) forControlEvents:UIControlEventTouchUpInside];
-    shotoBtn.tag = 1003;
-    _recordBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-    [_recordBtn setImage:[UIImage imageNamed:@"record"] forState:UIControlStateNormal];
-    [_recordBtn addTarget:self action:@selector(recordVideo) forControlEvents:UIControlEventTouchUpInside];
-    [_recordBtn setImage:[UIImage imageNamed:@"record_sel"] forState:UIControlStateSelected];
-    [_recordBtn setImage:[UIImage imageNamed:@"record_select"] forState:UIControlStateHighlighted];
-    _recordBtn.tag = 1004;
+    _btnPhoto = [UIButton buttonWithType:UIButtonTypeCustom];
+    [_btnPhoto setImage:[UIImage imageNamed:@"shotopic"] forState:UIControlStateNormal];
+    [_btnPhoto setImage:[UIImage imageNamed:@"shotopic_h"] forState:UIControlStateHighlighted];
+    [_btnPhoto addTarget:self action:@selector(shotoPic:) forControlEvents:UIControlEventTouchUpInside];
+    _btnPhoto.tag = 1003;
     
-    btnSwitch = [UIButton buttonWithType:UIButtonTypeCustom];
-    [btnSwitch setTitle:VIDEO_LOW forState:UIControlStateNormal];
-    [btnSwitch setBackgroundColor:[UIColor grayColor]];
-    [btnSwitch setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-    [btnSwitch addTarget:self action:@selector(viewSwitchView:) forControlEvents:UIControlEventTouchUpInside];
-    btnSwitch.tag = 1005;
-    [_downHUD addSubview:btnSwitch];
+    _btnRecord = [UIButton buttonWithType:UIButtonTypeCustom];
+    [_btnRecord setImage:[UIImage imageNamed:@"record"] forState:UIControlStateNormal];
+    [_btnRecord addTarget:self action:@selector(recordVideo) forControlEvents:UIControlEventTouchUpInside];
+    [_btnRecord setImage:[UIImage imageNamed:@"record_sel"] forState:UIControlStateSelected];
+    [_btnRecord setImage:[UIImage imageNamed:@"record_select"] forState:UIControlStateHighlighted];
+    _btnRecord.tag = 1004;
+    
+    _btnBD = [UIButton buttonWithType:UIButtonTypeCustom];
+    [_btnBD setImage:[UIImage imageNamed:@"play_bd"] forState:UIControlStateNormal];
+    [_btnBD addTarget:self action:@selector(switchVideoCodeInfo:) forControlEvents:UIControlEventTouchUpInside];
+    _btnBD.tag = 1005;
+    [_downHUD addSubview:_btnBD];
+    _btnBD.frame = Rect(180, 1, 60, 48);
+    
+    _btnHD = [UIButton buttonWithType:UIButtonTypeCustom];
+    [_btnHD setImage:[UIImage imageNamed:@"play_hd"] forState:UIControlStateNormal];
+    [_btnHD addTarget:self action:@selector(switchVideoCodeInfo:) forControlEvents:UIControlEventTouchUpInside];
+    _btnHD.tag = 1006;
+    _btnHD.frame = Rect(240, 1, 60, 48);
+    [_downHUD addSubview:_btnHD];
 
-     
-    [_recordBtn setEnabled:NO];
-    [playBtn setEnabled:NO];
-    [shotoBtn setEnabled:NO];
-    [_recordBtn  setEnabled:NO];
-    [stopBtn setEnabled:NO];
+    [_btnPlay setEnabled:NO];
+    [_btnPhoto setEnabled:NO];
+    [_btnRecord  setEnabled:NO];
+    [_btnBD setEnabled:NO];
+    [_btnHD setEnabled:NO];
     
-    [_downHUD addSubview:playBtn];
-    [_downHUD addSubview:stopBtn];
-    [_downHUD addSubview:shotoBtn];
-    [_downHUD addSubview:_recordBtn];
-    
-//  shotoBtn.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleBottomMargin;
-//    
-//    stopBtn.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleBottomMargin;
-//    _recordBtn.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleBottomMargin;
-//    playBtn.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleBottomMargin;
-//    btnSwitch.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleBottomMargin;
+    [_downHUD addSubview:_btnPlay];
+    [_downHUD addSubview:_btnPhoto];
+    [_downHUD addSubview:_btnRecord];
     
     [self.view setBackgroundColor:[UIColor whiteColor]];
     
-    _switchView = [[UIView alloc] initWithFrame:Rect(0, kScreenHeight-100, 45, 60)];
-    [_switchView setBackgroundColor:[UIColor blackColor]];
-    [self.view addSubview:_switchView];
-    UIButton *btnCode1 = [UIButton buttonWithType:UIButtonTypeCustom];
-    [btnCode1 setTitle:VIDEO_HIGH forState:UIControlStateNormal];
-    [btnCode1 setBackgroundColor:[UIColor grayColor]];
-    [btnCode1 setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-    [btnCode1 addTarget:self action:@selector(switchVideoCodeInfo:) forControlEvents:UIControlEventTouchUpInside];
-    [_switchView addSubview:btnCode1];
-    [btnCode1 setFrame:Rect(0, 0, 45, 30)];
+    _view_Ptz = [[PTZView alloc] initWithFrame:Rect(0, 0, 164, 114)];
+    [self.view addSubview:_view_Ptz];
+    _view_Ptz.hidden = YES;
+    _view_Ptz.delegate = self;
     
-    UIButton *btnCode2 = [UIButton buttonWithType:UIButtonTypeCustom];
-    [btnCode2 setTitle:VIDEO_LOW forState:UIControlStateNormal];
-    [btnCode2 setBackgroundColor:[UIColor grayColor]];
-    [btnCode2 setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-    [btnCode2 addTarget:self action:@selector(switchVideoCodeInfo:) forControlEvents:UIControlEventTouchUpInside];
-    [_switchView addSubview:btnCode2];
-    [btnCode2 setFrame:Rect(0, 31, 45, 30)];
-    [_switchView setHidden:YES];
+    topViewBg = [[UIImageView alloc] initWithFrame:_topHUD.bounds];
+    [topViewBg setImage:[UIImage imageNamed:@"ptz_bg"]];
+    
+    downViewBg = [[UIImageView alloc] initWithFrame:_downHUD.bounds];
+    [downViewBg setImage:[UIImage imageNamed:@"ptz_bg"]];
+    
+    btnPtz = [UIButton buttonWithType:UIButtonTypeCustom];
+    [btnPtz setImage:[UIImage imageNamed:@"ptz_control"] forState:UIControlStateNormal];
+    line1 = [self createImageViewLine];
+    line2 = [self createImageViewLine];
+    line3 = [self createImageViewLine];
+    line4 = [self createImageViewLine];
 }
+
+-(UIImageView *)createImageViewLine
+{
+    return [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"full_line"]];
+}
+
+-(void)switchVideoCodeInfo:(id)sender
+{
+    
+    UIButton *btn = (UIButton *)sender;
+    int nType = 0;
+    if(btn.tag==1005)
+    {
+        nType= 2;
+        _btnHD.enabled = YES;
+    }
+    else if(btn.tag == 1006)
+    {
+        nType = 1;
+        _btnBD.enabled = YES;
+    }
+    [self switchVideoCode:nType];
+    btn.enabled = NO;
+}
+
+//25   20  5
+
 #pragma mark - actions
 - (void)doneDidTouch: (id) sender
 {
+    bExit = YES;
     [self stopVideo];
-    [self dismissViewControllerAnimated:YES completion:^{
+    [self dismissViewControllerAnimated:YES completion:
+    ^{
         [[UIApplication sharedApplication] setStatusBarHidden:NO];
         [[UIApplication sharedApplication] setStatusBarOrientation:UIInterfaceOrientationPortrait];
     }];
 }
+
 -(void)connect_p2p_fail:(NSNotification*)notify
 {
-    
-    [self stopVideo];
-    
     NSString *strInfo = [notify object];
     __weak NSString *__strInfo = strInfo;
     __weak PlayP2PViewController *__weakSelf = self;
-    dispatch_async(dispatch_get_main_queue(),
+    dispatch_group_t group = dispatch_group_create();
+    dispatch_group_async(group, dispatch_get_global_queue(0, 0), ^{
+        [__weakSelf stopVideo];
+    });
+    dispatch_group_async(group,dispatch_get_main_queue(),
     ^{
         [ProgressHUD dismiss];
-        [__weakSelf.view makeToast:__strInfo];
+        [__weakSelf.view makeToast:__strInfo duration:1.0f position:@"center"];
     });
-    
+    dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
+    nCount++;
+    if (nCount<=3 && !bExit)
+    {
+        DLog(@"正在第%li次重连",(long)nCount);
+        __weak PlayP2PViewController *__weakSelf = self;
+        //bScreen)//bScreen no 竖屏   yes 横屏
+        if (IOS_SYSTEM_8)
+        {
+            dispatch_group_async(group,dispatch_get_main_queue(),
+            ^{
+               [ProgressHUD show:XCLocalized(@"reconnect") viewInfo:__weakSelf.view];
+            });
+        }
+        else
+        {
+            dispatch_group_async(group,dispatch_get_main_queue(), ^{
+                [ProgressHUD showPlayRight:XCLocalized(@"reconnect") viewInfo:__weakSelf.view];
+            });
+        }
+        dispatch_group_async(group,dispatch_get_global_queue(0, 0),
+        ^{
+           [__weakSelf decoderInfo];
+        });
+        nPlayStatus = 1;
+    }
 }
-
 
 -(void)decoderInfo
 {
     _playing = YES;
-    _decoder = [[XCDecoder alloc] initWithNO:_strNO format:_nFormat];
-    while(_decoder.frameWidth==0)
+    if([UserInfo sharedUserInfo].bGuess)
+    {
+        _decoder = [[XCDecoder alloc] initWithNO:_strNO format:_nFormat videoFormat:KxVideoFrameFormatYUV codeType:1];
+        _nCodeType = 1;
+    }
+    else
+    {
+        _decoder = [[XCDecoder alloc] initWithNO:_strNO format:_nFormat videoFormat:KxVideoFrameFormatYUV];
+        _nCodeType = 2;
+    }
+    while(_decoder.fps==0)
     {
         if (!_playing)
         {
@@ -396,77 +567,129 @@
     __weak PlayP2PViewController *wearSelf = self;
     dispatch_async(dispatch_get_main_queue(),
     ^{
+//        [wearSelf.playBtn setEnabled:NO];
+        [wearSelf play];
+    //    [wearSelf setPlayMode:YES];
+        [wearSelf initGlView];
+    });
+
+    [UIApplication sharedApplication].idleTimerDisabled = YES;
+}
+
+-(void)addOpenGlView
+{
+    [self initGlView];
+    [self.view insertSubview:_glView atIndex:0];
+    [_glView addGestureRecognizer:_tapGestureRecognizer];
+    [_glView addGestureRecognizer:_doubleRecognizer];
+    [_glView setUserInteractionEnabled:YES];
+}
+
+-(void)decoderTran
+{
+    _playing = YES;
+    XCDecoder *decoder = [[XCDecoder alloc] initWithNO:_strNO format:2 videoFormat:KxVideoFrameFormatYUV codeType:_nCodeType];
+    while(decoder.fps==0)
+    {
+        if (!_playing)
+        {
+            nPlayStatus = 0;
+            return ;
+        }
+        [NSThread sleepForTimeInterval:0.3f];
+    }
+    _playing = NO;
+    __weak PlayP2PViewController *wearSelf = self;
+    _decoder = decoder;
+    dispatch_async(dispatch_get_main_queue(),
+    ^{
+        [wearSelf.btnPlay setSelected:YES];
         [wearSelf play];
         [wearSelf initGlView];
     });
     [UIApplication sharedApplication].idleTimerDisabled = YES;
-    
-    
 }
--(void)playMovie
-{
-    if (self.playing)
-    {
-        NSMutableArray *array = [_decoder getVideoArray];
-        DLog(@"array:%d",array.count);
-        KxVideoFrame *frame ;
-        @synchronized(array)
-        {
-            if (array.count > 0) {
-                frame = array[0];
-                [array removeObjectAtIndex:0];
-            }
-        }
-        if (frame)
-        {
-            DLog(@"贴图");
-            [_glView render:frame];
-            [_decoder clearDuration:frame.duration];
-            frame = nil;
-        }
-    }
-    dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, 1.0/_decoder.fps * NSEC_PER_SEC);
-    __weak PlayP2PViewController *weakSelf = self;
-    dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
-        [weakSelf playMovie];
-    });
-}
-
-
-
-
 
 -(void)initGlView
 {
-    float height = _decoder.frameHeight/(_decoder.frameWidth/320.0f);
-    frameCenter = Rect(0, kScreenHeight/2-height/2,320,height);
+    if (UIInterfaceOrientationPortrait == [UIApplication sharedApplication].statusBarOrientation)
+    {
+        //16:9   320 ：240
+        CGFloat fHeight = kScreenWidth/4*3;
+        frameCenter = Rect(0,kScreenHeight/2-fHeight/2, kScreenWidth, fHeight);
+    }
+    else
+    {
+        if(IOS_SYSTEM_8)
+        {
+            frameCenter = Rect(0, 0,kScreenWidth,kScreenHeight);
+        }
+        else
+        {
+            frameCenter = Rect(0, 0,kScreenHeight,kScreenWidth);
+        }
+    }
+    //4:3  16:10
     _glView = [[KxMovieGLView alloc] initWithFrame:frameCenter decoder:_decoder];
-    _glView.contentMode = UIViewContentModeScaleAspectFit;//UIViewContentModeScaleAspectFill;UIViewContentModeScaleAspectFit
+    _glView.contentMode = UIViewContentModeScaleToFill;//UIViewContentModeScaleAspectFill;UIViewContentModeScaleAspectFit
     _glView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleBottomMargin;
-    [self.view addSubview:_glView];
-    [self setupUserInteraction];
-    __weak PlayP2PViewController *__self = self;
+    [self.view insertSubview:_glView atIndex:0];
+    [_glView addGestureRecognizer:_tapGestureRecognizer];
+    [_glView addGestureRecognizer:_doubleRecognizer];
+    [_glView setUserInteractionEnabled:YES];
+    [self.btnPlay setEnabled:YES];
+    [self.btnPlay setSelected:YES];
+    [self setPlayMode:YES];
+    
+    
+    
+#if 0
+    if([[UIApplication sharedApplication] statusBarOrientation]==UIInterfaceOrientationMaskPortrait)
+    {
+        _imgView = [[UIImageView alloc] initWithFrame:frameCenter];
+    }
+    else
+    {
+        CGFloat _width,_height;
+        if (IOS_SYSTEM_8) {
+            _width = kScreenWidth;
+            _height = kScreenHeight;
+        }
+        else
+        {
+            _width = kScreenHeight;
+            _height = kScreenWidth;
+        }
+        _imgView = [[UIImageView alloc] initWithFrame:Rect(0, 0, _width, _height)];
+    }
+    _imgView.contentMode = UIViewContentModeScaleAspectFit;
+    _imgView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleBottomMargin;
+    [self.view insertSubview:_imgView atIndex:0];
+    __weak PlayP2PViewController *_WeakSelf = self;
     dispatch_async(dispatch_get_main_queue(),
     ^{
-        [__self setPlayMode:YES];
+        [_WeakSelf.playBtn setSelected:YES];
+        [_WeakSelf setPlayMode:YES];
     });
-    
-    
+#endif
 }
 
 - (void) play
 {
-    if (_playing) {
+    if (_playing)
+    {
         return;
     }
-    dispatch_async(dispatch_get_main_queue(), ^{[ProgressHUD dismiss];});
+    __weak PlayP2PViewController *wearSelf = self;
+    dispatch_async(dispatch_get_main_queue(),
+    ^{
+        [ProgressHUD dismiss];
+    });
     _decoding = NO;
     _tickCounter = 0;
     _tickCorrectionTime = 0;
     _playing = YES;    
     [self asyncDecodeFrames];
-    [viewActivity stopAnimating];
-    __weak PlayP2PViewController *wearSelf = self;
     dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (1.0/100) * NSEC_PER_SEC);
     dispatch_after(popTime, dispatch_get_global_queue(0, 0), ^(void)
     {
@@ -478,19 +701,20 @@
 }
 - (void) tick
 {
-    if (_buffered && (_buffered>_minBufferedDuration || _decoder.isEOF))
-    {
-        _tickCorrectionTime = 0;
-        _buffered = NO;
-    }
+//    if (_buffered && ((_bufferedDuration > kMINBUFFEREDDURATION_IPC) || _decoder.isEOF ))
+//    {
+//        _tickCorrectionTime = 0;
+//        _buffered = NO;
+//    }
     CGFloat interval = 0;
-    if(!_buffered)
+//    if(!_buffered)
+//    {
+        interval = [self presentFrame]*0.2;
+//    }
+    if (_playing)
     {
-        interval = [self presentFrame];
-    }
-    if (self.playing) {
         const NSUInteger leftFrames = _videoFrames.count;
-        if (!leftFrames || _bufferedDuration < _minBufferedDuration)
+        if (leftFrames==0)
         {
             [self asyncDecodeFrames];
         }
@@ -499,28 +723,40 @@
             return ;
         }
         __weak PlayP2PViewController *wearSelf = self;
-        const NSTimeInterval correction = [self tickCorrection];
-        const NSTimeInterval time = MAX(interval + correction, 0.01);
+        const NSTimeInterval time = MAX(interval, 0.025);
         dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, time * NSEC_PER_SEC);
-        dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
+        dispatch_after(popTime, dispatch_get_global_queue(0, 0), ^(void)
+        {
             [wearSelf tick];
         });
     }
+    else
+    {
+        DLog(@"出去了");
+        return;
+    }
     if ((_tickCounter++ % 3) == 0)
     {
-        [self updateHUD];
+        __weak PlayP2PViewController *__weakSelf = self;
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [__weakSelf updateHUD];
+        });
     }
 }
 -(NSString*)formatTimeInterval:(CGFloat) seconds
 {
     seconds = MAX(0, seconds);
-    NSInteger s = seconds;
-    NSInteger m = s / 60;
-    NSInteger h = m / 60;
+    int s = seconds;
+    int m = s / 60;
+    int h = m / 60;
     s = s % 60;
     m = m % 60;
     return [NSString stringWithFormat:@"%d:%0.2d:%0.2d",h,m,s];
 }
+//1.原通道隐藏
+//2.打开已经播放  --对通道  --对正在播放
+//3.全屏显示
+
 -(void)updateHUD
 {
     if(!bRecord)
@@ -528,7 +764,12 @@
         return;
     }
     const CGFloat position = _movieDuration-_startDuration;// -_decoder.startTime;
-    _progressLabel.text = [self formatTimeInterval:position];
+    NSString *strTime = [self formatTimeInterval:position];
+    __weak UILabel *__timeLabel = _progressLabel;
+    dispatch_async(dispatch_get_main_queue(),
+    ^{
+        __timeLabel.text = strTime;
+    });
 }
 -(CGFloat)tickCorrection
 {
@@ -544,8 +785,8 @@
     NSTimeInterval dPosition = _movieDuration - _tickCorrectionPosition;
     NSTimeInterval dTime = now - _tickCorrectionTime;
     NSTimeInterval correction = dPosition - dTime;
-    
-    if (correction > 1.f || correction < -1.f) {
+    if (correction > 1.f || correction < -1.f)
+    {
         correction = 0;
         _tickCorrectionTime = 0;
     }
@@ -564,33 +805,46 @@
     }
     if (frame)
     {
-        [_glView render:frame];
+        __weak PlayP2PViewController *__weakSelf = self;
+        __weak KxVideoFrame *__frame = frame;
+        dispatch_sync(dispatch_get_main_queue(),
+        ^{
+            [__weakSelf presentVideoFrame:__frame];
+        });
         _movieDuration = frame.position;
         interval = frame.duration;
+        _bufferedDuration -= frame.duration;
         frame = nil;
+        
     }
     return interval;
 }
+
 - (CGFloat)presentVideoFrame: (KxVideoFrame *) frame
 {
     //修改成OPENGL 贴图RGB与YUV两种方式
     [_glView render:frame];
     return 0;
 }
-- (void) asyncDecodeFrames
+
+-(void)asyncDecodeFrames
 {
     if (self.decoding)
         return;
+    
     __weak PlayP2PViewController *wearSelf = self;
     self.decoding = YES;
-    dispatch_async(_dispatchQueue, ^{
+    dispatch_async(_dispatchQueue,
+    ^{
         BOOL good = YES;
-        while (good) {
+        while (good && wearSelf.playing)
+        {
             good = NO;
             @autoreleasepool
             {
                 if (!wearSelf.playing)
                 {
+                    DLog(@"跑出去");
                     return ;
                 }
                 NSArray *frames = [wearSelf.decoder decodeFrames];
@@ -604,6 +858,10 @@
                 }
                 frames = nil;
             }
+        }
+        if (!wearSelf.playing)
+        {
+            DLog(@"已经中断");
         }
         wearSelf.decoding = NO;
     });
@@ -622,53 +880,62 @@
             }
         }
     }
-    return self.playing && _bufferedDuration < _maxBufferedDuration;
+    return self.playing && _bufferedDuration < kMAXBUFFEREDDURATION_IPC;
 }
 - (BOOL)prefersStatusBarHidden
 {
     return YES;
 }
--(BOOL)shouldAutorotate
+#pragma mark 重力处理
+- (BOOL)shouldAutorotate
 {
-    if (IOS_SYSTEM_8) {
-        return NO;
-    }
-    return YES;
+    return NO;
 }
-
 -(NSUInteger)supportedInterfaceOrientations
 {
-    return UIInterfaceOrientationMaskAllButUpsideDown;
+    //UIInterfaceOrientationMaskPortrait
+    return UIInterfaceOrientationMaskLandscapeRight;
 }
--(void)dealloc
+
+-(CGAffineTransform)transformView
 {
-    [_videoFrames removeAllObjects];
-    [_tapGestureRecognizer removeTarget:self action:@selector(handleTap:)];
-    [_doubleRecognizer removeTarget:self action:@selector(handleTap:)];
-    [_glView removeFromSuperview];
-    [_downHUD removeFromSuperview];
-    [_topHUD removeFromSuperview];
-    [_lblName removeFromSuperview];
-    _decoder = nil;
-    _glView = nil;
-    _dispatchQueue = nil;
-    _doneButton = nil;
-    _topHUD = nil;
-    _topBar = nil;
-    
-}
--(void)viewWillLayoutSubviews
-{
-    UIInterfaceOrientation interfaceOrientation = [[UIApplication sharedApplication] statusBarOrientation];
-    if (interfaceOrientation == UIInterfaceOrientationPortrait) {
-        //翻转为竖屏时
-        [self setHorizontalFrame];
-    }else if (interfaceOrientation==UIDeviceOrientationLandscapeLeft || interfaceOrientation ==UIDeviceOrientationLandscapeRight) {
-        //翻转为横屏时
-        [self setVerticalFrame];
+    if(!bScreen)
+    {
+        return CGAffineTransformMakeRotation(M_PI/2);
+    }
+    else
+    {
+        return CGAffineTransformIdentity;
     }
 }
 
+-(void)viewDidLayoutSubviews
+{
+    [super viewDidLayoutSubviews];
+    [self setNewVerticalFrame];
+}
+
+-(void)playWithAction:(UIButton*)sender
+{
+    if (sender.selected)
+    {
+        [self stopVideo];
+        __weak UIButton *stopBtn = sender;
+        dispatch_async(dispatch_get_main_queue(), ^{
+            stopBtn.selected = NO;
+        });
+    }
+    else
+    {
+        [self playVideo];
+        __weak UIButton *stopBtn = sender;
+        dispatch_async(dispatch_get_main_queue(), ^{
+            stopBtn.selected = YES;
+            stopBtn.enabled = NO;
+        });
+        
+    }
+}
 #pragma mark 连接视频  起点
 -(void)playVideo
 {
@@ -676,47 +943,69 @@
     {
         return ;
     }
-    [ProgressHUD show:NSLocalizedString(@"loading", "loading")];
     __weak PlayP2PViewController *__weakSelf = self;
-    dispatch_async(dispatch_get_global_queue(0, 0), ^{
+    //bScreen)//bScreen no 竖屏   yes 横屏
+        if (IOS_SYSTEM_8)
+        {
+            dispatch_async(dispatch_get_main_queue(),
+            ^{
+               [ProgressHUD show:XCLocalized(@"loading") viewInfo:__weakSelf.view];
+            });
+        }
+        else
+        {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [ProgressHUD showPlayRight:XCLocalized(@"loading") viewInfo:__weakSelf.view];
+            });
+        }
+    
+    
+    dispatch_async(dispatch_get_global_queue(0, 0),
+    ^{
         [__weakSelf decoderInfo];
+        
     });
     nPlayStatus = 1;
 }
 #pragma mark 停止视频
 -(void)stopVideo
 {
-    
-    nPlayStatus = 0;
+    _playing = NO;
     _hiddenHUD = NO;
     [_decoder releaseDecode];
-    [_glView removeFromSuperview];
+    __weak PlayP2PViewController *_weakSelf = self;
+    dispatch_async(dispatch_get_main_queue(),
+    ^{
+        [_weakSelf setPlayMode:NO];
+        [_weakSelf.glView removeFromSuperview];
+        _weakSelf.glView= nil;
+    });
     if(bRecord)
     {
         [_progressLabel removeFromSuperview];
         bRecord = !bRecord;
         _startDuration = 0;
-        _recordBtn.selected = NO;
+        _btnRecord.selected = NO;
     }
     [self showToolBar];
-    _playing = NO;
     @synchronized(_videoFrames)
     {
         [_videoFrames removeAllObjects];
     }
-    _decoder = nil;
-    _glView = nil;
-    [self setPlayMode:NO];
-    UIButton *btn = (UIButton*)[_downHUD viewWithTag:1001];
-    __weak UIButton *btnWeak = btn;
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [btnWeak setEnabled:YES];
-    });
-    __weak PlayP2PViewController *__self = self;
+    _imgView = nil;
+    __weak UIButton *btn = btnSwitch;
     dispatch_async(dispatch_get_main_queue(),
     ^{
-       [__self setPlayMode:NO];
+       [_weakSelf.btnPlay setSelected:NO];
+        [_weakSelf.btnPlay setEnabled:YES];
+        [_weakSelf.btnBD setEnabled:NO];
+        btn.selected = NO;
     });
+    nPlayStatus = 0;
+    [self.view addGestureRecognizer:_doubleRecognizer];
+    [self.view addGestureRecognizer:_tapGestureRecognizer];
+    [NSThread sleepForTimeInterval:0.5f];
+    _decoder = nil;
     [UIApplication sharedApplication].idleTimerDisabled = NO;
 }
 #pragma mark 码流切换
@@ -728,178 +1017,361 @@
 -(void)switchVideoCode:(int)nCode
 {
     _playing = NO;
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [ProgressHUD show:NSLocalizedString(@"videoSwitch", nil)];
-    });
-    if (_decoder)
-    {
-        _decoder.nSwitchcode = NO;
-        
-        [_decoder switchP2PCode:nCode];
-    }
-    __weak PlayP2PViewController *weakSelf = self;
-    dispatch_async(dispatch_get_global_queue(0, 0),
-    ^{
-        while (!weakSelf.decoder.nSwitchcode)
-        {
-            [NSThread sleepForTimeInterval:0.1f];
-        }
-        [weakSelf play];
-        @synchronized(weakSelf.videoFrames)
-        {
-            [weakSelf.videoFrames removeAllObjects];
-        }
-    });
-    [_switchView setHidden:YES];
-}
-
--(void)viewSwitchView:(id)sender
-{
-    [_switchView setHidden:NO];
+    _decoding = NO;
     
-}
--(void)switchVideoCodeInfo:(id)sender
-{
-    UIButton *btn = (UIButton *)sender;
-    int nType = 0;
-    if([btn.titleLabel.text isEqualToString:VIDEO_HIGH])
+   //默认bScreen横屏幕
+    __weak PlayP2PViewController *__weakSelf = self;
+    if (IOS_SYSTEM_8)
     {
-        [btnSwitch setTitle:VIDEO_HIGH forState:UIControlStateNormal];
-        nType= 1;
+        dispatch_async(dispatch_get_main_queue(),
+        ^{
+                [ProgressHUD show:XCLocalized(@"videoSwitch") viewInfo:__weakSelf.view];
+        });
     }
     else
     {
-        [btnSwitch setTitle:VIDEO_LOW forState:UIControlStateNormal];
-        nType = 2;
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [ProgressHUD showPlayRight:XCLocalized(@"videoSwitch") viewInfo:__weakSelf.view];
+        });
     }
-    [self switchVideoCode:nType];
+    __block int __nCode = nCode;
+    /*
+            切换分为两种情况
+            1.如果是P2P,使用切换
+            2.如果是转发，停止视频播放，然后重新连接视频
+        先获取码流信息，在decoder类中加入信息
+    */
+    
+    if ([_decoder getRealType]==1)
+    {
+        //P2P方式  直接转换
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0f * NSEC_PER_SEC)), dispatch_get_global_queue(0, 0),
+        ^{
+               if (__weakSelf.decoder)
+               {
+                   [__weakSelf.decoder switchP2PCode:__nCode];
+               }
+               while (!__weakSelf.decoder.nSwitchcode)
+               {
+                   [NSThread sleepForTimeInterval:0.1f];
+               }
+               [__weakSelf play];
+               @synchronized(__weakSelf.videoFrames)
+               {
+                   [__weakSelf.videoFrames removeAllObjects];
+               }
+           //    [__weakSelf.switchView setHidden:YES];
+        });
+    }
+    else
+    {
+        if (bRecord)
+        {
+            [self recordVideo];
+        }
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(restartTran) name:NS_SWITCH_TRAN_OPEN_VC object:nil];
+        dispatch_async(dispatch_get_main_queue(),
+        ^{
+            [__weakSelf stopVideo];
+        });
+        _nCodeType = nCode;
+        DLog(@"nCode:%d",nCode);
+    }
+}
+-(void)restartTran
+{
+    __weak PlayP2PViewController *__weakSelf = self;
+    dispatch_async(dispatch_get_global_queue(0, 0),
+    ^{
+        [__weakSelf decoderTran];
+    });
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:NS_SWITCH_TRAN_OPEN_VC object:nil];
 }
 
+
+
 #pragma mark 抓拍
--(void)shotoPic
+-(void)shotoPic:(UIButton*)btnSender
 {
-    BOOL bFlag = [CaptureService captureToPhotoAlbum:_glView];
-    if (bFlag) {
+    //YUV 方式抓拍  captureToPhotoAlbum:(UIView *)_glView name:(NSString*)devName;
+    btnSender.enabled = NO;
+    UIImage *image = [_decoder capturePhoto];
+    BOOL bFlag = [CaptureService captureToPhotoYUV:image name:_strName];// width:_decoder.frameWidth height:_decoder.frameHeight];
+    if (bFlag)
+    {
         __weak PlayP2PViewController *weakSelf = self;
         dispatch_async(dispatch_get_main_queue(), ^{
-            [weakSelf.view makeToast:@"抓拍成功"];
+            [weakSelf.view makeToast:XCLocalized(@"captureS") duration:1.0 position:@"center"];
         });
     }else
     {
         if (bFlag) {
             __weak PlayP2PViewController *weakSelf = self;
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [weakSelf.view makeToast:@"抓拍失败"];
+            dispatch_async(dispatch_get_main_queue(),
+            ^{
+                [weakSelf.view makeToast:XCLocalized(@"captureF") duration:1.0 position:@"center"];
             });
         }
     }
+    image = nil;
+    [self performSelector:@selector(snaptBtnEnYes) withObject:nil afterDelay:1.5];
 }
+-(void)snaptBtnEnYes
+{
+    __weak UIButton *btnSender =(UIButton*)[_downHUD viewWithTag:1003];
+    dispatch_async(dispatch_get_main_queue(),
+    ^{
+        btnSender.enabled = YES;
+    });
+}
+
 
 -(void)recordVideo
 {
     if(bRecord)
     {
-        [self.view makeToast:@"录像停止" duration:1.0 position:@"center"];
+        bRecord = NO;
+        [self.view makeToast:XCLocalized(@"stopRecord") duration:1.0 position:@"center"];
         [_decoder recordStop];
-        [_progressLabel removeFromSuperview];
-        bRecord = !bRecord;
+        __weak UILabel *lblProgress = _progressLabel;
+        dispatch_async(dispatch_get_main_queue(), ^{
+            lblProgress.hidden = YES;
+        });
         _startDuration = 0;
     }
     else
     {
-        [self.view makeToast:@"录像开始" duration:1.0 position:@"center"];
-        [_decoder recordStart];
-        
-        [_topHUD addSubview:_progressLabel];
+        _btnRecord.enabled = NO;
+        UIImage *image = [_decoder capturePhoto];
+        DLog(@"image:%@",image);
+        [self.view makeToast:XCLocalized(@"startRecord") duration:1.0 position:@"center"];
+        NSString *strPath = [CaptureService captrueRecordYUV:image];
+        [_decoder recordStart:strPath name:_strName];
+        _progressLabel.hidden = NO;
         _startDuration = _movieDuration;
         bRecord = !bRecord;
+        image = nil;
+        [self performSelector:@selector(recordBtnEnYes) withObject:nil afterDelay:1.5];
     }
-
-    _recordBtn.selected = bRecord;
+    _btnRecord.selected = bRecord;
 }
-
+-(void)recordBtnEnYes
+{
+    __weak UIButton *btnSender = _btnRecord;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        btnSender.enabled = YES;
+    });
+}
 
 
 
 #pragma mark 横屏
 -(void)setVerticalFrame
 {
-    if(IOS_SYSTEM_8)
+    
+    CGFloat width,height;
+    
+    width = kScreenHeight;
+    height = kScreenWidth;
+    
+    topViewBg.frame=_topHUD.bounds;
+    
+    [_topHUD insertSubview:topViewBg atIndex:0];
+    [_lblName setTextColor:[UIColor whiteColor]];
+    _lblName.frame = Rect(80, 13, width - 160, 20);
+    _downHUD.frame = Rect(0, height-50, width, 50);
+    
+    [_progressLabel removeFromSuperview];
+    [_progressLabel setFrame:Rect(10,15, 60, 20)];
+    
+    [_downHUD addSubview:_progressLabel];
+
+    [self frameView].frame = Rect(0, 0,width, height);
+    [self frameView].contentMode = UIViewContentModeScaleAspectFill;
+    
+    downViewBg.frame = _downHUD.bounds;
+    [_downHUD insertSubview:downViewBg atIndex:0];
+
+    
+    //横屏的时候修改变更内容
+    [_downHUD viewWithTag:1001].frame = Rect(width/2-150,  2 , 60, 48);
+    [_downHUD viewWithTag:1003].frame = Rect(width/2-90, 2 , 60, 48);
+    [_downHUD viewWithTag:1004].frame = Rect(width/2-30, 2 , 60, 48);
+    [_downHUD viewWithTag:1005].frame = Rect(width/2+30, 2, 60, 48);
+    [_downHUD viewWithTag:1006].frame = Rect(width/2+90, 2, 60, 48);
+    
+    [(UIButton*)[_downHUD viewWithTag:1001] setImage:[UIImage imageNamed:@"full_play"] forState:UIControlStateNormal];
+    [(UIButton*)[_downHUD viewWithTag:1001] setImage:[UIImage imageNamed:@"full_stop"] forState:UIControlStateSelected];
+    [(UIButton*)[_downHUD viewWithTag:1003] setImage:[UIImage imageNamed:@"full_snap"] forState:UIControlStateNormal];
+    [(UIButton*)[_downHUD viewWithTag:1004] setImage:[UIImage imageNamed:@"full_record"] forState:UIControlStateNormal];
+    [(UIButton*)[_downHUD viewWithTag:1005] setImage:[UIImage imageNamed:@"full_bd"] forState:UIControlStateNormal];
+    [(UIButton*)[_downHUD viewWithTag:1006] setImage:[UIImage imageNamed:@"full_hd"] forState:UIControlStateNormal];
+    
+    _view_Ptz.hidden = NO;
+    _view_Ptz.frame = Rect(width-164, height/2-57, 164, 114);
+    
+}
+
+#pragma mark 新横屏
+-(void)setNewVerticalFrame
+{
+    CGFloat width,height;
+    if (IOS_SYSTEM_8)
     {
-        _lblName.frame = Rect(80,10,kScreenWidth-160,15);
-        _downHUD.frame = CGRectMake(0, kScreenHeight-40, kScreenWidth, 44);
-        _progressLabel.frame = Rect(kScreenWidth-80, 10, 60, 20);
-        _glView.frame = self.view.frame;
-        _glView.contentMode = bIsFull ? UIViewContentModeScaleAspectFill : UIViewContentModeScaleAspectFit;
+        width = kScreenWidth;
+        height = kScreenHeight;
     }
     else
     {
-  //      _topHUD.frame = Rect(0, 0, kScreenHeight, 44);
-        _lblName.frame = Rect(80, 10, kScreenHeight - 160, 15);
-        _progressLabel.frame = Rect(kScreenHeight-80, 10, 60, 20);
-        _downHUD.frame = Rect(0, kScreenWidth-50, kScreenHeight, 50);
-        _glView.frame = Rect(0, 0,kScreenHeight, kScreenWidth);
-        _glView.contentMode = bIsFull ? UIViewContentModeScaleAspectFill : UIViewContentModeScaleAspectFit;
-        
-        
-        [_downHUD viewWithTag:1001].frame = Rect(kScreenHeight/2-122.5, 2, 45, 45);
-        [_downHUD viewWithTag:1002].frame = Rect(kScreenHeight/2-72.5, 2, 45, 45);
-        [_downHUD viewWithTag:1003].frame = Rect(kScreenHeight/2-22.5, 2, 45, 45);
-        [_downHUD viewWithTag:1004].frame = Rect(kScreenHeight/2+22.5,2, 45, 45);
-        [_downHUD viewWithTag:1005].frame = Rect(kScreenHeight/2+72.5, 10, 45, 30);
-        [_switchView setFrame:Rect(btnSwitch.frame.origin.x, kScreenWidth-108, 45,60)];
-        
+        width = kScreenSourchHeight;
+        height = kScreenSourchWidth;
     }
+
+    _topHUD.frame = Rect(0, 0, width, 49);
+    
+    topViewBg.frame=_topHUD.bounds;
+    
+    [_topHUD insertSubview:topViewBg atIndex:0];
+    
+    [_lblName setTextColor:[UIColor whiteColor]];
+    _lblName.frame = Rect(50, 13, width - 160, 20);
+    _downHUD.frame = Rect(0, height-50, width, 50);
+    [_lblName setTextAlignment:NSTextAlignmentLeft];
+    
+    [_progressLabel removeFromSuperview];
+    [_progressLabel setFrame:Rect(10,15, 60, 20)];
+    
+    
+    
+    [_downHUD addSubview:_progressLabel];
+    
+    [self frameView].frame = Rect(0, 0,width, height);
+    [self frameView].contentMode = UIViewContentModeScaleAspectFill;//UIViewContentModeScaleAspectFit
+    
+    [_downHUD insertSubview:downViewBg atIndex:0];
+    downViewBg.frame = _downHUD.bounds;
+    
+    //横屏的时候修改变更内容
+    [_downHUD viewWithTag:1001].frame = Rect(width-60*3,  1 , 60, 48);
+    [_downHUD viewWithTag:1003].frame = Rect(width-60*2, 1 , 60, 48);
+    [_downHUD viewWithTag:1004].frame = Rect(width-60, 1 , 60, 48);
+
+    [_btnBD removeFromSuperview];
+    [_btnHD removeFromSuperview];
+    
+    [_topHUD addSubview:_btnHD];
+    [_topHUD addSubview:_btnBD];
+    [_topHUD addSubview:btnPtz];
+    
+    _btnBD.frame = Rect(width-60*3, 0, 60,48);
+    _btnHD.frame = Rect(width-60*2, 0, 60,48);
+    
+    btnPtz.frame = Rect(width-60, 0, 60, 48);
+    
+    [btnPtz addTarget:self action:@selector(showPtzView) forControlEvents:UIControlEventTouchUpInside];
+    
+    [(UIButton*)[_downHUD viewWithTag:1001] setImage:[UIImage imageNamed:@"full_play"] forState:UIControlStateNormal];
+    [(UIButton*)[_downHUD viewWithTag:1001] setImage:[UIImage imageNamed:@"full_stop"] forState:UIControlStateSelected];
+    [(UIButton*)[_downHUD viewWithTag:1003] setImage:[UIImage imageNamed:@"full_snap"] forState:UIControlStateNormal];
+    [(UIButton*)[_downHUD viewWithTag:1004] setImage:[UIImage imageNamed:@"full_record"] forState:UIControlStateNormal];
+    
+    [_btnBD setImage:[UIImage imageNamed:@"full_bd"] forState:UIControlStateNormal];
+    [_btnHD setImage:[UIImage imageNamed:@"full_hd"] forState:UIControlStateNormal];
+    
+    
+    _view_Ptz.frame = Rect(width-164, height/2-57, 164, 114);
+//    
 }
+
+-(void)showPtzView
+{
+    _view_Ptz.hidden = !_view_Ptz.hidden;
+}
+
 
 #pragma mark 竖屏
 -(void)setHorizontalFrame
 {
-    if (IOS_SYSTEM_8)
-    {
-        _progressLabel.frame = Rect(kScreenWidth-80, 10, 60, 20);
-        _lblName.frame = Rect(80,10,kScreenWidth-160,15);
-        _downHUD.frame = Rect(0, kScreenHeight-40, kScreenWidth, 40);
-        _glView.frame = bIsFull ? self.view.frame : frameCenter;
-        _glView.contentMode = bIsFull ? UIViewContentModeScaleAspectFill :UIViewContentModeScaleAspectFit ;
-    }else
-    {
+    _downHUD.frame = Rect(0, kScreenHeight-50,kScreenWidth, 50);
+    [_progressLabel removeFromSuperview];
+    [_topHUD addSubview:_progressLabel];
+    _progressLabel.frame = Rect(kScreenWidth-80, 11, 60, 20);
+    [_lblName setTextColor:[UIColor blackColor]];
+    _lblName.frame = Rect(80,15,kScreenWidth-160,20);
 
-        _progressLabel.frame = Rect(kScreenWidth-80, 10, 60, 20);
-        _lblName.frame = Rect(80,10,kScreenWidth-160,15);
-        _downHUD.frame = Rect(0, kScreenHeight-50,kScreenWidth, 50);
-        _glView.frame = bIsFull ? self.view.frame : frameCenter;
-        _glView.contentMode = bIsFull ? UIViewContentModeScaleAspectFill:UIViewContentModeScaleAspectFit ;
-        
-        [_downHUD viewWithTag:1001].frame = Rect(30, 2, 45, 45);
-        [_downHUD viewWithTag:1002].frame = Rect(80, 2, 45, 45);
-        [_downHUD viewWithTag:1003].frame = Rect(130, 2, 45, 45);
-        [_downHUD viewWithTag:1004].frame = Rect(180,2, 45, 45);
-        [_downHUD viewWithTag:1005].frame = Rect(230, 10, 45, 30);
-        [_switchView setFrame:Rect(btnSwitch.frame.origin.x, kScreenHeight-108,45, 60)];
-    }
+    _view_Ptz.hidden = YES;
+    [self frameView].frame = frameCenter;
+    [_downHUD viewWithTag:1001].frame = Rect(kScreenWidth/2-150, 2 , 60, 48);
+    [_downHUD viewWithTag:1003].frame = Rect(kScreenWidth/2-90, 2 , 60, 48);
+    [_downHUD viewWithTag:1004].frame = Rect(kScreenWidth/2-30, 2 , 60, 48);
+    _btnBD.frame = Rect(kScreenWidth/2+30, 2, 60, 48);
+    _btnHD.frame = Rect(kScreenWidth/2+90, 2, 60, 48);
+    
+    
+    [(UIButton*)[_downHUD viewWithTag:1001] setImage:[UIImage imageNamed:@"realplay"] forState:UIControlStateNormal];
+    [(UIButton*)[_downHUD viewWithTag:1001] setImage:[UIImage imageNamed:@"stop"] forState:UIControlStateSelected];
+    [(UIButton*)[_downHUD viewWithTag:1003] setImage:[UIImage imageNamed:@"shotopic"] forState:UIControlStateNormal];
+    [(UIButton*)[_downHUD viewWithTag:1004] setImage:[UIImage imageNamed:@"record"] forState:UIControlStateNormal];
+    [_btnBD setImage:[UIImage imageNamed:@"play_bd"] forState:UIControlStateNormal];
+    [_btnHD setImage:[UIImage imageNamed:@"play_hd"] forState:UIControlStateNormal];
+    
+    
+    _hiddenHUD = NO;
+    [self showToolBar];
+    
+    [topViewBg removeFromSuperview];
+    [downViewBg removeFromSuperview];
+}
+
+-(UIView*)frameView
+{
+    return _glView ? _glView : _imgView;
 }
 
 #pragma mark 视频播放模式
 -(void)setPlayMode:(BOOL)bPlayMode
 {
-    for (UIButton *btn in _downHUD.subviews)
+    if ([UserInfo sharedUserInfo].bGuess)
     {
-        if (btn.tag == 1001)
+        ((UIButton*)[_downHUD viewWithTag:1003]).enabled = NO;
+        ((UIButton*)[_downHUD viewWithTag:1004]).enabled = NO;
+        _btnHD.enabled = NO;
+        _btnBD.enabled = NO;
+
+    }
+    else
+    {
+        ((UIButton*)[_downHUD viewWithTag:1003]).enabled = bPlayMode;
+        ((UIButton*)[_downHUD viewWithTag:1004]).enabled = bPlayMode;
+        if(_playing)
         {
-            [btn setEnabled:!bPlayMode];
-        }else
+            if (_nCodeType==1)//高清
+            {
+                _btnBD.enabled = YES;//1005  bd的tag
+                _btnHD.enabled = NO;//1006   hd的tag
+            }
+            else//标清
+            {
+                _btnBD.enabled = NO;
+                _btnHD.enabled = YES;
+            }
+        }
+        else
         {
-            [btn setEnabled:bPlayMode];
+            _btnBD.enabled = NO;
+            _btnHD.enabled = NO;
         }
     }
+    
 }
-//-(void)transformViewController
-//{
-//    UIInterfaceOrientation interface = [UIApplication sharedApplication].statusBarOrientation;
-//    self.view.transform = CGAffineTransformMakeRotation(M_PI/2);
-//    self.view.bounds = CGRectMake(0, 0, kScreenHeight, kScreenWidth);
-//}
-
+-(void)ptzView:(int)ptzCmd
+{
+    DLog(@"指令:%d",ptzCmd);
+    DLog(@"还是没用?");
+    if(_decoder)
+    {
+        [_decoder ptz_control:ptzCmd];
+    }
+}
 
 @end

@@ -8,6 +8,12 @@
 
 #import <Foundation/Foundation.h>
 
+typedef void(^HttpUpdMobile)(int nStatus);
+
 @interface UpdMobileService : NSObject
+
+@property (nonatomic,copy) HttpUpdMobile httpBlock;
+
+-(void)requestUpdMobile:(NSString*)strReal;
 
 @end

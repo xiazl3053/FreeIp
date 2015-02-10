@@ -7,6 +7,7 @@
 //
 
 #import "CustomNaviBarView.h"
+#import "XCNotification.h"
 
 #define FLOAT_TitleSizeNormal               19.0f
 #define FLOAT_TitleSizeMini                 14.0f
@@ -15,13 +16,13 @@
 
 @interface CustomNaviBarView ()
 
-@property (nonatomic, readonly) UIButton *m_btnBack;
+
 @property (nonatomic, readonly) UILabel *m_labelTitle;
 @property (nonatomic, readonly) UIImageView *m_imgViewBg;
 @property (nonatomic, readonly) UIButton *m_btnLeft;
 @property (nonatomic, readonly) UIButton *m_btnRight;
 @property (nonatomic, readonly) BOOL m_bIsBlur;
-
+@property (nonatomic, readonly) UIImageView *m_smallImg;
 
 @end
 
@@ -33,26 +34,26 @@
 @synthesize m_btnLeft = _btnLeft;
 @synthesize m_btnRight = _btnRight;
 @synthesize m_bIsBlur = _bIsBlur;
-
+@synthesize m_smallImg = _smallImg;
 
 + (CGRect)rightBtnFrame
 {
-    return Rect(258.0f, 22.0f, [[self class] barBtnSize].width, [[self class] barBtnSize].height);
+    return Rect(kScreenWidth-[[self class] barBtnSize].width-5, 20.0f, [[self class] barBtnSize].width, [[self class] barBtnSize].height);
 }
 
 + (CGSize)barBtnSize
 {
-    return Size(60.0f, 40.0f);
+    return Size(44.0f, 44.0f);
 }
 
 + (CGSize)barSize
 {
-    return Size(320.0f, 64.0f);
+    return Size(kScreenWidth, 64.0f);
 }
 
 + (CGRect)titleViewFrame
 {
-    return Rect(65.0f, 22.0f, 190.0f, 40.0f);
+    return Rect(65.0f, 22.0f, kScreenWidth-130, 45.0f);
 }
 
 // 创建一个导航条按钮：使用默认的按钮图片。
@@ -60,10 +61,9 @@
 {
     UIButton *btn = [[self class] createImgNaviBarBtnByImgNormal:@"NaviBtn_Normal" imgHighlight:@"NaviBtn_Normal_H" target:target action:action];
     [btn setTitle:strTitle forState:UIControlStateNormal];
-    [btn setTitleColor:RGB_TextDark forState:UIControlStateNormal];
-    btn.titleLabel.font = [UIFont systemFontOfSize:12.0f];
+    [btn setTitleColor:RGB(15,173,225) forState:UIControlStateNormal];
+    btn.titleLabel.font = [UIFont fontWithName:@"Helvetica" size:12.0f];
     [UtilityFunc label:btn.titleLabel setMiniFontSize:8.0f forNumberOfLines:1];
-    
     return btn;
 }
 
@@ -127,36 +127,34 @@
     self.backgroundColor = [UIColor whiteColor];
     
     // 默认左侧显示返回按钮
-    _btnBack = [[self class] createImgNaviBarBtnByImgNormal:@"NaviBtn_Back" imgHighlight:@"NaviBtn_Back_H" target:self action:@selector(btnBack:)];
+ //   _btnBack = [[self class] createImgNaviBarBtnByImgNormal:@"NaviBtn_Back" imgHighlight:@"NaviBtn_Back_H" target:self action:@selector(btnBack:)];
     
     _labelTitle = [[UILabel alloc] initWithFrame:CGRectZero];
     _labelTitle.backgroundColor = [UIColor clearColor];
     _labelTitle.textColor = RGB_TitleNormal;
-    _labelTitle.font = [UIFont systemFontOfSize:FLOAT_TitleSizeNormal];
+    _labelTitle.font = [UIFont fontWithName:@"Helvetica" size:FLOAT_TitleSizeNormal];
     _labelTitle.textAlignment = NSTextAlignmentCenter;
-    
-//    _imgViewBg = [[UIImageView alloc] initWithFrame:self.bounds];
-//    _imgViewBg.image = [[UIImage imageNamed:@"NaviBar_Bg"] resizableImageWithCapInsets:UIEdgeInsetsMake(0, 0, 0, 0)];
-//    _imgViewBg.alpha = 0.98f;
-    
-//    if (_bIsBlur)
-//    {
-//     //       iOS7可设置是否需要现实磨砂玻璃效果
-//        _imgViewBg.alpha = 0.0f;
-//        UINavigationBar *naviBar = [[UINavigationBar alloc] initWithFrame:self.bounds];
-//        [self addSubview:naviBar];
-//    }else{}
-    
     _labelTitle.frame = [[self class] titleViewFrame];
     
-//    _imgViewBg.frame = self.bounds;
-    
-//    [self addSubview:_imgViewBg];
     [self addSubview:_labelTitle];
-    UIView *_viewLine = [[UIView alloc] initWithFrame:Rect(0, self.frame.size.height-1, kScreenWidth, 1)];
-    [_viewLine setBackgroundColor:[UIColor grayColor]];
-    [self addSubview:_viewLine];
-    [self setLeftBtn:_btnBack];
+    
+    
+    UILabel *sLine1 = [[UILabel alloc] initWithFrame:CGRectMake(0, RectHeight(self.frame)-1, kScreenWidth, 0.5)];
+    sLine1.backgroundColor = [UIColor colorWithRed:198/255.0
+                                             green:198/255.0
+                                              blue:198/255.0
+                                             alpha:1.0];
+    UILabel *sLine2 = [[UILabel alloc] initWithFrame:CGRectMake(0, RectHeight(self.frame)-0.5, kScreenWidth, 0.5)] ;
+    sLine2.backgroundColor = [UIColor whiteColor];
+    [self addSubview:sLine1];
+    [self addSubview:sLine2];
+    _labelTitle.userInteractionEnabled = YES;
+    [_labelTitle addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(clickTitle)]];
+}
+
+-(void)clickTitle
+{
+    [[NSNotificationCenter defaultCenter] postNotificationName:NS_CUSTOM_BAR_TITLE_VC object:nil];
 }
 
 - (void)setTitle:(NSString *)strTitle
@@ -170,14 +168,16 @@
     {
         [_btnLeft removeFromSuperview];
         _btnLeft = nil;
-    }else{}
+    }else
+    {}
     
     _btnLeft = btn;
     if (_btnLeft)
     {
-        _btnLeft.frame = Rect(2.0f, 22.0f, [[self class] barBtnSize].width, [[self class] barBtnSize].height);
+        _btnLeft.frame = Rect(5.0f, 20.0f, [[self class] barBtnSize].width, [[self class] barBtnSize].height);
         [self addSubview:_btnLeft];
-    }else{}
+    }else
+    {}
 }
 
 - (void)setRightBtn:(UIButton *)btn

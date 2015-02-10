@@ -15,4 +15,6 @@ typedef void(^HttpAddDeviceBlock)(int nStatus);
 
 -(void)requestAddDevice:(NSString*)strNO auth:(NSString*)strAuth;
 
+-(void)queryDeviceIsExits:(NSString*)strNO auth:(NSString*)strAuth;
+
 @end

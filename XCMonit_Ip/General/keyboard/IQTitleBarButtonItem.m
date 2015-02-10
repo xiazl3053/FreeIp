@@ -39,7 +39,7 @@
         [label setTextAlignment:NSTextAlignmentCenter];
         [label setText:title];
         [label setAutoresizingMask:UIViewAutoresizingFlexibleWidth];
-        [label setFont:[UIFont boldSystemFontOfSize:12.0]];
+        [label setFont:[UIFont fontWithName:@"Helvetica" size:12.0]];
 
         self.customView = label;
         self.enabled = NO;

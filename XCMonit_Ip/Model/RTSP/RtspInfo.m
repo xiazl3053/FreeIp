@@ -14,12 +14,18 @@
 {
     self = [super init];
     if (self) {
+        /*
+         [rs stringForColumn:@"id"],[rs stringForColumn:@"devName"],[rs stringForColumn:@"user"],
+         [rs stringForColumn:@"pwd"],[rs stringForColumn:@"address"],[rs stringForColumn:@"port"],
+         [rs stringForColumn:@"type"],[rs stringForColumn:@"channel"],nil];
+         
+         */
         _nId = [items[0] integerValue];
         _strDevName = items[1];
-        _strAddress = items[2];
-        _nPort = [items[3] integerValue];
-        _strUser = items[4];
-        _strPwd = items[5];
+        _strAddress = items[4];
+        _nPort = [items[5] integerValue];
+        _strUser = items[2];
+        _strPwd = items[3];
         _strType = items[6];
         _nChannel = [items[7] integerValue];
         return self;

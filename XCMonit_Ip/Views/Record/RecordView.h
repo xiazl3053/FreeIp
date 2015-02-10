@@ -10,4 +10,10 @@
 
 @interface RecordView : UIView
 
+@property (nonatomic,strong) UIImageView *imgView;
+@property (nonatomic,strong) UILabel *lblDev;
+@property (nonatomic,strong) UILabel *lblTime;
+@property (nonatomic,strong) UIImageView *imgSelect;
+
+
 @end

@@ -54,11 +54,12 @@
 }
 -(void)requestDelDevInfo:(NSString*)strDevNO auth:(NSString *)strDevAuth
 {
-    NSString *strUrl = [[NSString alloc] initWithFormat:@"%@index.php?r=service/service/breakdevice&session_id=%@&device_id=%@",NSLocalizedString(@"httpserver","http service"),
+    NSString *strUrl = [[NSString alloc] initWithFormat:@"%@index.php?r=service/service/breakdevice&session_id=%@&device_id=%@",
+                        XCLocalized(@"httpserver"),
                         [UserInfo sharedUserInfo].strSessionId,strDevNO];
     NSURL *url=[NSURL URLWithString:strUrl];//创建URL
     NSMutableURLRequest *request=[[NSMutableURLRequest alloc]initWithURL:url];//通过URL创建网络请求
-    [request setTimeoutInterval:10];//设置超时时间
+    [request setTimeoutInterval:XC_HTTP_TIMEOUT];//设置超时时间
     [request setHTTPMethod:@"POST"];//设置请求方式
     __block DeleteDevService *weakSelf = self;
     [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue mainQueue] completionHandler:

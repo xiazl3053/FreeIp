@@ -10,4 +10,9 @@
 
 @interface XCPhotoViewController : UIViewController
 
+-(id)initWithArray:(NSMutableArray*)ary current:(int)nSelect;
+
+-(void)show;
+
 @end
+

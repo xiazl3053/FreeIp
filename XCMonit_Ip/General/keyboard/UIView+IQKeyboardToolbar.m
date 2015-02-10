@@ -320,7 +320,7 @@ IQ_LoadCategory(IQUIViewToolbar)
 	
 	//  Create a done button to show on keyboard to resign it. Adding a selector to resign it.
 //    UIBarButtonItem *doneButton =[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:target action:doneAction];
-    UIBarButtonItem *doneButton =[[UIBarButtonItem alloc] initWithTitle:@"完成" style:UIBarButtonItemStylePlain target:target action:doneAction];
+    UIBarButtonItem *doneButton =[[UIBarButtonItem alloc] initWithTitle:XCLocalized(@"keyboardDone") style:UIBarButtonItemStylePlain target:target action:doneAction];
 
 	if (IQ_IS_IOS7_OR_GREATER)
 	{
@@ -330,8 +330,8 @@ IQ_LoadCategory(IQUIViewToolbar)
 //		UIBarButtonItem *prev = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"IQKeyboardManager.bundle/IQButtonBarArrowLeft"] style:UIBarButtonItemStylePlain target:target action:previousAction];
 		UIBarButtonItem *fixed =[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFixedSpace target:nil action:nil];
 		[fixed setWidth:23];
-        UIBarButtonItem *prev =[[UIBarButtonItem alloc] initWithTitle:@"上一个" style:UIBarButtonItemStylePlain target:target action:previousAction];
-        UIBarButtonItem *next = [[UIBarButtonItem alloc] initWithTitle:@"下一个" style:UIBarButtonItemStylePlain target:target action:nextAction];
+        UIBarButtonItem *prev =[[UIBarButtonItem alloc] initWithTitle:XCLocalized(@"keyboardFirst") style:UIBarButtonItemStylePlain target:target action:previousAction];
+        UIBarButtonItem *next = [[UIBarButtonItem alloc] initWithTitle:XCLocalized(@"keyboardEnd") style:UIBarButtonItemStylePlain target:target action:nextAction];
         
 //		UIBarButtonItem *next = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"IQKeyboardManager.bundle/IQButtonBarArrowRight"] style:UIBarButtonItemStylePlain target:target action:nextAction];
         

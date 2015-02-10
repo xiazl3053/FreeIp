@@ -137,7 +137,25 @@
 #define SIZE_TextTitleNormal                    17.0f
 #define SIZE_TextLarge                          16.0f
 #define SIZE_TextHuge                           18.0f
+#define XC_HTTP_TIMEOUT                         10
 
 
+#define VIDEO_LOW  NSLocalizedString(@"videoLow", nil)
+#define VIDEO_HIGH  NSLocalizedString(@"videoHight", nil)
+
+
+#define  MJRefreshFooterPullToRefresh NSLocalizedString(@"pulltomore","")
+#define  MJRefreshFooterReleaseToRefresh NSLocalizedString(@"releasemore", "")
+#define  MJRefreshFooterRefreshing  NSLocalizedString(@"devfresh", "")
+
+#define  MJRefreshHeaderPullToRefresh NSLocalizedString(@"pullto", "")
+#define  MJRefreshHeaderReleaseToRefresh NSLocalizedString(@"releaseRefresh", "")
+#define  MJRefreshHeaderRefreshing NSLocalizedString(@"devfresh", "")
+
+
+#define isPhone5 ([UIScreen instancesRespondToSelector:@selector(currentMode)] ? CGSizeEqualToSize(CGSizeMake(640, 1136), [[UIScreen mainScreen] currentMode].size) : NO)
+#define isPhone6 ([UIScreen instancesRespondToSelector:@selector(currentMode)] ? CGSizeEqualToSize(CGSizeMake(750,1334), [[UIScreen mainScreen] currentMode].size) : NO)
+#define isPhone6p ([UIScreen instancesRespondToSelector:@selector(currentMode)] ? CGSizeEqualToSize(CGSizeMake(1242,2208), [[UIScreen mainScreen] currentMode].size) : NO)
+#define isPhone4 ([UIScreen instancesRespondToSelector:@selector(currentMode)] ? CGSizeEqualToSize(CGSizeMake(640,960), [[UIScreen mainScreen] currentMode].size) : NO)
 
 #endif

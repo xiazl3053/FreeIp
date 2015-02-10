@@ -7,9 +7,9 @@
 //
 #import <Foundation/Foundation.h>
 #import "UtilsMacro.h"
-#include "P2PSDKClient.h"
+#import "P2PSDKClient.h"
 #include <stdio.h>
-#include <string.h>
+
 #include <sys/types.h>
 #include <errno.h>
 #include <stdlib.h>
@@ -31,14 +31,16 @@ DEFINE_SINGLETON_FOR_HEADER(P2PInitService);
 @property (nonatomic,strong) NSString *strAddress;
 
 -(P2PSDKClient*)getP2PSDK;
--(void)setP2PSDKNull;
--(NewQueue *)NewQueue;
 
+-(void)setP2PSDKNull;
+
+-(NSRecursiveLock *)getTheLock;
+
+-(void)releaseLock;
 
 -(BOOL)getIPWithHostName:(const NSString *)hostName;
--(void)put_queue:(NewQueue*)que buf:(uint8_t*)buf size:(int)size;
--(int)get_queue:(NewQueue*)que buf:(uint8_t*)buf size:(int)size;
--(void)free_queue:(NewQueue*)que;
+
+-(void)convertBlock:(const char *)mInputFileName output:(const char *)mOutputFileName;
 
 @end
 

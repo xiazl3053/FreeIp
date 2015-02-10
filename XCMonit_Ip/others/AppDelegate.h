@@ -7,9 +7,11 @@
 //
 
 #import <UIKit/UIKit.h>
-//       http://ny-dus.com/p/jp
+@class Reachability;
 @interface AppDelegate : UIResponder <UIApplicationDelegate>
-
+{
+    Reachability  *hostReach;
+}
 @property (strong, nonatomic) UIWindow *window;
 
 @end

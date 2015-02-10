@@ -12,9 +12,8 @@
 #import "CustomNaviBarView.h"
 @interface XCTabBar()
 
-
 @property (strong) NSMutableArray *buttonData;
-
+@property (nonatomic,strong) NSMutableArray *arrayItems;
 
 - (void)setupButtons;
 @property (nonatomic,assign) NSInteger nIndex;
@@ -22,21 +21,33 @@
 
 @implementation XCTabBar
 
-
+-(void)dealloc
+{
+    [_arrayItems removeAllObjects];
+    _arrayItems = nil;
+    DLog(@"xctable dealloc");
+}
 
 - (id)initWithItems:(NSArray *)items
 {
     self = [super init];
     if (self) {
         DLog(@"%f",kScreenHeight);
-        float originY = kScreenHeight - 44;
-        self.frame = CGRectMake(0, originY+20 , kScreenWidth, 44);
+        float originY = kScreenHeight - 49;
+        self.frame = CGRectMake(0, originY+HEIGHT_MENU_VIEW(20, 0) , kScreenWidth, 49);
         [self setBackgroundColor:RGB(255, 255, 255)];
         _buttonData = [[NSMutableArray alloc]initWithArray:items];
         
-        UIView *lineView = [[UIView alloc] initWithFrame:Rect(0, 1, kScreenWidth, 1)];
-        [lineView setBackgroundColor:[UIColor grayColor]];
-        [self addSubview:lineView];
+        UILabel *sLine1 = [[UILabel alloc] initWithFrame:CGRectMake(0, 0.5, kScreenWidth, 0.5)];
+        sLine1.backgroundColor = [UIColor colorWithRed:198/255.0
+                                                 green:198/255.0
+                                                  blue:198/255.0
+                                                 alpha:1.0];
+        UILabel *sLine2 = [[UILabel alloc] initWithFrame:CGRectMake(0, 1 , kScreenWidth, 0.5)] ;
+        sLine2.backgroundColor = [UIColor whiteColor];
+        
+        [self addSubview:sLine1];
+        [self addSubview:sLine2];
         
         [self setupButtons];
         _nIndex = 0;
@@ -66,16 +77,28 @@
             }
         }
         NSInteger buttonX = count * buttonSize;
-        XCButton *tabButton = [[XCButton alloc] initWithTabInfo:tabInfo frame:CGRectMake(buttonX + buttonSize/2-40/2, 0,40, 40)];
+        UIView *view = [[UIView alloc] initWithFrame:Rect(buttonX, 0, buttonSize, 48)];
+        view.userInteractionEnabled = YES;
+        [view setTag:count+20];
+        [view addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapIndex:)]];
+        
+       // DLog(@"",buttonSize);
+        XCButton *tabButton = [[XCButton alloc] initWithTabInfo:tabInfo frame:CGRectMake(buttonSize/2-48/2.0, 0 ,48, 48)];
         [tabButton setTag:count+10];
         [tabButton addTarget:self action:@selector(clickIndex:) forControlEvents:UIControlEventTouchUpInside];
-        [self addSubview:tabButton];
+        [view addSubview:tabButton];
+        [self addSubview:view];
+        
         count++;
     }
 }
 -(void)clickIndex:(UIButton *)sender
 {
-    [self setSelectIndex:sender.tag-10];
+    [self setSelectIndex:sender.tag - 10];
+}
+-(void)tapIndex:(UITapGestureRecognizer *)sender
+{
+    [self setSelectIndex:sender.view.tag-20];
 }
 - (void)setSelectIndex:(NSInteger)nIndex
 {

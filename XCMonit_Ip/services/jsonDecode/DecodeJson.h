@@ -11,5 +11,9 @@
 @interface DecodeJson : NSObject
 
 +(NSString*) decryptUseDES:(NSString*)cipherText key:(NSString*)key;
-+(NSString*)XCmdMd5String:(NSString *)str;
++(NSString*) XCmdMd5String:(NSString *)str;
++(BOOL) validateEmail: (NSString *) candidate;
+
++(NSString*)getDeviceTypeByType:(int)nType;
+
 @end

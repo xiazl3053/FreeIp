@@ -20,13 +20,15 @@
 #import "Toast+UIView.h"
 #import "PlayFourViewController.h"
 #import "IndexViewController.h"
+#import "RecordDb.h"
+#import "QrcodeViewController.h"
+#import "DecodeJson.h"
 
 #define HOME_DEVICE_IDENTIFIER    @"deviceIdentifier"
 
 @interface HomeViewController ()<UITableViewDelegate,UITableViewDataSource,DeviceDelegate>
 {
     NSUInteger _nFormat;
-    UISwipeGestureRecognizer *_switpeGesture;
 }
 @property (nonatomic,strong) UITableView *tableView;
 @property (nonatomic,strong) NSMutableArray *array;
@@ -35,6 +37,16 @@
 @end
 
 @implementation HomeViewController
+
+-(void)dealloc
+{
+    DLog(@"HomeViewController dealloc");
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [_tableView removeFromSuperview];
+    [_array removeAllObjects];
+    
+    _array = nil;
+}
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -54,7 +66,7 @@
 }
 - (void)initUI
 {
-    [self setNaviBarTitle:NSLocalizedString(@"home", "home")];    // 设置标题
+    [self setNaviBarTitle:XCLocalized(@"home")];    // 设置标题
     [self setNaviBarLeftBtn:nil];       // 若不需要默认的返回按钮，直接赋nil
     [self setNaviBarRightBtn:nil];
 }
@@ -66,10 +78,14 @@
         [_btn setTitle:@"TRAN" forState:UIControlStateNormal];
     }else
     {
-        
         _nFormat = 1;
         [_btn setTitle:@"P2P" forState:UIControlStateNormal];
     }
+}
+-(void)viewDidAppear:(BOOL)animated
+{
+    [super viewDidAppear:animated];
+    [self updateUIData];
 }
 - (void)viewDidLoad
 {
@@ -79,7 +95,7 @@
     // Do any additional setup after loading the view.
     
     _tableView = [[UITableView alloc] initWithFrame:CGRectMake(0, [CustomNaviBarView barSize].height, kScreenWidth,
-                                kScreenHeight+HEIGHT_MENU_VIEW(20, 0)-44-[CustomNaviBarView barSize].height)];
+                                kScreenHeight+HEIGHT_MENU_VIEW(20, 0)-XC_TAB_BAR_HEIGHT-[CustomNaviBarView barSize].height)];
     [self.view addSubview:_tableView];
     _tableView.delegate = self;
     _tableView.dataSource = self;
@@ -90,11 +106,7 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateHomeView:) name:NSUPDATE_HOME_TABLEVIEW_VC object:nil];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(get_list_timeout) name:NS_GET_DEVICE_LIST_VC object:nil];
-//    [self.view setBackgroundColor:[UIColor whiteColor]];
-    
-    _switpeGesture = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(enter_ListView)];
-    [_switpeGesture setDirection:UISwipeGestureRecognizerDirectionLeft];
-    [self.view addGestureRecognizer:_switpeGesture];
+
     [self.view setUserInteractionEnabled:YES];
 }
 -(void)enter_ListView
@@ -103,12 +115,16 @@
 }
 -(void)get_list_timeout
 {
-    [self.view makeToast:NSLocalizedString(@"deviceinfotimeout", "deviceinfotimeout")];
+    [self.view makeToast:XCLocalized(@"deviceinfotimeout")];
 }
 
 -(void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
+    [UIApplication sharedApplication].idleTimerDisabled = NO;
+    
+    
+    
 }
 -(void)viewWillDisappear:(BOOL)animated
 {
@@ -119,21 +135,64 @@
      NSArray *array = [notification object];
     [_array removeAllObjects];
     [_array addObjectsFromArray:array];
-    DLog(@"array:%@",_array);
-    if(_tableView)
+    [self updateUIData];
+}
+
+-(void)updateUIData
+{
+    [_tableView reloadData];
+    if (_array.count==0)
     {
-        [_tableView reloadData];
+        [[_tableView viewWithTag:1001] removeFromSuperview];
+        [[_tableView viewWithTag:1002] removeFromSuperview];
+        [[_tableView viewWithTag:1003] removeFromSuperview];
+        
+        UIImageView *imgView = [[UIImageView alloc] initWithFrame:Rect((kScreenWidth - 97)/2, 132.5, 97, 70)];
+        imgView.image=[UIImage imageNamed:@"no_device"];
+        [_tableView addSubview:imgView];
+        imgView.tag = 1001;
+        
+        UILabel *lblInfo = [[UILabel alloc] initWithFrame:Rect(0, imgView.frame.origin.y+imgView.frame.size.height+20.5, kScreenWidth, 39)];
+        [lblInfo setText:XCLocalized(@"noDevice")];
+        [lblInfo setTextAlignment:NSTextAlignmentCenter];
+        [lblInfo setFont:[UIFont fontWithName:@"Helvetica" size:15.0f]];
+        [lblInfo setTextColor:RGB(208, 208, 208)];
+        [_tableView addSubview:lblInfo];
+        lblInfo.tag = 1002;
+        
+        UIButton *btn = [UIButton  buttonWithType:UIButtonTypeCustom];
+        [btn setTitle:XCLocalized(@"AddCamera") forState:UIControlStateNormal];
+        btn.frame = Rect(46, lblInfo.frame.origin.y+lblInfo.frame.size.height+31,kScreenWidth-92,45);
+        [btn setBackgroundImage:[UIImage imageNamed:@"delete_btn"] forState:UIControlStateNormal];
+        [btn setBackgroundImage:[UIImage imageNamed:@"delete_btn_onpress"] forState:UIControlStateHighlighted];
+        [_tableView addSubview:btn];
+        btn.tag = 1003;
+        [btn addTarget:self action:@selector(addDevice) forControlEvents:UIControlEventTouchUpInside];
     }
+    else
+    {
+        [[_tableView viewWithTag:1001] removeFromSuperview];
+        [[_tableView viewWithTag:1002] removeFromSuperview];
+        [[_tableView viewWithTag:1003] removeFromSuperview];
+    }
+}
+//invite+udp://192.168.1.2:6000
+
+//invite
+
+-(void)addDevice
+{
+    QrcodeViewController *qrcode = [[QrcodeViewController alloc] init];
+    [self presentViewController:qrcode animated:YES completion:^{}];
 }
 
 -(void)initData
 {
-    DLog(@"array:%@",_array);
+
 }
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
 }
 #pragma mark 重力处理
 - (BOOL)shouldAutorotate NS_AVAILABLE_IOS(6_0)
@@ -147,7 +206,7 @@
 
 #pragma mark TableVieww委托
 
--(int)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+-(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     return _array.count;
 }
@@ -157,25 +216,27 @@
     DeviceCell *cell = [tableView dequeueReusableCellWithIdentifier:HOME_DEVICE_IDENTIFIER];
     if (cell==nil) {
         cell = [[DeviceCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:HOME_DEVICE_IDENTIFIER];
-    }
+    }  
+    
     DeviceInfoModel *devModel = [_array objectAtIndex:indexPath.row];
     [cell setPlayModel];
+    cell.nStatus = devModel.iDevOnline;
+    [cell setDevName:@""];
     cell.lblDevNO.text = devModel.strDevName;
     NSString *strImage = devModel.iDevOnline ? @"deviceOn" : @"deviceOff";
     [cell.imgView setImage:[UIImage imageNamed:strImage]];
     cell.strName = devModel.strDevName;
     cell.strDevNO = devModel.strDevNO;
     cell.nType = [devModel.strDevType integerValue];
-    cell.nStatus = devModel.iDevOnline;
+    cell.lblType.text = [DecodeJson getDeviceTypeByType:[devModel.strDevType intValue]]; //[[IndexViewController sharedIndexViewController] getDeviceTypeByType:[devModel.strDevType integerValue]];
     //图片暂时使用默认的
     cell.delegate = self;
-    
     return cell;
 }
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     DeviceInfoModel *devModel = [_array objectAtIndex:indexPath.row];
-    if ([devModel.strDevType intValue]<2000)
+    if ([devModel.strDevType integerValue]<2000)
     {
         //单通道播放视频
         PlayP2PViewController *playController = [[PlayP2PViewController alloc] initWithNO:devModel.strDevNO name:devModel.strDevName format:_nFormat];
@@ -185,30 +246,30 @@
     {
         //多屏幕播放视频
         PlayFourViewController *playController = [[PlayFourViewController alloc] initWithDevInfo:devModel];
-        [self.parentViewController presentViewController:playController animated:YES completion:nil];
+        [self presentViewController:playController animated:YES completion:nil];
     }
-    
 }
+
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    return kTableviewCellHeight;
+    return kTableviewDeviceCellHeight;
 }
 
 
--(void)dealloc
-{
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-}
 -(void)recordVideo:(NSString *)strNO name:(NSString *)strDevName line:(int)nLine
 {
+    NSArray *aryRecord = [RecordDb queryRecord:strNO];
+    if (aryRecord.count<1)
+    {
+        [self.view makeToast:XCLocalized(@"noRecords")];
+        return;
+    }
+
     RecordViewController *record = [[RecordViewController alloc] initWithNo:strNO status:nLine];
-    [self.parentViewController presentViewController:record animated:YES completion:nil];
+    [self presentViewController:record animated:YES completion:nil];
 }
 -(void)playVideo:(NSString*)strNO name:(NSString*)strDevName type:(NSInteger)nType
 {
-//    PlayP2PViewController *playController = [[PlayP2PViewController alloc] initWithNO:strNO name:strDevName format:_nFormat];
-//    [self.parentViewController presentViewController:playController animated:YES completion:nil];
-    //设备类型为1-1000属于IPC ,
 #if 1
     DeviceInfoModel *devModel = nil;
     for (DeviceInfoModel *devInfoModel in _array)
@@ -229,7 +290,8 @@
     {
         //多屏幕播放视频
         PlayFourViewController *playController = [[PlayFourViewController alloc] initWithDevInfo:devModel];
-        [self.parentViewController presentViewController:playController animated:YES completion:nil];
+        [self presentViewController:playController animated:YES completion:nil];
+        
     }
 #endif
 #if 0

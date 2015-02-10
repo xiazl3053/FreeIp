@@ -18,7 +18,6 @@
 
 @end
 
-
 @interface DeviceCell : UITableViewCell
 
 @property (nonatomic,strong) NSString *strDevNO;
@@ -28,7 +27,11 @@
 @property (nonatomic,strong) UILabel *lblDevNO;
 @property (nonatomic,strong) NSString *strName;
 @property (nonatomic,assign) NSInteger nType;
-@property (nonatomic,assign) int nStatus;
+@property (nonatomic,assign) NSInteger nStatus;
+@property (nonatomic,strong) UILabel *lblType;
+
+-(void)setDevName:(NSString*)strDevName;
+
 -(void)removeTap;
 
 -(void)setPlayModel;

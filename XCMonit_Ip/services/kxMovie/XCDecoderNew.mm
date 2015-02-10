@@ -21,9 +21,11 @@
 #include <pthread.h>
 
 #define PPSHAREINIT [P2PInitService sharedP2PInitService]
+
+#define kMaxBufferDuration_DVR   0.02
+#define kMinBufferDuration_DVR   0.01
 extern "C"
 {
-    #include "libswresample/swresample.h"
     #include "libavformat/avformat.h"
     #include "libswscale/swscale.h"
 }
@@ -32,32 +34,31 @@ extern "C"
 int read_code(void *opaque, uint8_t *buf, int buf_size)
 {
     int size = buf_size;
- //   DLog(@"size:%d",buf_size);
+
     int ret = -1;
     struct timeval tv;
     gettimeofday(&tv,NULL);
     RecvFile *recvInfo = (RecvFile *)opaque;
-    do{
-        if(!recvInfo || recvInfo->bDevDisConn)
+    do
+    {
+        if(!recvInfo || recvInfo->bExit)
         {
             return -1;
         }
         struct timeval result;
         gettimeofday(&result,NULL);
-
-        if (recvInfo->aryVideo.count>0)
+        @synchronized(recvInfo->aryVideo)
         {
-            NSData *data = [recvInfo->aryVideo objectAtIndex:0];
-            size = data.length;
-            memcpy(buf, [data bytes], data.length);
-            size = data.length;
-            @synchronized(recvInfo->aryVideo)
+            if (recvInfo->aryVideo.count>0)
             {
+                NSData *data = [recvInfo->aryVideo objectAtIndex:0];
+                size = (int)data.length;
+                memcpy(buf, [data bytes], data.length);
                 [recvInfo->aryVideo removeObjectAtIndex:0];
+                ret = 0;
             }
-            ret = 0;
         }
-        if(result.tv_sec-tv.tv_sec>=5)
+        if(result.tv_sec-tv.tv_sec>=30)
         {
             DLog(@"退出了");
             return -1;
@@ -66,7 +67,7 @@ int read_code(void *opaque, uint8_t *buf, int buf_size)
     return size;
 }
 
-NSData * copyFrameDataNew(UInt8 *src, int linesize, int width, int height)
+NSData* copyFrameDataNew(UInt8 *src, int linesize, int width, int height)
 {
     width = MIN(linesize, width);
     NSMutableData *md = [NSMutableData dataWithLength:width * height]; //[NSMutableData dataWithLength: width * height];
@@ -82,6 +83,7 @@ NSData * copyFrameDataNew(UInt8 *src, int linesize, int width, int height)
     }
     return md;
 }
+
 
 
 @interface XCDecoderNew()
@@ -101,7 +103,6 @@ NSData * copyFrameDataNew(UInt8 *src, int linesize, int width, int height)
     AVPicture           _picture;
     BOOL                _pictureValid;
     
-    
     int                 nConnectStatus;
     int                 nFormat;
     int                 _videoStream;
@@ -109,7 +110,7 @@ NSData * copyFrameDataNew(UInt8 *src, int linesize, int width, int height)
     AVFrame            *pVideoFrame;
     
     BOOL               _bIsDecoding;
-    
+    BOOL               bFirst;
     CGFloat            _videoTimeBase;
     bool               _destorySDK;
     BOOL               _isEOF;
@@ -120,8 +121,12 @@ NSData * copyFrameDataNew(UInt8 *src, int linesize, int width, int height)
     CGFloat _minBufferedDuration;
     CGFloat _maxBufferedDuration;
     CGFloat _moviePosition;
+    NSInteger nStartNum;
 }
 @property (nonatomic,assign) BOOL     decoding;
+@property (nonatomic,assign) BOOL   bP2P;
+@property (nonatomic,assign) BOOL bTran;
+@property (nonatomic,assign) NSInteger nNum;
 //@property (nonatomic,assign) int nChannel;
 
 @end
@@ -176,14 +181,11 @@ NSData * copyFrameDataNew(UInt8 *src, int linesize, int width, int height)
     
 }
 
-
-
-
-#pragma mark 解码操作   P2P方式
+#pragma mark 解码操作 P2P方式
 -(BOOL)initVideoParam
 {
     DLog(@"开始时间");
-    while (1)
+    while (YES)
     {
         if (nConnectStatus==1)
         {
@@ -196,109 +198,70 @@ NSData * copyFrameDataNew(UInt8 *src, int linesize, int width, int height)
         }
         if (!_bNotify)
         {
+            DLog(@"退出了?");
             return NO;
         }
+        [NSThread sleepForTimeInterval:1.0f];
     }
-    pthread_mutex_init(&mutex,NULL);
     DLog(@"开始解码方法:%@",_strNO);
     nFFMpegStatus = 1;
     _videoArray = [NSMutableArray array];
     _bIsDecoding = NO;
-    _minBufferedDuration = 0.01f;
-    _maxBufferedDuration = 0.05f;
-    AVInputFormat* pAvinputFmt = NULL;
-    AVCodec         *pCodec = NULL;
-    AVIOContext		*pb = NULL;
-    int				streamNumber = -1;
-    int i;
-    uint8_t	*buf = NULL;
-    buf = (uint8_t*)malloc(sizeof(uint8_t)*256);
-    av_register_all();
-    avcodec_register_all();
-    
-    pb = avio_alloc_context(buf,256,0,recv,read_code,NULL, NULL);
-    pAvinputFmt = av_find_input_format("H264");
     pFormatCtx = avformat_alloc_context();
-    pFormatCtx->pb = pb;
-    pFormatCtx->max_analyze_duration = 1 * AV_TIME_BASE;
-    pthread_mutex_lock(&mutex);
-    if(avformat_open_input(&pFormatCtx, "", pAvinputFmt, NULL) != 0 )
-    {
-        goto Release_avformat_open_input;
-    }
-    if(avformat_find_stream_info(pFormatCtx, NULL ) < 0 )
-    {
-        goto Release_avformat_open_input;
-    }
-    pthread_mutex_unlock(&mutex);
+    pFormatCtx->max_analyze_duration=100000;
+    pFormatCtx->probesize = 100000;
     
-    for (i = 0; i < pFormatCtx->nb_streams;i++)
-    {
-        if (pFormatCtx->streams[i]->codec->codec_type == AVMEDIA_TYPE_VIDEO)
-        {
-            streamNumber = i;
-            break;
-        }
-    }
-    if(streamNumber == -1 )
+    if(_videoStream == -1 )
     {
         DLog(@"找不到视频数据");
         return NO;
     }
-    pCodecCtx = pFormatCtx->streams[streamNumber]->codec;
-    pCodec = avcodec_find_decoder(pCodecCtx->codec_id);
+    AVCodec *pCodec = avcodec_find_decoder(AV_CODEC_ID_H264);
+    pCodecCtx = avcodec_alloc_context3(pCodec);
+    
     if(pCodec == nil)
     {
+        DLog(@"跑了？");
         return NO;
     }
     DLog(@"找到码流");
-    pthread_mutex_lock(&mutex);
+    [[PPSHAREINIT getTheLock] lock];
     if(avcodec_open2(pCodecCtx, pCodec, NULL) < 0 )
     {
-
         return NO;
     }
-    pthread_mutex_unlock(&mutex);
-    
+    [[PPSHAREINIT getTheLock] unlock];
     if(pCodec->capabilities&CODEC_CAP_TRUNCATED)
     {
         pCodecCtx->flags |= CODEC_FLAG_TRUNCATED;
     }
     pVideoFrame = avcodec_alloc_frame();
-    if( pVideoFrame == NULL ){
+    if(pVideoFrame == NULL)
+    {
         return NO;
     }
-    [self avStreamFPS:pFormatCtx->streams[_videoStream] defaultTime:0.04 fps:&_fFPS timeBase:&_videoTimeBase];
-    DLog(@"fps:%f",_fFPS);
+    _fFPS = 25.0f;
     _bIsDecoding = YES;
- //   _videoFrameFormat = KxVideoFrameFormatYUV;
-    //转换成rgb
-    //FPS赋值
     nFFMpegStatus = 2;
-    
     return YES;
     
 Release_avformat_open_input:
     
     avformat_free_context(pFormatCtx);
     pFormatCtx = NULL;
-    av_free(pb);
     if (_bNotify)
     {
         self.nError = 2;
-        _strError = NSLocalizedString(@"nostream", nil);
+        self.strError = XCLocalized(@"nostream");
         [[NSNotificationCenter defaultCenter] postNotificationName:NSCONNECT_P2P_DVR_FAIL_VC object:self];
     }
     return NO;
-    
-    
 }
 
 #pragma mark  play函数
 -(void)startPlay
 {
     DLog(@"开启播放");
-    _dispatch_queue = dispatch_queue_create("com.xzl.newdecode", DISPATCH_QUEUE_CONCURRENT);
     _decoding = NO;
     _playing = YES;
     __weak XCDecoderNew *__weakSelf = self;
@@ -309,17 +272,20 @@ Release_avformat_open_input:
 #pragma mark 持续解码
 -(void)tick
 {
-    if(!_playing){return;}
-        
-
+    if(!_playing)
+    {
+        DLog(@"已经退出");
+        [self closeScaler];
+        [self closeFile];
+        return;
+    }
     const NSUInteger leftFrames = _videoArray.count;
-    if (!leftFrames)
+    if (leftFrames==0)
     {
         [self asyncDecodeFrames];
     }
-    
-    float nTime = _fFPS;
-    dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, 1.0/nTime * NSEC_PER_SEC);
+    const NSTimeInterval time = MAX(1.0/_fFPS*0.5, 0.025);// 1/25 * 0.25
+    dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, time * NSEC_PER_SEC);
     __weak XCDecoderNew *weakSelf = self;
     dispatch_after(popTime, dispatch_get_global_queue(0, 0), ^(void)
     {
@@ -327,35 +293,31 @@ Release_avformat_open_input:
     });
 }
 
-
--(void)pauseVideo
-{
-    
-}
-
-
-- (void) asyncDecodeFrames
+- (void)asyncDecodeFrames
 {
     if (_decoding)
     {
         return;
     }
-
     _decoding = YES;
     if (!_playing)
     {
             return ;
     }
     BOOL good = YES;
-    while (good)
+    while (good && _playing)
     {
         good = NO;
         NSArray *frames = [self decodeFrames];
-        if(frames.count)
+        if(frames.count>0)
         {
             good = [self addFrames:frames];
         }
         frames = nil;
+    }
+    if (!_playing)
+    {
+        DLog(@"已经中断");
     }
     _decoding = NO;
 
@@ -374,7 +336,7 @@ Release_avformat_open_input:
             }
         }
     }
-    return _playing && _bufferedDuration < _maxBufferedDuration;
+    return _playing && _bufferedDuration < kMinBufferDuration_DVR;
 }
 
 -(KxVideoFrame*)getNextFrame
@@ -382,7 +344,8 @@ Release_avformat_open_input:
     KxVideoFrame *frame;
     @synchronized(_videoArray)
     {
-        if (_videoArray.count > 0) {
+        if (_videoArray.count > 0)
+        {
             frame = _videoArray[0];
             [_videoArray removeObjectAtIndex:0];
         }
@@ -390,6 +353,10 @@ Release_avformat_open_input:
     if (frame)
     {
         _bufferedDuration -= frame.duration;
+    }
+    else
+    {
+        return nil;
     }
     return frame;
 }
@@ -408,16 +375,41 @@ Release_avformat_open_input:
     NSMutableArray *result = [[NSMutableArray alloc] init];
     BOOL bFinish = NO;
     int nRef = 0;
-
+    if (!_playing || !_bIsDecoding)
+    {
+        return  result;
+    }
+    uint8_t *puf = (uint8_t *)malloc(500*1024);
     while (!bFinish)
     {
         if (!_bNotify)
         {
             return result;
         }
-
-        nRef =av_read_frame(pFormatCtx, &packet);
-        
+        nRef = 0;
+        @synchronized(recv->aryVideo)
+        {
+            if (recv->aryVideo.count>0)
+            {
+                NSData *data = [recv->aryVideo objectAtIndex:0];
+                if(data.length<500*1024)
+                {
+                    packet.size = (int)data.length;
+                    memcpy(puf, [data bytes], data.length);
+                    [recv->aryVideo removeObjectAtIndex:0];
+                    packet.data = puf;
+                }
+            }
+            else
+            {
+                packet.size = 0;
+            }
+        }
+        if (packet.size==0)
+        {
+            [NSThread sleepForTimeInterval:0.03f];
+            continue;
+        }
         if(nRef>=0)
         {
             int len = avcodec_decode_video2(pCodecCtx,pVideoFrame,&gotframe,&packet);
@@ -429,7 +421,6 @@ Release_avformat_open_input:
                     [result addObject:frameVideo];
                     bFinish = YES;
                 }
-                frameVideo = nil;
             }
             if (0 == len || -1 == len)
             {
@@ -441,12 +432,19 @@ Release_avformat_open_input:
             //结束
             _isEOF = YES;
             _nError = 3;//Disconnect
-            _strError = NSLocalizedString(@"Disconnect", "Disconnect");
-            [[NSNotificationCenter defaultCenter] postNotificationName:NSCONNECT_P2P_DVR_FAIL_VC object:self];
+            _strError = XCLocalized(@"Disconnect");
+            DLog(@"_strError:%@",_strError);
+            if (_bNotify)
+            {
+                [[NSNotificationCenter defaultCenter] postNotificationName:NSCONNECT_P2P_DVR_FAIL_VC object:self];
+                _bNotify = NO;
+            }
             break;
         }
         av_free_packet(&packet);
+
     }
+    free(puf);
     return result;
 }
 
@@ -476,18 +474,15 @@ Release_avformat_open_input:
                                          pVideoFrame->linesize[2],
                                          pVideoFrame->width / 2,
                                          pVideoFrame->height / 2);
-        
         frame = yuvFrame;
         
     } else {
         
-        if (!_swsContext &&
-            ![self setupScaler]) {
-            
-            NSLog(@"fail setup video scaler");
+        if (!_swsContext && ![self setupScaler])
+        {
+            DLog(@"fail setup video scaler");
             return nil;
         }
-        
         sws_scale(_swsContext,
                   (const uint8_t **)pVideoFrame->data,
                   pVideoFrame->linesize,
@@ -501,9 +496,9 @@ Release_avformat_open_input:
                                       length:rgbFrame.linesize * pCodecCtx->height];
         frame = rgbFrame;
     }
+    
     frame.width = pCodecCtx->width;
     frame.height = pCodecCtx->height;
-
     frame.duration = 1.0 / _fFPS;
     _moviePosition += frame.duration;
     frame.position = _moviePosition;
@@ -523,10 +518,10 @@ Release_avformat_open_input:
         timebase = av_q2d(st->codec->time_base);
     else
         timebase = defaultTimeBase;
-    
+    DLog(@"timebase:%f",timebase);
     if (st->codec->ticks_per_frame != 1)
     {
-        NSLog(@"WARNING:st.codec.ticks_per_frame=%d", st->codec->ticks_per_frame);
+        DLog(@"WARNING:st.codec.ticks_per_frame=%d", st->codec->ticks_per_frame);
     }
     if (st->avg_frame_rate.den && st->avg_frame_rate.num)
         fps = av_q2d(st->avg_frame_rate);
@@ -545,75 +540,102 @@ Release_avformat_open_input:
 -(void)startP2PServer:(NSString*)nsDevId
 {
     sdk = [PPSHAREINIT getP2PSDK];
-    char myId[20] = {0};
-    srand(time(NULL));
-    long  randomNum = rand();
-    sprintf(myId, "ios_%ld", randomNum);
-    BOOL ret = NO;
-    DLog(@"strAddress:%@",PPSHAREINIT.strAddress);
-    if(PPSHAREINIT.strAddress)
+    _nNum=0;
+    if (sdk==NULL)
     {
-        ret = sdk->Initialize([PPSHAREINIT.strAddress UTF8String], myId);
-    }
-    else
-    {
-        BOOL bFlag = [PPSHAREINIT getIPWithHostName:NSLocalizedString(@"p2pserver", "p2p server")];
-        DLog(@"NSLocalizedString-p2pserver:%@",NSLocalizedString(@"p2pserver", "p2p server"));
-        if (bFlag)
-        {
-            ret = sdk->Initialize([PPSHAREINIT.strAddress UTF8String], myId);
-        }
-        else
-        {
-            self.nError = 1;
-            self.strError = NSLocalizedString(@"connectFail", "connectFail");
-            [[NSNotificationCenter defaultCenter] postNotificationName:NSCONNECT_P2P_DVR_FAIL_VC object:self];
-            nConnectStatus = -1;
-            return ;
-        }
-    }
-    DLog(@"myid:%s",myId);
-    if(ret)
-    {
-        NSLog(@"sdk Inialize success \n");
-    }
-    else
-    {
-        NSLog(@"%s sdk Inialize failed \n", [nsDevId UTF8String]);
-        nConnectStatus = -1;
+        DLog(@"没有解析出相应的IP");
         self.nError = 1;
-        self.strError = NSLocalizedString(@"connectFail", "connectFail");
+        self.strError = XCLocalized(@"connectFail");
         [[NSNotificationCenter defaultCenter] postNotificationName:NSCONNECT_P2P_DVR_FAIL_VC object:self];
-        return ;
+        return;
     }
     if (!recv)
     {
         recv = new RecvFile(sdk,0,_nChannel);
     }
     recv->peerName = [nsDevId UTF8String];
-    __weak XCDecoderNew *weakSelf = self;
-    dispatch_async(dispatch_get_global_queue(0, 0), ^
-    {
-        //默认选择辅码流
-        BOOL bReturn = recv->startGcd(nFormat,2);
-       if (!bReturn)
+    __weak XCDecoderNew *_weakSelf = self;
+    dispatch_async(dispatch_get_global_queue(0, 0),
+    ^{
+       BOOL bReturn = recv->threadP2P(2);
+       if (bReturn)
        {
-           nConnectStatus = -1;
-           recv->bDevDisConn = YES;
-           if (_bNotify)
+           _weakSelf.bP2P = YES;
+           DLog(@"P2P打洞成功");
+           if (_weakSelf.bTran)//close TRAN
            {
-               weakSelf.nError = 1;
-               weakSelf.strError = NSLocalizedString(@"connectFail", "connectFail");
-               [[NSNotificationCenter defaultCenter] postNotificationName:NSCONNECT_P2P_DVR_FAIL_VC object:weakSelf];
+               DLog(@"关闭转发");
+               recv->closeTran();
+           }
+           else
+           {
+               DLog(@"开始P2P接收码流");
+               nConnectStatus = 1;
            }
        }
        else
        {
-           DLog(@"连接成功");
-           nConnectStatus = 1;
+           _weakSelf.nNum++;
+           if (!_weakSelf.bTran)//close TRAN
+           {
+               DLog(@"tran-p2p fail");
+               if (_weakSelf.bNotify)
+               {
+                   if(_weakSelf.nNum==2)
+                   {
+                       recv->bDevDisConn = YES;
+                       nConnectStatus = -1;
+                       _weakSelf.nError = 1;
+                       _weakSelf.strError = XCLocalized(@"connectFail");
+                       [[NSNotificationCenter defaultCenter] postNotificationName:NSCONNECT_P2P_DVR_FAIL_VC object:_weakSelf];
+                   }
+               }
+           }
+           else
+           {
+               DLog(@"等待转发");
+           }
        }
-    });
-    
+   });
+
+   dispatch_async(dispatch_get_global_queue(0, 0),
+   ^{
+       BOOL bReturn = recv->threadTran(2);
+       if (bReturn)
+       {
+           _weakSelf.bTran = YES;
+           DLog(@"转发成功");
+           //转发
+           if (_weakSelf.bP2P)//close TRAN
+           {
+               DLog(@"P2P已成功,关闭转发");
+               recv->closeTran();
+           }
+           else
+           {
+               DLog(@"P2P未成功,开始解码");
+               nConnectStatus = 1;
+           }
+       }
+       else
+       {
+           _weakSelf.nNum++;
+           if (!_weakSelf.bP2P)//close TRAN
+           {
+               if (_weakSelf.bNotify)
+               {
+                   if(_weakSelf.nNum==2)
+                   {
+                       recv->bDevDisConn = YES;
+                       nConnectStatus = -1;
+                       _weakSelf.nError = 1;
+                       _weakSelf.strError = XCLocalized(@"connectFail");
+                       [[NSNotificationCenter defaultCenter] postNotificationName:NSCONNECT_P2P_DVR_FAIL_VC object:_weakSelf];
+                   }
+               }
+           }
+       }
+   });
 }
 #pragma mark 码流切换
 -(void)switchP2PCode:(int)nCode
@@ -627,19 +649,18 @@ Release_avformat_open_input:
             if(bReturn)
             {
                 _weakSelf.bSwitch = YES;
+                [self initVideoParam];
             }
             else
             {
-                [[NSNotificationCenter defaultCenter] postNotificationName:NSSWITCH_P2P_FAIL_VC object:@"码流切换失败"];
+                self.nError = 2;
+                self.strError = XCLocalized(@"streamSetFail");
+                [[NSNotificationCenter defaultCenter] postNotificationName:NSCONNECT_P2P_DVR_FAIL_VC object:self];
             }
         });
         
     }
 }
-
-
-
-
 
 -(CGFloat)frameWidth
 {
@@ -655,25 +676,25 @@ Release_avformat_open_input:
 }
 -(void)dealloc
 {
-    @synchronized(_videoArray)
-    {
-        [_videoArray removeAllObjects];
-    }
     if(recv)
     {
         recv->StopRecv();
-        [PPSHAREINIT free_queue:recv->mReciveQueue];
-        recv->mReciveQueue = NULL;
         recv = NULL;
     }
     if (_destorySDK)
     {
+        DLog(@"释放了");
         [PPSHAREINIT setP2PSDKNull];
     }
     [self closeFile];
+    DLog(@"释放");
 }
 -(void)closeFile
 {
+    @synchronized(_videoArray)
+    {
+        [_videoArray removeAllObjects];
+    }
     _videoStream = -1;
     if (pVideoFrame)
     {
@@ -682,24 +703,18 @@ Release_avformat_open_input:
     }
     if (pCodecCtx)
     {
-        pthread_mutex_lock(&mutex);
+        [[PPSHAREINIT getTheLock] lock];
         avcodec_close(pCodecCtx);
-        pthread_mutex_unlock(&mutex);
+        [[PPSHAREINIT getTheLock] unlock];
         pCodecCtx = NULL;
     }
-    
     if (pFormatCtx)
     {
         pFormatCtx->interrupt_callback.opaque = NULL;
         pFormatCtx->interrupt_callback.callback = NULL;
-        dispatch_sync(dispatch_get_global_queue(0, 0),
-        ^{
-            avformat_close_input(&pFormatCtx);
-        });
-        
+        avformat_close_input(&pFormatCtx);
         pFormatCtx = NULL;
     }
-    pthread_mutex_destroy(&mutex);
 }
 
 -(void)releaseDecode
@@ -719,7 +734,7 @@ Release_avformat_open_input:
 - (BOOL) setupScaler
 {
     [self closeScaler];
-    
+    DLog(@"%d-%d",pCodecCtx->width,pCodecCtx->height);
     _pictureValid = avpicture_alloc(&_picture,
                                     PIX_FMT_RGB24,
                                     pCodecCtx->width,
@@ -762,22 +777,13 @@ Release_avformat_open_input:
     return NO;
 }
 
-
-//#ifdef _FOR_DEBUG_
-//-(BOOL) respondsToSelector:(SEL)aSelector {
-//    printf("SELECTOR: %s\n", [NSStringFromSelector(aSelector) UTF8String]);
-//    return [super respondsToSelector:aSelector];
-//}
-//#endif
-
-
-
 #pragma mark 录像开始
--(void)recordStart
+-(void)recordStart:(NSString*)strPath name:(NSString*)strDevName
 {
     if (recv)
     {
-        recv->startRecord(_moviePosition);
+  //      nStartNum = pCodecCtx->frame_number;
+        recv->startRecord(_moviePosition,[strPath UTF8String],[strDevName UTF8String]);
     }
 }
 #pragma mark 录像停止
@@ -785,10 +791,22 @@ Release_avformat_open_input:
 {
     if(recv)
     {
-        recv->stopRecord(_moviePosition);
+   //     NSInteger nAllFrameNumber = pCodecCtx->frame_number - nStartNum;
+        recv->stopRecord(_moviePosition,0,25);
     }
 }
 
+#pragma mark 云台指令
+-(void)sendPtzCmd:(int)nPtzCmd
+{
+    if(recv)
+    {
+        PtzControlMsg ptzCon;
+        ptzCon.ptzcmd = (PTZCONTROLTYPE)nPtzCmd;
+        ptzCon.channel = _nChannel;
+        recv->sendPtzControl(&ptzCon);
+    }
+}
 
 
 

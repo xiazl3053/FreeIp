@@ -13,4 +13,5 @@
 
 -(void)initData:(NSInteger)nIndex;
 -(void)loadMoreData;
+
 @end

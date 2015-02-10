@@ -12,14 +12,20 @@
 #ifdef DEBUG
 #   define DLog(fmt, ...) NSLog((@"%s [Line %d] " fmt), __PRETTY_FUNCTION__, __LINE__, ##__VA_ARGS__);
 #else
-#   define DLog(...)
+#   define DLog(...) //NSLog((@"%s [Line %d] " fmt), __PRETTY_FUNCTION__, __LINE__, ##__VA_ARGS__);
 #endif
 
-#define XCFontInfo(x) [UIFont systemFontOfSize:x]
+#define XCFontInfo(x) [UIFont fontWithName:@"Helvetica" size:x]
 #define kScreenWidth [UIScreen mainScreen].applicationFrame.size.width
 #define kScreenHeight [UIScreen mainScreen].applicationFrame.size.height
+
+#define kScreenSourchWidth [UIScreen mainScreen].bounds.size.width
+#define kScreenSourchHeight [UIScreen mainScreen].bounds.size.height
+
+
 #define HEIGHT_MENU_VIEW(x,y) ([[[UIDevice currentDevice] systemVersion] floatValue] >= 7.0 ? x : y)
 #define PHP_HOST_URL   @"http://www.freeip.com/"
+
 //#define PHP_HOST_URL   @"http://183.57.82.43/ys/"
 //http://www.freeip.com/
 //http://183.57.82.43/ys/

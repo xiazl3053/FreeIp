@@ -17,6 +17,7 @@
     _strMobile = items[0];
     _strEmail = items[1];//items[2] 邮件是否绑定
     _strName = items[3];
+    _strOnlyName = items[4];
     _strLastInfo = items[5];
     _strFile = items[6];
     _iProNumber = [items[7] integerValue];

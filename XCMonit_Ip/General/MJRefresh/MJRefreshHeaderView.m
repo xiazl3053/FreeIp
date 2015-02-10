@@ -28,7 +28,7 @@
         // 1.创建控件
         UILabel *lastUpdateTimeLabel = [[UILabel alloc] init];
         lastUpdateTimeLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-        lastUpdateTimeLabel.font = [UIFont boldSystemFontOfSize:12];
+        lastUpdateTimeLabel.font = [UIFont fontWithName:@"Helvetica" size:12];
         lastUpdateTimeLabel.textColor = MJRefreshLabelTextColor;
         lastUpdateTimeLabel.backgroundColor = [UIColor clearColor];
         lastUpdateTimeLabel.textAlignment = NSTextAlignmentCenter;
@@ -106,10 +106,10 @@
     } else {
         formatter.dateFormat = @"yyyy-MM-dd HH:mm";
     }
-    NSString *time = [formatter stringFromDate:self.lastUpdateTime];
+ //   NSString *time = [formatter stringFromDate:self.lastUpdateTime];
     
     // 3.显示日期
-    self.lastUpdateTimeLabel.text = [NSString stringWithFormat:@"最后更新：%@", time];
+  //self.lastUpdateTimeLabel.text = [NSString stringWithFormat:@"最后更新：%@", time];
 }
 #pragma mark - 监听UIScrollView的contentOffset属性
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context

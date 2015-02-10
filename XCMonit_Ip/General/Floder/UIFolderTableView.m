@@ -44,8 +44,6 @@
     [super dealloc];
 }
 
-
-
 - (void)openFolderAtIndexPath:(NSIndexPath *)indexPath
                       WithContentView:(UIView *)subClassContentView
                         openBlock:(FolderOpenBlock)openBlock 
@@ -103,8 +101,8 @@
                                   top:NO
                           transparent:NO];
     // 绑定关闭动作
-    [self.top addTarget:self action:@selector(performClose:) forControlEvents:UIControlEventTouchUpInside];
-    [self.bottom addTarget:self action:@selector(performClose:) forControlEvents:UIControlEventTouchUpInside];
+    [self.top addTarget:self action:@selector(performClose) forControlEvents:UIControlEventTouchUpInside];
+    [self.bottom addTarget:self action:@selector(performClose) forControlEvents:UIControlEventTouchUpInside];
     [self.top.cover addGestureRecognizer:[[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapGestureAction:)] autorelease]];
     [self.bottom.cover addGestureRecognizer:[[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapGestureAction:)] autorelease]];
     
@@ -113,9 +111,12 @@
     [self addSubview:self.bottom];
     
     CGRect viewFrame = subClassContentView.frame;
-    if (position.y - deltaY + viewFrame.size.height > height) {
+    if (position.y - deltaY + viewFrame.size.height > height)
+    {
         viewFrame.origin.y = height + deltaY - viewFrame.size.height;
-    } else {
+    }
+    else
+    {
         viewFrame.origin.y = position.y;
     }
     subClassContentView.frame = viewFrame;
@@ -162,7 +163,7 @@
     
     // 透明变半透明
     [UIView animateWithDuration:duration animations:^{
-        self.top.cover.alpha = COVERALPHA;
+   //     self.top.cover.alpha = COVERALPHA;
         self.bottom.cover.alpha = COVERALPHA;
     }];
     
@@ -178,13 +179,15 @@
     if (gesture.state == UIGestureRecognizerStateChanged || 
         gesture.state == UIGestureRecognizerStateEnded) {
         if (gesture.numberOfTapsRequired > 0) {
-            [self performClose:gesture];
+            [self performClose];
         }
     }
 }
 
-- (void)performClose:(id)sender {
-    if (self.closing) {
+- (void)performClose
+{
+    if (self.closing)
+    {
         return;
     }else {
         self.closing = YES;
@@ -219,7 +222,7 @@
     [UIView animateWithDuration:duration animations:^{
         
         self.contentOffset = self.oldContentOffset;
-        self.top.cover.alpha = 0;
+    //    self.top.cover.alpha = 0;
         self.bottom.cover.alpha = 0;
         
     }];

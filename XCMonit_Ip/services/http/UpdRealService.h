@@ -7,7 +7,11 @@
 //
 
 #import <Foundation/Foundation.h>
-
+typedef void(^HttpUpdReal)(int nStatus);
 @interface UpdRealService : NSObject
+
+@property (nonatomic,copy) HttpUpdReal httpBlock;
+
+-(void)requestUpdReal:(NSString*)strReal;
 
 @end

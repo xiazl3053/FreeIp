@@ -20,7 +20,9 @@
     _strStartTime = items[2];
     _strEndTime = items[3];
     _strFile = items[4];
-    _allTime = [items[5] integerValue];
+    _allTime = [items[6] integerValue];
+    _imgFile = items[5];
+    _strDevName = items[7];
     return self;
 }
 

@@ -23,7 +23,8 @@
     if (self) {
         // Initialization code
         self.titleLabel.textAlignment = NSTextAlignmentCenter;
-        self.titleLabel.font = [UIFont systemFontOfSize:9.0f];
+        
+        self.titleLabel.font = [UIFont fontWithName:@"Helvetica" size:20];
         
         [self setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
         [self setTitleColor:[UIColor greenColor] forState:UIControlStateSelected];
@@ -37,11 +38,11 @@
     if (self)
     {
         self.titleLabel.textAlignment = NSTextAlignmentCenter;
-        self.titleLabel.font = [UIFont systemFontOfSize:9.0f];
+        self.titleLabel.font = [UIFont fontWithName:@"Helvetica" size:9.0f];
         
         [self setTitle:tabInfo.strTitle forState:UIControlStateNormal];
         [self setTitleColor:[UIColor darkGrayColor] forState:UIControlStateNormal];
-        [self setTitleColor:RGB(21,100,230) forState:UIControlStateSelected];
+        [self setTitleColor:RGB(15,173,225) forState:UIControlStateSelected];
 
         _imgNormal = [UIImage imageNamed:tabInfo.strNorImg];
         _imgSelect = [UIImage imageNamed:tabInfo.strHighImg];
@@ -55,12 +56,13 @@
 
 -(CGRect)imageRectForContentRect:(CGRect)bounds
 {
-    return CGRectMake(6.5,3, 27, 27);
+    
+    return CGRectMake(9, 3, 30, 30);//49
 }
 
 - (CGRect)titleRectForContentRect:(CGRect)contentRect
 {
-    return CGRectMake(0.0, 30, 40, 10);
+    return CGRectMake(0.0, 36, 48, 12);
 }
 
 /*

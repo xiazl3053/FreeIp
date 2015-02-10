@@ -7,10 +7,11 @@
 //
 
 #import "UserInfo.h"
-
+#import "UserAllInfoModel.h"
 @implementation UserInfo
 
 DEFINE_SINGLETON_FOR_CLASS(UserInfo);
+
 
 
 @end

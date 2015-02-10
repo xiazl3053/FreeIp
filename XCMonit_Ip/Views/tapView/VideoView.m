@@ -14,6 +14,7 @@
 }
 @property (nonatomic,strong) UITapGestureRecognizer *tapGesture;
 @property (nonatomic,strong) UITapGestureRecognizer *doubleGesture;
+
 @end
 
 @implementation VideoView
@@ -29,12 +30,22 @@
         _doubleGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(doubleClickView)];
         _tapGesture.numberOfTapsRequired =1;
         _doubleGesture.numberOfTapsRequired = 2;
+
         [self setUserInteractionEnabled:YES];
         [self addGestureRecognizer:_tapGesture];
         [self addGestureRecognizer:_doubleGesture];
+    //    [self addImage];
     }
     return self;
 }
+//-(void)addImage
+//{
+//    [self addSubview:_imgView];
+//}
+//-(void)removeImage
+//{
+//    [_imgView removeFromSuperview];
+//}
 -(void)clickOnView
 {
     if ([_delegate respondsToSelector:@selector(clickView:)])

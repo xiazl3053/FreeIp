@@ -7,10 +7,10 @@
 //
 
 #import <UIKit/UIKit.h>
-
+@class RtspInfo;
 @interface RTSPPlayViewController : UIViewController
 
 
--(id)initWithContentPath:(NSString*)strPath;
+-(id)initWithContentRtsp:(RtspInfo*)rtspInfo channel:(NSInteger)nChannel;
 
 @end

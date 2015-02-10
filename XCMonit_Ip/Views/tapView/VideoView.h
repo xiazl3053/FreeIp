@@ -22,5 +22,9 @@
 
 @property (nonatomic,assign) id<VideoViewDelegate> delegate;
 @property (nonatomic,assign) NSInteger nCursel;
+@property (nonatomic,strong) UIImageView *imgView;
 
+//
+//-(void)addImage;
+//-(void)removeImage;
 @end

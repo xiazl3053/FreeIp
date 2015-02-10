@@ -7,7 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
-
-@interface TwoStepViewController : UIViewController
+#import "CustomViewController.h"
+@interface TwoStepViewController : CustomViewController
 
 @end

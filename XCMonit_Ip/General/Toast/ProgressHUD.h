@@ -25,7 +25,7 @@
 //-------------------------------------------------------------------------------------------------------------------------------------------------
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------
-#define HUD_STATUS_FONT			[UIFont boldSystemFontOfSize:16]
+#define HUD_STATUS_FONT			[UIFont fontWithName:@"Helvetica" size:16]
 //-------------------------------------------------------------------------------------------------------------------------------------------------
 #ifdef sheme_white
 #define HUD_STATUS_COLOR		[UIColor whiteColor]
@@ -36,15 +36,15 @@
 #endif
 //-------------------------------------------------------------------------------------------------------------------------------------------------
 #ifdef sheme_black
-#define HUD_STATUS_COLOR		[UIColor blackColor]
-#define HUD_SPINNER_COLOR		[UIColor blackColor]
+#define HUD_STATUS_COLOR		[UIColor whiteColor]
+#define HUD_SPINNER_COLOR		[UIColor whiteColor]
 
 #define HUD_IMAGE_SUCCESS		[UIImage imageNamed:@"ProgressHUD.bundle/success-black.png"]
 #define HUD_IMAGE_ERROR			[UIImage imageNamed:@"ProgressHUD.bundle/error-black.png"]
 #endif
 //-------------------------------------------------------------------------------------------------------------------------------------------------
 #import "GlobalDefine.h"
-#define HUD_BACKGROUND_COLOR	RGBA(244,255,244,0.5)
+#define HUD_BACKGROUND_COLOR	RGBA(0,0,0,0.6)
 //-------------------------------------------------------------------------------------------------------------------------------------------------
 @interface ProgressHUD : UIView
 //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -55,9 +55,12 @@
 + (void)show:(NSString *)status;
 + (void)showSuccess:(NSString *)status;
 + (void)showError:(NSString *)status;
++ (void)show:(NSString *)status viewInfo:(UIView *)view;
++ (void)showPlayRight:(NSString *)status viewInfo:(UIView *)view;
 
+@property (atomic, strong) UIView *viewInfo;
 @property (atomic, strong) UIWindow *window;
-@property (atomic, strong) UIToolbar *hud;
+@property (atomic, strong) UIView *hud;
 @property (atomic, strong) UIActivityIndicatorView *spinner;
 @property (atomic, strong) UIImageView *image;
 @property (atomic, strong) UILabel *label;

@@ -8,6 +8,26 @@
 
 #import <UIKit/UIKit.h>
 
-@interface XCDirect_InfoView : UIView
+
+@protocol XCDirectDelegate <NSObject>
+
+@required
+-(void)record_Direct:(NSInteger)nIndex;
+-(void)update_Direct:(NSInteger)nIndex;
+@optional
 
 @end
+
+@interface XCDirect_InfoView : UIView
+
+@property (nonatomic,assign) NSInteger nCount;
+
+@property (nonatomic,assign) id<XCDirectDelegate> delegate;
+
+-(id)initWithFrame:(CGRect)frame;
+
+@end
+
+
+
+

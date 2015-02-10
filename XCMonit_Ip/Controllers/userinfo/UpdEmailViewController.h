@@ -7,7 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
-
-@interface UpdEmailViewController : UIViewController
+#import "CustomViewController.h"
+@interface UpdEmailViewController : CustomViewController
 
 @end

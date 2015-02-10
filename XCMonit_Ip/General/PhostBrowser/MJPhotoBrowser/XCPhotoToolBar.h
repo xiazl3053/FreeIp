@@ -1,5 +1,5 @@
 //
-//  MJPhotoToolbar.h
+//  XCPhotoToolbar.h
 //  FingerNews
 //
 //  Created by mj on 13-9-24.
@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-@interface MJPhotoToolbar : UIView
+@interface XCPhotoToolbar : UIView
 // 所有的图片对象
 @property (nonatomic, strong) NSArray *photos;
 // 当前展示的图片索引

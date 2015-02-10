@@ -16,7 +16,6 @@
 #import <OpenGLES/ES2/gl.h>
 #import <OpenGLES/ES2/glext.h>
 #import "XCDecoder.h"
-#import "XCDecoderNew.h"
 
 //////////////////////////////////////////////////////////
 
@@ -217,8 +216,8 @@ static void mat4f_LoadOrtho(float left, float right, float bottom, float top, fl
     glTexImage2D(GL_TEXTURE_2D,
                  0,
                  GL_RGB,
-                 frame.width,
-                 frame.height,
+                 (int)frame.width,
+                 (int)frame.height,
                  0,
                  GL_RGB,
                  GL_UNSIGNED_BYTE,
@@ -281,10 +280,14 @@ static void mat4f_LoadOrtho(float left, float right, float bottom, float top, fl
 - (void) setFrame: (KxVideoFrame *) frame
 {
     KxVideoFrameYUV *yuvFrame = (KxVideoFrameYUV *)frame;
-    
-    assert(yuvFrame.luma.length == yuvFrame.width * yuvFrame.height);
-    assert(yuvFrame.chromaB.length == (yuvFrame.width * yuvFrame.height) / 4);
-    assert(yuvFrame.chromaR.length == (yuvFrame.width * yuvFrame.height) / 4);
+    if (yuvFrame==nil)
+    {
+        DLog(@"yuvFrame=nil");
+        return ;
+    }
+//    assert(yuvFrame.luma.length == yuvFrame.width * yuvFrame.height);
+//    assert(yuvFrame.chromaB.length == (yuvFrame.width * yuvFrame.height) / 4);
+//    assert(yuvFrame.chromaR.length == (yuvFrame.width * yuvFrame.height) / 4);
 
     const NSUInteger frameWidth = frame.width;
     const NSUInteger frameHeight = frame.height;    
@@ -298,14 +301,15 @@ static void mat4f_LoadOrtho(float left, float right, float bottom, float top, fl
     const NSUInteger widths[3]  = { frameWidth, frameWidth / 2, frameWidth / 2 };
     const NSUInteger heights[3] = { frameHeight, frameHeight / 2, frameHeight / 2 };
     
-    for (int i = 0; i < 3; ++i)
-    {
+    for (int i = 0; i < 3; ++i) {
+        
         glBindTexture(GL_TEXTURE_2D, _textures[i]);
+        
         glTexImage2D(GL_TEXTURE_2D,
                      0,
                      GL_LUMINANCE,
-                     widths[i],
-                     heights[i],
+                     (int)widths[i],
+                     (int)heights[i],
                      0,
                      GL_LUMINANCE,
                      GL_UNSIGNED_BYTE,
@@ -336,7 +340,6 @@ static void mat4f_LoadOrtho(float left, float right, float bottom, float top, fl
 {
     if (_textures[0])
         glDeleteTextures(3, _textures);
-    
 }
 
 @end
@@ -352,8 +355,7 @@ enum {
 
 @implementation KxMovieGLView {
     
-    XCDecoder  *_decoder;
-    XCDecoderNew *_decoderNew;
+    XCDecoder *_decoder;
     EAGLContext     *_context;
     GLuint          _framebuffer;
     GLuint          _renderbuffer;
@@ -362,10 +364,8 @@ enum {
     GLuint          _program;
     GLint           _uniformMatrix;
     GLfloat         _vertices[8];
+    
     id<KxMovieGLRenderer> _renderer;
-    CGFloat         _framwWidth;
-    CGFloat         _frameHeight;
-    int nType;
 }
 
 + (Class) layerClass
@@ -378,11 +378,22 @@ enum {
 {
     self = [super initWithFrame:frame];
     if (self) {
-        nType = 1;
+        
         _decoder = decoder;
         
+//        if (decoder.videoFrameFormat == KxVideoFrameFormatYUV)
+//        {
+//            _renderer = [[KxMovieGLRenderer_YUV alloc] init];
+//            DLog(@"OK use YUV GL renderer");
+//        }
+//        else
+//        {
+//            _renderer = [[KxMovieGLRenderer_RGB alloc] init];
+//            DLog(@"OK use RGB GL renderer");
+//        }
         _renderer = [[KxMovieGLRenderer_YUV alloc] init];
         DLog(@"OK use YUV GL renderer");
+
         CAEAGLLayer *eaglLayer = (CAEAGLLayer*) self.layer;
         eaglLayer.opaque = YES;
         eaglLayer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:
@@ -395,11 +406,11 @@ enum {
         if (!_context ||
             ![EAGLContext setCurrentContext:_context]) {
             
-            DLog(@"failed to setup EAGLContext");
+            DLog(@"failed to setup EAGLContext");            
             self = nil;
             return nil;
         }
-        srand(time(NULL));
+        
         glGenFramebuffers(1, &_framebuffer);
         glGenRenderbuffers(1, &_renderbuffer);
         glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
@@ -408,11 +419,11 @@ enum {
         glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &_backingWidth);
         glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &_backingHeight);
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, _renderbuffer);
-        
+        DLog(@"OK use YUV GL renderer:%d---%d",_backingWidth,_backingHeight);
         GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
         if (status != GL_FRAMEBUFFER_COMPLETE) {
             
-            NSLog(@"failed to make complete framebuffer object %x", status);
+            DLog(@"failed to make complete framebuffer object %x", status);
             self = nil;
             return nil;
         }
@@ -430,6 +441,7 @@ enum {
             self = nil;
             return nil;
         }
+        
         _vertices[0] = -1.0f;  // x0
         _vertices[1] = -1.0f;  // y0
         _vertices[2] =  1.0f;  // ..
@@ -438,92 +450,14 @@ enum {
         _vertices[5] =  1.0f;
         _vertices[6] =  1.0f;  // x3
         _vertices[7] =  1.0f;  // y3
-        DLog(@"OK setup GL");
+        
     }
-    return self;
-}
-
--(id)initWithFrame:(CGRect)frame
-             decoderNew: (XCDecoderNew *) decoder
-{
-    self = [super initWithFrame:frame];
-    if (self) {
-        nType = 2;
-        _decoderNew = decoder;
-        if ([decoder setupVideoFrameFormat:KxVideoFrameFormatYUV]) {
-            
-            _renderer = [[KxMovieGLRenderer_YUV alloc] init];
-            NSLog(@"OK use YUV GL renderer");
-            
-        } else {
-            
-            _renderer = [[KxMovieGLRenderer_RGB alloc] init];
-            NSLog(@"OK use RGB GL renderer");
-        }
-        DLog(@"OK use YUV GL renderer");
-        CAEAGLLayer *eaglLayer = (CAEAGLLayer*) self.layer;
-        eaglLayer.opaque = YES;
-        eaglLayer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:
-                                        [NSNumber numberWithBool:FALSE], kEAGLDrawablePropertyRetainedBacking,
-                                        kEAGLColorFormatRGBA8, kEAGLDrawablePropertyColorFormat,
-                                        nil];
-        
-        _context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
-        
-        if (!_context ||
-            ![EAGLContext setCurrentContext:_context]) {
-            
-            DLog(@"failed to setup EAGLContext");
-            self = nil;
-            return nil;
-        }
-        srand(time(NULL));
-        glGenFramebuffers(1, &_framebuffer);
-        glGenRenderbuffers(1, &_renderbuffer);
-        glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
-        glBindRenderbuffer(GL_RENDERBUFFER, _renderbuffer);
-        [_context renderbufferStorage:GL_RENDERBUFFER fromDrawable:(CAEAGLLayer*)self.layer];
-        glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &_backingWidth);
-        glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &_backingHeight);
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, _renderbuffer);
-        
-        GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-        if (status != GL_FRAMEBUFFER_COMPLETE) {
-            
-            NSLog(@"failed to make complete framebuffer object %x", status);
-            self = nil;
-            return nil;
-        }
-        
-        GLenum glError = glGetError();
-        if (GL_NO_ERROR != glError) {
-            
-            DLog(@"failed to setup GL %x", glError);
-            self = nil;
-            return nil;
-        }
-        
-        if (![self loadShaders]) {
-            
-            self = nil;
-            return nil;
-        }
-        _vertices[0] = -1.0f;  // x0
-        _vertices[1] = -1.0f;  // y0
-        _vertices[2] =  1.0f;  // ..
-        _vertices[3] = -1.0f;
-        _vertices[4] = -1.0f;
-        _vertices[5] =  1.0f;
-        _vertices[6] =  1.0f;  // x3
-        _vertices[7] =  1.0f;  // y3
-        DLog(@"OK setup GL");
-    }
+    
     return self;
 }
 
 - (void)dealloc
 {
-    DLog(@"dealloc GLView");
     _renderer = nil;
 
     if (_framebuffer) {
@@ -550,36 +484,27 @@ enum {
 
 - (void)layoutSubviews
 {
-//    glViewport(0, 0, self.frame.size.width, self.frame.size.height);
-    
-//    glScissor(0, 0, self.frame.size.width, self.frame.size.height);
-    
-//#if 0
     glBindRenderbuffer(GL_RENDERBUFFER, _renderbuffer);
-    
     [_context renderbufferStorage:GL_RENDERBUFFER fromDrawable:(CAEAGLLayer*)self.layer];
-
 	glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &_backingWidth);
     glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &_backingHeight);
-	
+    
     GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-
-	if (status != GL_FRAMEBUFFER_COMPLETE)
-    {
+	if (status != GL_FRAMEBUFFER_COMPLETE) {
+		
         DLog(@"failed to make complete framebuffer object %x", status);
-	} else {
-        DLog(@"self.frame.size.width:%f---self.frame.size.height:%f",self.frame.size.width,self.frame.size.height);
+        
+	}
+    else
+    {
+        
         DLog(@"OK setup GL framebuffer %d:%d", _backingWidth, _backingHeight);
-        _framwWidth = self.frame.size.width;
-        _frameHeight = self.frame.size.height;
     }
     
-    
+    //
     [self updateVertices];
     [self render: nil];
-//#endif
 }
-
 
 - (void)setContentMode:(UIViewContentMode)contentMode
 {
@@ -624,17 +549,20 @@ enum {
     [_renderer resolveUniforms:_program];
 	
 exit:
-    
     if (vertShader)
+    {
         glDeleteShader(vertShader);
+    }
     if (fragShader)
+    {
         glDeleteShader(fragShader);
-    
-    if (result) {
-        
+    }
+    if (result)
+    {
         DLog(@"OK setup GL programm");
-        
-    } else {
+    }
+    else
+    {
         
         glDeleteProgram(_program);
         _program = 0;
@@ -645,25 +573,25 @@ exit:
 
 - (void)updateVertices
 {
-    //(self.contentMode == UIViewContentModeScaleAspectFit)
-    const BOOL fit = (self.contentMode == UIViewContentModeScaleAspectFit);
-    float width;
-    float height;
-    if (nType==1) {
-        width =  fit ? _decoder.frameWidth : _framwWidth;
-        height =  fit ? _decoder.frameHeight : _frameHeight;
-    }
-    else if (nType == 2)
-    {
-        width =  fit ? _decoderNew.frameWidth : _framwWidth;
-        height =  fit ? _decoderNew.frameHeight : _frameHeight;
-    }
+    //UIViewContentModeScaleAspectFill
+    const BOOL fit      = (self.contentMode == UIViewContentModeScaleAspectFit);
+//    const float width   = _decoder.frameWidth;
+//    const float height  = _decoder.frameHeight;
+    
+    
+    const float width   = _backingWidth;
+    const float height  = _backingHeight;
     
     const float dH      = (float)_backingHeight / height;
-    const float dW      = (float)_backingWidth	  / width;
-    const float dd      = MIN(dH, dW);
+    const float dW      = (float)_backingWidth	/ width;
+    
+    const float dd      = fit ? MIN(dH, dW) : MAX(dH, dW);
+    
     const float h       = (height * dd / (float)_backingHeight);
     const float w       = (width  * dd / (float)_backingWidth);
+    
+//    const float h = (height * dd / (float)_backingHeight);
+//    const float w = (width  * dd / (float)_backingWidth);
     
     _vertices[0] = - w;
     _vertices[1] = - h;
@@ -675,7 +603,7 @@ exit:
     _vertices[7] =   h;
 }
 
-- (void)render: (KxVideoFrame *) frame
+-(void)render: (KxVideoFrame *) frame
 {        
     static const GLfloat texCoords[] = {
         0.0f, 1.0f,
@@ -684,7 +612,7 @@ exit:
         1.0f, 0.0f,
     };
 	
- //   [EAGLContext setCurrentContext:_context];
+    [EAGLContext setCurrentContext:_context];
     
     glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
     glViewport(0, 0, _backingWidth, _backingHeight);
@@ -692,10 +620,10 @@ exit:
     glClear(GL_COLOR_BUFFER_BIT);
 	glUseProgram(_program);
         
-    if (frame) {
+    if (frame)
+    {
         [_renderer setFrame:frame];        
     }
-    
     if ([_renderer prepareRender]) {
         
         GLfloat modelviewProj[16];
@@ -710,7 +638,7 @@ exit:
     #if 0
         if (!validateProgram(_program))
         {
-            NSLog(@"Failed to validate program");
+            DLog(@"Failed to validate program");
             return;
         }
     #endif
@@ -719,126 +647,7 @@ exit:
     }
     
     glBindRenderbuffer(GL_RENDERBUFFER, _renderbuffer);
-    
-    
     [_context presentRenderbuffer:GL_RENDERBUFFER];
-}
-- (id) initWithFrame:(CGRect)frame
-               width:(CGFloat)fWidth height:(CGFloat)fHeight size:(int)nSize
-{
-    self = [super initWithFrame:frame];
-    if (self) {
-        
-        // _decoder = decoder;
-        _framwWidth = fWidth;
-        _frameHeight = fHeight;
-        DLog(@"_framwWidth:%f---_frameHeight:%f",_framwWidth,_frameHeight);
-        
-        _renderer = [[KxMovieGLRenderer_YUV alloc] init];
-        DLog(@"OK use YUV GL renderer");
-        CAEAGLLayer *eaglLayer = (CAEAGLLayer*) self.layer;
-        eaglLayer.opaque = YES;
-        eaglLayer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:
-                                        [NSNumber numberWithBool:FALSE], kEAGLDrawablePropertyRetainedBacking,
-                                        kEAGLColorFormatRGBA8, kEAGLDrawablePropertyColorFormat,
-                                        nil];
-        
-        _context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
-        
-        if (!_context ||
-            ![EAGLContext setCurrentContext:_context]) {
-            
-            DLog(@"failed to setup EAGLContext");
-            self = nil;
-            return nil;
-        }
-        
-        glGenFramebuffers(1, &_framebuffer);
-        glGenRenderbuffers(1, &_renderbuffer);
-        
-        glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
-        glBindRenderbuffer(GL_RENDERBUFFER, _renderbuffer);
-        
-        [_context renderbufferStorage:GL_RENDERBUFFER fromDrawable:(CAEAGLLayer*)self.layer];
-
-        glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &_backingWidth);
-        glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &_backingHeight);
-        
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, _renderbuffer);
-        
-        GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-        if (status != GL_FRAMEBUFFER_COMPLETE) {
-            
-            NSLog(@"failed to make complete framebuffer object %x", status);
-            self = nil;
-            return nil;
-        }
-        
-        GLenum glError = glGetError();
-        if (GL_NO_ERROR != glError) {
-            
-            DLog(@"failed to setup GL %x", glError);
-            self = nil;
-            return nil;
-        }
-        
-        if (![self loadShaders]) {
-            
-            self = nil;
-            return nil;
-        }
-        _vertices[0] = -1.0f;
-        _vertices[1] = -1.0f;
-        _vertices[2] =  1.0f;
-        _vertices[3] = -1.0f;
-        _vertices[4] = -1.0f;
-        _vertices[5] =  1.0f;
-        _vertices[6] =  1.0f;
-        _vertices[7] =  1.0f;
-        DLog(@"OK setup GL");
-    }
-    return self;
-}
-
--(UIImage*)snapshot:(UIView*)eaglview
-{
-    glBindRenderbuffer(GL_RENDERBUFFER, _renderbuffer);
-    glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &_backingWidth);
-    glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &_backingHeight);
-
-    NSInteger x = 0, y = 0, width = _backingWidth, height = _backingHeight;
-    NSInteger dataLength = width * height * 4;
-    GLubyte *data = (GLubyte*)malloc(dataLength * sizeof(GLubyte));
-    
-    glPixelStorei(GL_PACK_ALIGNMENT, 4);
-    glReadPixels(x, y, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data);
-    CGDataProviderRef ref = CGDataProviderCreateWithData(NULL, data, dataLength, NULL);
-    CGColorSpaceRef colorspace = CGColorSpaceCreateDeviceRGB();
-    CGImageRef iref = CGImageCreate(width, height, 8, 32, width * 4, colorspace, kCGBitmapByteOrder32Big | kCGImageAlphaPremultipliedLast,
-                                    ref, NULL, true, kCGRenderingIntentDefault);
-    NSInteger widthInPoints, heightInPoints;
-    if (NULL != UIGraphicsBeginImageContextWithOptions) {
-        CGFloat scale = eaglview.contentScaleFactor;
-        widthInPoints = width / scale;
-        heightInPoints = height / scale;
-        UIGraphicsBeginImageContextWithOptions(CGSizeMake(widthInPoints, heightInPoints), NO, scale);
-    }
-    else {
-        widthInPoints = width;
-        heightInPoints = height;
-        UIGraphicsBeginImageContext(CGSizeMake(widthInPoints, heightInPoints));
-    }
-    CGContextRef cgcontext = UIGraphicsGetCurrentContext();
-    CGContextSetBlendMode(cgcontext, kCGBlendModeCopy);
-    CGContextDrawImage(cgcontext, CGRectMake(0.0, 0.0, widthInPoints, heightInPoints), iref);
-    UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
-    UIGraphicsEndImageContext();
-    // Clean up
-    free(data);
-    CFRelease(ref);
-    CFRelease(colorspace);
-    CGImageRelease(iref);
-    return image;
 }
 
 @end

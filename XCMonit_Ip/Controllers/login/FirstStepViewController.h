@@ -7,7 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
-
-@interface FirstStepViewController : UIViewController
+#import "CustomViewController.h"
+@interface FirstStepViewController : CustomViewController
 
 @end

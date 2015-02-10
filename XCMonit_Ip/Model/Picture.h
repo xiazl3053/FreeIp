@@ -8,6 +8,12 @@
 
 #import <Foundation/Foundation.h>
 
-@interface Picture : NSObject
+@interface PictureModel : NSObject
 
+@property (nonatomic,assign) NSInteger nId;
+@property (nonatomic,strong) NSString *strDevName;
+@property (nonatomic,strong) NSString *strFile;
+@property (nonatomic,strong) NSString *strTime;
+
+-(id)initWithItems:(NSArray*)items;
 @end

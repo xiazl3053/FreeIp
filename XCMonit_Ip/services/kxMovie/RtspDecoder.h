@@ -10,26 +10,27 @@
 #import <CoreGraphics/CoreGraphics.h>
 #import "DecoderPublic.h"
 
+@class RtspInfo;
 @interface RtspDecoder : NSObject
 
 @property (readonly, nonatomic) CGFloat fps;
 @property (nonatomic,assign) BOOL isEOF;
 @property (nonatomic,assign) BOOL     decoding;
 @property (nonatomic,assign) BOOL playing;
-@property (nonatomic,strong) NSMutableArray *videoArray;
 
-- (BOOL) openDecoder: (NSString *) path
-               error: (NSError **) perror;
+@property (nonatomic,assign) NSInteger nTimeOut;
+
+-(BOOL)openDecoder:(NSString *)path error:(NSError **) perror;
 
 -(NSMutableArray*)decodeFrames;
 
--(NSMutableArray*)getVideoArray;
+-(void)stopRecord;//录像结束
+-(void)recordStart:(NSString*)strPath name:(NSString*)strDevName;//录像开始
+-(int)protocolInit:(RtspInfo*)rtspInfo path:(NSString *)strPath channel:(int)nChannel code:(int)nCode;//DVR直连
+-(void)releaseRtspDecoder;//释放rtsp一些标志
 
--(void)startPlay;
--(void)stopRecord;
--(void)startRecord;
 
-
+@property (nonatomic, assign) BOOL bExit;
 @property (readonly, nonatomic) NSUInteger frameWidth;
 @property (readonly, nonatomic) NSUInteger frameHeight;
 @end

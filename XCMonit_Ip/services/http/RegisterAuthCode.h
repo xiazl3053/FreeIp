@@ -7,7 +7,22 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "DecodeJson.h"
+typedef void(^HttpAuthCode)(NSString *strImg, int nStatus);
+
+typedef void(^HttpAuthRegister)(int nStatus);
+
+typedef void(^HttpAuthUser)(int nStatus);
 
 @interface RegisterAuthCode : NSObject
+
+@property (nonatomic,copy) HttpAuthRegister httpReg;
+@property (nonatomic,copy) HttpAuthCode httpBlock;
+@property (nonatomic,copy) HttpAuthUser httpAuthBlock;
+
+
+-(void)requestAuthCode;
+-(void)requestRegister:(NSString*)strUser pwd:(NSString*)strPwd auth:(NSString *)strAuth code:(NSString *)strCode;
+-(void)requestAuthUsername:(NSString *)strUser;
 
 @end

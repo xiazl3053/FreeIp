@@ -19,7 +19,7 @@
 @property (nonatomic,assign) NSInteger nPort;
 @property (nonatomic,strong) NSString *strType;
 @property (nonatomic,assign) NSInteger nChannel;
-
+@property (nonatomic,assign) NSInteger nRow;
 
 -(id)initWithItems:(NSArray*)items;
 

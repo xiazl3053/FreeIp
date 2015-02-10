@@ -6,10 +6,8 @@ extern "C" {
 #ifndef __P2PSDK_H__
 #define __P2PSDK_H__
 
-
-
-//#include <string>
 #include <stdio.h>
+    
 #define MAX_MSG_DATA_LEN 512
 
 #ifdef _MSC_VER_

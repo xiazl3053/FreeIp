@@ -12,8 +12,10 @@
 #import <objc/runtime.h>
 
 @interface UIScrollView()
+
 @property (weak, nonatomic) MJRefreshHeaderView *header;
 @property (weak, nonatomic) MJRefreshFooterView *footer;
+
 @end
 
 
@@ -43,7 +45,8 @@ static char MJRefreshFooterViewKey;
     [self didChangeValueForKey:@"MJRefreshFooterViewKey"];
 }
 
-- (MJRefreshFooterView *)footer {
+- (MJRefreshFooterView *)footer
+{
     return objc_getAssociatedObject(self, &MJRefreshFooterViewKey);
 }
 
@@ -75,7 +78,8 @@ static char MJRefreshFooterViewKey;
 - (void)addHeaderWithTarget:(id)target action:(SEL)action
 {
     // 1.创建新的header
-    if (!self.header) {
+    if (!self.header)
+    {
         MJRefreshHeaderView *header = [MJRefreshHeaderView header];
         [self addSubview:header];
         self.header = header;
@@ -152,7 +156,8 @@ static char MJRefreshFooterViewKey;
 - (void)addFooterWithTarget:(id)target action:(SEL)action
 {
     // 1.创建新的footer
-    if (!self.footer) {
+    if (!self.footer)
+    {
         MJRefreshFooterView *footer = [MJRefreshFooterView footer];
         [self addSubview:footer];
         self.footer = footer;

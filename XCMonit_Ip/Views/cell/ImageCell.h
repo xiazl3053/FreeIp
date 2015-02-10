@@ -8,16 +8,35 @@
 
 #import <UIKit/UIKit.h>
 
+@class ImageCell;
+
+@protocol RecordCellDelegate <NSObject>
+
+//-(void)realPlayRecordById:(NSInteger)nId;
+
+-(void)addPicView:(ImageCell*)imgCell view:(UIView*)view index:(NSInteger)nIndex;
+-(void)addRecordView:(ImageCell*)imgCell view:(UIView*)view index:(NSInteger)nIndex;
+
+@end
+
+
 @interface ImageCell : UITableViewCell
 
+@property (nonatomic,assign) NSInteger nRow;
 
 @property (nonatomic,strong) NSMutableArray *array;
-@property (nonatomic,strong) NSString *strFile;
 
+@property (nonatomic,strong) NSMutableArray *aryImage;
 
-- (void)tapImage:(UITapGestureRecognizer *)tap;
+@property (nonatomic,strong) NSMutableDictionary *aryDict;
+
+@property (nonatomic,assign) id<RecordCellDelegate> delegate;
+
+@property (nonatomic,assign) BOOL bDel;
+
 - (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier;
--(void)setArrayInfo:(NSArray*)array;
+-(void)setArrayInfo:(NSArray*)array record:(NSArray*)aryRecord;
 -(void)freshCell;
 
 @end
+
