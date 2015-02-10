@@ -1,0 +1,97 @@
+//
+//  Prefix header
+//
+//  The contents of this file are implicitly included at the beginning of every source file.
+//
+
+#import <Availability.h>
+
+#ifndef __IPHONE_3_0
+#warning "This project uses features only available in iOS SDK 3.0 and later."
+#endif
+#import "DevInfoMacro.h"
+
+//#define kServerName    “183.57.82.43”
+
+
+#ifdef __OBJC__
+    #import <UIKit/UIKit.h>
+    #import <Foundation/Foundation.h>
+    #import "GlobalDefine.h"
+
+#endif
+
+
+
+/*
+ 
+ 
+ lipo -create /Users/xiazhonglin/Desktop/iosp2p/avmv7/libenet.a
+ /Users/xiazhonglin/Desktop/iosp2p/armv7s/libenet.a -output
+ /Users/xiazhonglin/Desktop/iosp2p/new/libenet.a
+ 
+ lipo -create /Users/xiazhonglin/Desktop/iosp2p/armv7/libenet.a /Users/xiazhonglin/Desktop/iosp2p/armv7s/libenet.a -output /Users/xiazhonglin/Desktop/iosp2p/libenet.a
+ 
+ lipo -create /Users/xiazhonglin/Desktop/iosp2p/armv7/libnattrav.a /Users/xiazhonglin/Desktop/iosp2p/armv7s/libnattrav.a -output /Users/xiazhonglin/Desktop/iosp2p/libnattrav.a
+ 
+ lipo -create /Users/xiazhonglin/Desktop/iosp2p/armv7/librutil.a /Users/xiazhonglin/Desktop/iosp2p/armv7s/librutil.a -output /Users/xiazhonglin/Desktop/iosp2p/librutil.a
+ 
+ lipo -create /Users/xiazhonglin/Desktop/iosp2p/armv7/libsdkclient.a /Users/xiazhonglin/Desktop/iosp2p/armv7s/libsdkclient.a -output /Users/xiazhonglin/Desktop/iosp2p/libsdkclient.a
+ 
+ libnattrav.a  librutil.a libsdkclient.a
+ 
+
+RTSP设备列表:
+                1.列表信息可伸缩
+                2.添加新的RTSP设备
+                3.RTSP协议检测－判断设备状态,30秒轮巡检测-调用ffmpeg接口
+                4.列表内容:左边图片-RTSP,上-右边:设备名;下－左:设备状态
+RTSP信息数据库:    
+ 1.用户名  
+ 2.密码  
+ 3.地址   
+ 4.设备类型
+ 5.通道
+ 6.端口
+ 7.设备名
+ 8.唯一ID
+ 
+RTSP视频播放:      
+ 1.请求实时流
+ 2.DVR/NVR通道切换
+ 3.停止、抓拍、录像、重连
+ 4.全屏效果
+ 
+RTSP设备添加页面:
+ 1.设备名
+ 2.地址
+ 3.端口
+ 4.类型
+ 5.通道
+ 6.用户名
+ 7.密码
+
+ 
+ 
+ 
+ 
+ 
+1.看IPC和DVR、NVR实时流时，如果抓拍图片成功，则提示“抓拍成功”提示，抓拍时按钮设计成红色  --美工修改   --已经修改
+2.看DVR、NVR实时流时，点击录像按钮时，录像按钮图标要设计成红色，而且要提示"开始录像",IPC录像时
+有提示“开始录像”，录像完成后图标要恢复正常，且提示“录像停止”。而且如果对应通道如果没有视频时，
+则抓拍和录像按钮应该设置成灰色，使其不能抓拍和录像           --图片修改   --已经修改
+3.本地录像显示默认显示当天录像，且支持按时间(具体到天)来查询录像,无录像文件时页面显示无录像文件的相关提示  --功能更改
+4.“更多” 里面添加"查看版本"信息    --
+5.增加”序列号扫描“功能
+6.FREEIP图标logo改成云状环绕的logo
+ 
+ 
+ 
+www.freeip.com
+1456738216
+ 
+ 
+ 
+ 
+ 
+ */

@@ -1,0 +1,151 @@
+/* 
+  Localizable.strings
+  LocalizableDemo
+
+  Created by Jordan Cao on 12-9-26.
+  Copyright (c) 2012年 AirView.com. All rights reserved.
+*/
+/*Loginbtn */
+"Loginbtn" = "登录";
+/*Loginuser */
+"Loginuser" = "请输入用户名";
+/*Loginpwd */
+"Loginpwd" = "请输入密码";
+/*Loginregister */
+"Loginregister" = "注册";
+
+/*http service*/
+"httpserver" = "http://www.freeip.com/";
+
+/*P2P service*/
+"p2pserver" = "www.freeipc.com";
+
+/*offline*/
+"offline" = "离线";
+
+/*online*/
+"online" = "在线";
+
+/*device status*/
+"statu" = "状态";
+
+/*device type*/
+"type" = "类型";
+
+/*devNO*/
+"devNO" = "序列号";
+
+/*devDel*/
+"devDel" = "删除";
+
+/*home*/
+"home" = "我的";
+
+/*device*/
+"device" = "设备管理";
+
+/*more*/
+"more" = "更多";
+
+/*picture*/
+"picture" = "图片";
+
+/*userinfo*/
+"userinfo" = "用户信息";
+
+/*aboutus*/
+"aboutus" = "关于我们";
+
+/*version*/
+"version" = "当前版本";
+
+/*cancel*/
+"cancel" = "取消";
+
+/*confirm*/
+"confirm" = "确认";
+
+/*delete device request*/
+"delDeviceQuq" = "是否删除设备";
+
+/*logout*/
+"logout" = "注销";
+
+/*device*/
+"devDetails" = "设备详情";
+
+/*loading*/
+"loading" = "正在连接...";
+
+/*connectFail*/
+"connectFail" = "连接设备失败";
+
+/*Disconnect*/
+"Disconnect" = "设备连接中断";
+
+/*deviceinfotimeout*/
+"deviceinfotimeout" = "获取设备信息超时";
+
+/*updDevName*/
+"updDevName" = "修改设备名称";
+
+/*save*/
+"save" = "保存";
+
+/*cameraName*/
+"cameraName" = "设备名称(长度小于50)";
+
+/*userAuth*/
+"userAuth" = "用户名不能为空";
+
+/*pwdAuth*/
+"pwdAuth" = "密码不能为空";
+
+/*logining*/
+"logining" = "登录中...";
+
+/*authError*/
+"authError" = "用户名或者密码错误";
+
+/*loginTime*/
+"loginTime" = "连接超时...";
+
+/*ServerException*/
+"ServerException" = "服务器异常";
+
+"Remind" = "提示";
+"logoutRemind" = "是否注销";
+"AddCamera" = "添加设备";
+"inputNO" = "请输入序列号";
+"serialLength" = "序列号长度必须为13";
+"addOk" = "添加成功";
+"bindingError" = "该设备已被其他用户绑定";
+"serialError" = "设备序列号不存在";
+"addTimeout" = "添加设备超时";
+"Modify" = "修改设备名";
+"cameraLess" = "长度必须小于50";
+"cameranull" = "设备名不能为空";
+"updateOK" = "修改成功";
+"updateTimeOut" = "修改设备名超时";
+"nostream" = "没有获取到码流";
+"switchError" = "码流切换失败";
+"picturesView" = "图片";
+"Nickname" = "昵称";
+"Useravatar" = "用户头像";
+"RealName" = "真实姓名";
+"email" = "邮箱";
+"mobile" = "手机号码";
+"userType" = "账户类型";
+"familyType" = "家庭用户";
+"recordInfo" = "录像信息";
+"RecordDelete" = "删除";
+"RecordConfirm" = "确定";
+"videoLow" = "流畅";
+"videoHight" = "高清";
+"NULLInfo" = "空";
+"videoSwitch" = "正在设置码流";
+"userTimeout" = "获取用户信息超时";
+"rtspList" = "RTSP列表";
+
+"versionInfo" = "版本信息";
+

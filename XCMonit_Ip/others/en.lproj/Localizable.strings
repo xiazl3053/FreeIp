@@ -1,0 +1,160 @@
+/* 
+  Localizable.strings
+  LocalizableDemo
+
+  Created by Jordan Cao on 12-9-26.
+  Copyright (c) 2012年 AirView.com. All rights reserved.
+*/
+
+/*Loginbtn */
+"Loginbtn" = "Login";
+
+/*Loginuser */
+"Loginuser" = "please enter your username";
+
+/*Loginpwd */
+"Loginpwd" = "please enter your password";
+
+/*Loginregister */
+"Loginregister" = "Register";
+
+/*http service*/
+"httpserver" = "http://www.freeip.com/";
+
+/*P2P service*/
+"p2pserver" = "www.freeipc.com";
+
+/*offline*/
+"offline" = "off line";
+
+/*online*/
+"online" = "on line";
+
+/*device status*/
+"statu" = "Status";
+
+/*device type*/
+"type" = "Type";
+
+/*devNO*/
+"devNO" = "Serial Number";
+
+/*devDel*/
+"devDel" = "Delete";
+
+/*home*/
+"home" = "Home";
+
+/*device*/
+"device" = "Cameras";
+
+/*more*/
+"more" = "More";
+
+/*picture*/
+"picture" = "Pictures";
+
+/*userinfo*/
+"userinfo" = "User Unfo";
+
+/*aboutus*/
+"aboutus" = "About Us";
+
+/*version*/
+"version" = "version";
+
+/*cancel*/
+"cancel" = "Cancel";
+
+/*confirm*/
+"confirm" = "Confirm";
+
+/*delete device request*/
+"delDeviceQuq" = "Do you want to delete the camera?";
+
+/*logout*/
+"logout" = "logout";
+
+/*DeviceDetails*/
+"devDetails" = "Camera Details";
+
+/*loading*/
+"loading" = "loading...";
+
+/*connectFail*/
+"connectFail" = "Connect the camera failed";
+
+/*Disconnect*/
+"Disconnect" = "Camera connection interrupted";
+
+/*deviceinfotimeout*/
+"deviceinfotimeout" = "Get the camera information timeout";
+
+/*updDevName*/
+"updDevName" = "Modify";
+
+
+/*save*/
+"save" = "save";
+
+/*cameraName*/
+"cameraName" = "The camera name(The length is less than 50)";
+
+/*userAuth*/
+"userAuth" = "User name can not be empty";
+
+/*pwdAuth*/
+"pwdAuth" = "user password can not be empty";
+
+/*logining*/
+"logining" = "login...";
+/*authError*/
+"authError" = "User name or password error";
+/*loginTime*/
+"loginTime" = "Connection Timeout";
+/*ServerException*/
+"ServerException" = "Server exception";
+"Remind" = "Remind";
+"logoutRemind" = "Are you sure to logout";
+
+"AddCamera" = "Add Camera";
+"inputNO" = "Please enter the serial number";
+"serialLength" = "Serial number length is equal to 13";
+"addOk" = "Successfully added";
+"bindingError" = "The camera has been other user binding";
+"serialError" = "The camera serial number does not exist";
+"addTimeout" = "Add camera timeout";
+"Modify" = "Modify camera name";
+"cameraLess" = "The length is less than 50";
+"cameranull" = "The camera name cannot be empty";
+"updateOK" = "Successful modification";
+"updateTimeOut" = "Modify camera name timeout";
+"nostream" = "No access to the stream";
+"switchError" = "Stream switching failure";
+"picturesView" = "Pictures";
+"Nickname" = "Nickname";
+"Useravatar" = "User avatar";
+"RealName" = "Real Name";
+"email" = "Email";
+"mobile" = "mobile";
+"userType" = "Account Type";
+"familyType" = "Family User";
+"recordInfo" = "Record";
+"RecordDelete" = "Delete";
+"RecordConfirm" = "OK";
+"videoLow" = "BD";
+"videoHight" = "HD";
+"NULLInfo" = "null";
+"videoSwitch" = "video";
+"userTimeout" = "Get user information timeout";
+"rtspList" = "RTSP List";
+
+"versionInfo" = "version info";
+
+
+
+
+
+
+
+

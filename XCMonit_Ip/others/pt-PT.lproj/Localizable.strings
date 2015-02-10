@@ -1,0 +1,251 @@
+/*Loginbtn */
+"Loginbtn" = "Login";
+/*Loginuser */
+"Loginuser" = "Please enter the user name";
+"regUser"="Please enter the mailbox";
+/*Loginpwd */
+"Loginpwd" = "Please enter the login password";
+"LoginpwdAgain" = "Please confirm the login password";
+/*Loginregister */
+"Loginregister" = "Register";
+/*http service*/
+"httpserver" = "http://www.freeip.com/";
+/*P2P service*/
+"p2pserver" = "www.freeipc.com";
+/*offline*/
+"offline" = "Off line";
+/*online*/
+"online" = "On line";
+/*device status*/
+"statu" = "Status";
+/*device type*/
+"type" = "Type";
+/*devNO*/
+"devNO" = "Serial Number";
+/*devDel*/
+"devDel" = "Delete";
+/*home*/
+"home" = "Home";
+/*device*/
+"device" = "Device";
+/*more*/
+"more" = "More";
+"rtsp" = "Direct";
+/*picture*/
+"picture" = "Pictures";
+/*userinfo*/
+"userinfo" = "User Info";
+/*aboutus*/
+"aboutus" = "About Us";
+/*version*/
+"version" = "Version";
+/*cancel*/
+"cancel" = "Cancel";
+/*confirm*/
+"confirm" = "Confirm";
+/*delete device request*/
+"delDeviceQuq" = "Do you want to delete the device?";
+/*logout*/
+"logout" = "Logout";
+/*DeviceDetails*/
+"devDetails" = "Device Details";
+/*loading*/
+"loading" = "Loading...";
+/*connectFail*/
+"connectFail" = "Connect the device failed";
+/*Disconnect*/
+"Disconnect" = "Device connection interrupted";
+/*deviceinfotimeout*/
+"deviceinfotimeout" = "Get the device information timeout";
+/*updDevName*/
+"updDevName" = "Modify";
+/*save*/
+"save" = "Save";
+/*cameraName*/
+"cameraName" = "The device name(The length is less than 50)";
+/*userAuth*/
+"userAuth" = "Username can not be empty";
+/*pwdAuth*/
+"pwdAuth" = "Password can not be empty";
+/*logining*/
+"logining" = "Login...";
+/*authError*/
+"authError" = "Username or password error";
+/*loginTime*/
+"loginTime" = "Connection Timeout";
+/*ServerException*/
+"ServerException" = "Server exception";
+"Remind" = "Remind";
+"logoutRemind" = "Are you sure to logout";
+"AddCamera" = "Add device";
+"inputNO" = "Please enter the serial number";
+"serialLength" = "Serial number length is equal to 13";
+"addOk" = "Successfully added";
+"bindingError" = "The device had been binded by other users";
+"serialError" = "The device serial number does not exist";
+"addTimeout" = "Add device timeout";
+"Modify" = "Modify device name";
+"cameraLess" = "The length is less than 50";
+"cameranull" = "The device name cannot be empty";
+"updateOK" = "Successful modification";
+"updateTimeOut" = "Modify device name timeout";
+"nostream" = "No access to the stream";
+"streamSetFail"="Failed to set video stream";
+"switchError" = "Stream switching failure";
+"picturesView" = "Pictures";
+"Nickname" = "Nickname";
+"Useravatar" = "User Avatar";
+"RealName" = "Real Name";
+"email" = "Email";
+"mobile" = "Mobile";
+"userType" = "Account Type";
+"familyType" = "Family User";
+"recordInfo" = "Record";
+"RecordDelete" = "Delete";
+"RecordConfirm" = "OK";
+"videoLow" = "BD";
+"videoHight" = "HD";
+"NULLInfo" = "NULL";
+"videoSwitch" = "Video streaming settings";
+"userTimeout" = "Get user information timeout";
+"rtspList" = "Direct List";
+"deviceList" = "Device List";
+"versionInfo" = "Version Info";
+"startTime"="Start Time";
+"endTime"="End Time";
+"allTime"="All Time";
+"ipcType"="IPC";
+"DVR4"="DVR-4";
+"DVR8"="DVR-8";
+"DVR16"="DVR-16";
+"DVR24"="DVR-24";
+"DVR32"="DVR-32";
+"DVRError"="DVR-Error";
+"NVR4"="NVR-4";
+"NVR8"="NVR-8";
+"NVR16"="NVR-16";
+"NVR24"="NVR-24";
+"NVR32"="NVR-32";
+"NVRError"="NVR-Error";
+"deviceNULL" = "Device-NULL";
+"Next"="Refresh";
+"RegisterView" = "Register";
+"RegiAuth"="Enter the above text";
+"UsernameAlready"="Username is already registered";
+"TwoPwd"="Two passwords do not match";
+"RegTimeout"="Registration fails, the connection timeout";
+"RegData"="Registration fails, data errors";
+"RegPic"="Registration fails, the picture content error";
+"RegSuc"="Successful registration";
+"Registering"="Registering";
+"EnterImg"="Please enter the text in the image";
+"confirmPwd"="Confirm password can not be empty";
+"pwdNull"="Password can not be empty";
+"userNull"="Username can not be empty";
+"picNull"="Picture text can not be empty";
+"ImageFail"="Image acquisition fails";
+"auth_ico"="auth_default_en";
+"help"="Help";
+"saveLogin"="Save";
+"input"="Input";
+"addrtsp"="Add Direct";
+"devName"="Device name";
+"devAddr"="IP";
+"devPort"="Port";
+"devUser"="Username";
+"devPwd"="Password";
+"devNameNULL"="The device name can not be empty";
+"devAddrNULL"="Ip can not be empty";
+"devPortNULL"="Port can not be empty";
+"devAddOk"="Successfully added!";
+"startTime" = "Start";
+"endTime" = "End";
+"noRecords"="Recording is empty";
+"devName_info"="Device name";
+"rtspinterrup"="Connection interruption";
+"startRecord"="Begin recording...";
+"stopRecord"="End recording...";
+"captureS"="Capture success";
+"captureF"="Capture fail";
+"playOK"="Finished playing";
+"deleteDevice"="Deleting the device";
+"deleteDeviceOK"="delete success";
+"deleteDeviceFail"="delete fail";
+"deleteDeviceFail_server"="Server Information Error";
+"keyboardFirst"="Previous";
+"keyboardEnd"="Next";
+"keyboardDone"="Done";
+"dateLang"="en_us";
+"startOEnd"="Start date can not be after the end date";
+"endOStart"="End date can not be before the start date";
+"updateEmail"="Email Change";
+"updateReal"="Realname Change";
+"nickUpd"="Nickname Change";
+"oldPwd"="Old password";
+"updpwd"="Password Change";
+"newpwd"="New password";
+"pwdCom"="Password confirmation";
+"oldEmpty"="Old password can not be empty";
+"newEmpty"="New password can not be empty";
+"nickEmpty"="Nick name can not be empty";
+"comEmpty"="Confirm password can not be empty";
+"oldError"="Old password error";
+"newError"="New passwords do not match";
+"pwdLength"="Password length can not be less than 6";
+"updpwding"="Modify password...";
+"updnicking"="Modify nickname...";
+"updemailing"="Modify email...";
+"updemailing"="Modify realname...";
+"emailEmpty"="EMail cannot be empty";
+"emailError"="EMail format error";
+"emailBind"="The user's email is bound, unable to set";
+"email"="Email";
+"noDevice"="No device currently added";
+"deviceInfo"="The current number of device";
+"devfresh"="Loading...";
+"releaseRefresh"="Release to refresh...";
+"pullto"="Pull to refresh...";
+"pulltomore"="Pull to refresh more...";
+"releasemore"="Release to refresh more...";
+"devDone"="device loaded";
+"unFindStream"="Unable to find stream";
+"helpWeb"="www.freeip.com/index.php?r=site/AboutAppEn";
+"autoLogin"="Auto Login";
+"savePhoto"="Save";
+"qrResult"="Didn't scan the serial number";
+"qrcode_h"="qrcode_h";
+"qrcode"="qrcode_en";
+"noRecording"="No photos or videos";
+"helpicon"="help_en";
+"find_pwd"="Forgot password";
+"next_find"="Next";
+"UserInfoNotExits"="The user information does not exist";
+"NewPwd"="Please enter a new password";
+"confirmNewPwd"="Please confirm new password";
+"resend"="Resend";
+"VerifyAccount"="Verify account...";
+"VertifySucc"="Verification code has been sent to the mailbox";
+"VertifyExits"="user name does not exist";
+"VertifyEmail"="email is not bound";
+"vertifyCode"="Verification code";
+"sendCode"="Sending Verification code...";
+"vertifyError"="Verification code is error";
+"vertifyEmpty"="Password is empty";
+"vertifyTimeout"="Session is time out";
+"vertifyUser"="User name is not the same";
+"vertiEmpty"="Verification code can not be empty";
+"guessImg"="guess_en";
+"alSend"="Has been sent to the mailbox";
+"photos"="Photos";
+"camera"="Camera";
+"uploadDone"="Uploaded successfully";
+"savePhotos"="Save to photos";
+"networkstatus3G"="Current network:2G/3G/4G";
+"networkstatusWIFI"="Current network:WIFI";
+"networkstatusNO"="No network";
+
+"oldPwdError"="Old password error";
+
+
+
+

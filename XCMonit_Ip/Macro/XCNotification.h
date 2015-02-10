@@ -1,0 +1,30 @@
+//
+//  XCNotification.h
+//  XCMonit_Ip
+//
+//  Created by xia zhonglin  on 14-5-22.
+//  Copyright (c) 2014年 xia zhonglin . All rights reserved.
+//
+
+#ifndef XCMonit_Ip_XCNotification_h
+#define XCMonit_Ip_XCNotification_h
+
+
+
+#define NSCONNECT_P2P_DVR_FAIL_VC @"NSCONNECT_P2P_DVR_FAIL_VC"
+#define NSCONNECT_P2P_FAIL_VC   @"NSCONNECT_P2P_FAIL_VC"
+#define NSSWITCH_P2P_FAIL_VC    @"NSSWITCH_P2P_FAIL_VC"
+#define NSUPDATE_DEVICE_LIST_VC    @"NSUPDATGE_DEVICE_LIST_VC"
+#define NSUPDATE_HOME_TABLEVIEW_VC   @"NSUPDATE_HOME_TABLEVIEW_VC"
+#define NSKEY_BOARD_RETURN_VC   @"NSKEY_BOARD_RETURN_VC"
+#define NSUPDATE_DEV_NAME_VC   @"NSUPDATE_DEV_NAME_VC"
+#define NS_APPLITION_ENTER_BACK  @"NS_APPLITION_ENTER_BACK"
+#define NS_APPLITION_ENTER_FOREG @"NS_APPLITION_ENTER_FOREG"
+#define NS_DELETE_IMAGE_VC   @"NS_DELETE_IMAGE_VC"
+#define NS_UPDATE_IMAGE_VC    @"NS_UPDATE_IMAGE_VC"
+#define NS_GET_DEVICE_LIST_VC    @"NS_GET_DEVICE_LIST_VC"
+#define NS_RTSP_DISCONNECT_VC     @"NS_RTSP_DISCONNECT_VC"
+
+
+
+#endif
