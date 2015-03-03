@@ -155,9 +155,17 @@
             ((UIButton*)[self.view viewWithTag:nIndex+1001]).selected = NO;
         }
     }
+    if (nTag==1002)
+    {
+        [_txtPort setPlaceholder:XCLocalized(@"dvrPort")];
+    }
+    else
+    {
+        [_txtPort setPlaceholder:XCLocalized(@"devPort")];
+    }
+    
     btnSelect = btnType;
     btnType.selected = YES;
-    
     _imgTab.frame = Rect((btnType.tag-1001)*kScreenWidth/3.0,[CustomNaviBarView barSize].height+39, kScreenWidth/3.0, 3);
     [self segmentAction:nTag];
 }

@@ -62,6 +62,7 @@
     
     NSString *strNewPwd = _txtPwd.text;
     NSString *strConPwd = _txtAuth.text;
+
     if ([strNewPwd isEqualToString:@""])
     {
         [self.view makeToast:XCLocalized(@"pwdNull")];
@@ -81,6 +82,12 @@
     if ([strCode isEqualToString:@""])
     {
         [self.view makeToast:XCLocalized(@"vertiEmpty")];
+        return;
+    }
+    
+    if (![strNewPwd isEqualToString:strConPwd])
+    {
+        [self.view makeToast:XCLocalized(@"TwoPwd")];
         return;
     }
     

@@ -196,7 +196,22 @@ www.freeip.com
     svn import /Users/xiazhonglin/Documents/XCMonit_IpV5.1.3 https://172.18.191.42:8443/svn/xzlProject/trunk/ios/XCMonit_IpV5.1.3 -m "初始化导入"
  
  
- zfe845251361     caoxi628688
+    zfe845251361     caoxi628688
+    
+ 
+    3月2日
+    新增功能
+    1.电子放大
+    详解：最大将视频放大4.0
+    加入scrollview
+    
+ 
+ 
+ 
+ 
+ 
+ 
+ 
  
 */
 

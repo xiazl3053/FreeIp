@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>27D21A81-44EA-4CB8-88C9-032E6981F9A9</string>
+	<key>IDESourceControlProjectName</key>
+	<string>XCMonit_Ip</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>223cf592-68e2-7843-8673-3955c81043b3</key>
+		<string>https://172.18.191.42:8443/svn/xzlProject</string>
+		<key>223cf592-68e2-7843-8673-3955c81043b3++5801</key>
+		<string>https://172.18.191.42:8443/svn/xzlProject</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>XCMonit_Ip.xcodeproj</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>223cf592-68e2-7843-8673-3955c81043b3</key>
+		<string>../../..</string>
+		<key>223cf592-68e2-7843-8673-3955c81043b3++5801</key>
+		<string>../..</string>
+	</dict>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>111</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>223cf592-68e2-7843-8673-3955c81043b3++5801</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.subversion</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>223cf592-68e2-7843-8673-3955c81043b3</string>
+			<key>IDESourceControlWCCName</key>
+			<string></string>
+		</dict>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.subversion</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>223cf592-68e2-7843-8673-3955c81043b3++5801</string>
+			<key>IDESourceControlWCCName</key>
+			<string>XCMonit_IpV5.1</string>
+		</dict>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>223cf592-68e2-7843-8673-3955c81043b3++5801</string>
+			<key>IDESourceControlWCCName</key>
+			<string>XCMonit_IpV5.1</string>
+		</dict>
+	</array>
+</dict>
+</plist>

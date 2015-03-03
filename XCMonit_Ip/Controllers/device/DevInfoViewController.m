@@ -167,7 +167,7 @@
         {
             cell.lblDevInfo.text = XCLocalized(@"devName_info");
             cell.lblContext.text = _devInfo.strDevName;
-            cell.lblContext.frame = CGRectMake(kScreenWidth-180, 44.5/2-10, 150, 20);
+            cell.lblContext.frame = CGRectMake(kScreenWidth-155, 44.5/2-10, 140, 20);
             [cell addView:0 height:0];
             [cell addView:20 height:43];
             cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;

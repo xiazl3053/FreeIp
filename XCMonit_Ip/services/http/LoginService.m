@@ -80,25 +80,8 @@
     [UserInfo sharedUserInfo].strPwd = strPwd;
     NSString *strMD5 = [DecodeJson XCmdMd5String:strPwd];
     [UserInfo sharedUserInfo].strMd5 = strMD5;
-    
-    
-//    const char *hostN= [@"www.freeip.com" UTF8String];
-//    struct hostent* phot;
-//    phot = gethostbyname(hostN);
-//    struct in_addr ip_addr;
-//    if(phot)
-//    {
-//        memcpy(&ip_addr, phot->h_addr_list[0], 4);
-//        char ip[20] = {0};
-//        inet_ntop(AF_INET, &ip_addr, ip, sizeof(ip));
-//        NSString *strAddress = [NSString stringWithUTF8String:ip];
-//        DLog(@"strAddress:%@",strAddress);
-//
-//    }
-//    54.67.32.26     美国
-//    58.96.171.214   香港
 
-    NSString *strUrl = [[NSString alloc] initWithFormat:@"%@index.php?r=login/login/PhoneLogin&user_name=%@&password=%@",XCLocalized(@"httpserver"),strUser,strMD5];
+    NSString *strUrl = [[NSString alloc] initWithFormat:@"%@index.php?r=login/login/PhoneLogin&user_name=%@&password=%@",XCLocalized(@"httpserver"),[strUser stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding],strMD5];
     DLog(@"strUrl:%@",strUrl);
     NSURL *url=[NSURL URLWithString:strUrl];//创建URL
     NSMutableURLRequest *request=[[NSMutableURLRequest alloc]initWithURL:url];//通过URL创建网络请求

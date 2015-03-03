@@ -24,7 +24,8 @@ extern "C"
 
 #define P2PSHAREDINIT  [P2PInitService sharedP2PInitService]
 using namespace std;
-int nTimeOut ;
+int nTimeOut;
+
 NSArray *collectStreams(AVFormatContext *formatCtx, enum AVMediaType codecType)
 {
     NSMutableArray *ma = [NSMutableArray array];
@@ -615,13 +616,14 @@ int nInfoNum = 0;
     CGFloat minDuration = 0;
     CGFloat decodedDuration = 0;
     uint8_t *puf= (uint8_t*)malloc(500*1024);
+    
     while (!bFinish)
     {
         if (!_bNotify)
         {
             return result;
         }
-        nRef = 0;//av_read_frame(pFormatCtx, &packet);
+        nRef = 0;
         @synchronized(recv->aryVideo)
         {
             if (recv->aryVideo.count>0)
@@ -650,6 +652,7 @@ int nInfoNum = 0;
             [NSThread sleepForTimeInterval:0.03f];
             continue;
         }
+
         if(nRef>=0)
         {
             int len = avcodec_decode_video2(pCodecCtx,pVideoFrame,&gotframe,&packet);
@@ -672,8 +675,8 @@ int nInfoNum = 0;
             }
             if (0 == len || -1 == len)
             {
-                av_free_packet(&packet);
-                break;
+                DLog(@"PSP PPS");
+                continue;
             }
         }
         else
@@ -713,7 +716,6 @@ int nInfoNum = 0;
             return result;
         }
         nRef = av_read_frame(pFormatCtx, &packet);
-   //     DLog(@"packet.size:%d",packet.size);
         if(nRef>=0)
         {
             int len = avcodec_decode_video2(pCodecCtx,pVideoFrame,&gotframe,&packet);

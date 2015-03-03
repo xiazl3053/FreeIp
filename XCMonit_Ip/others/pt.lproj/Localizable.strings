@@ -48,7 +48,7 @@
 "serialError" = "O número de série do dispositivo não existe";
 "addTimeout" = "Adicione o limite de tempo do dispositivo";
 "Modify" = "Modifique o nome do dispositivo";
-"cameraLess" = "O comprimento é menos de 50";
+"cameraLess" = "O comprimento é menos de 64";
 "cameranull" = "O nome do dispositivo não pode estar vazio";
 "updateOK" = "Modificação bem sucedida";
 "updateTimeOut" = " Modificar o nome do dispositivo de tempo limite";
@@ -114,7 +114,8 @@
 "addrtsp"="Adicionar Direct";
 "devName"="Nome do dispositivo";
 "devAddr"="IP";
-"devPort"="Porta";
+"devPort"="RTSP Porta";
+"dvrPort"="Server Porta";
 "devUser"="Nome de usuário";
 "devPwd"="Senha";
 "devNameNULL"="O nome do dispositivo não pode estar vazio";

@@ -75,7 +75,6 @@ typedef int (^XCReadData)(void *opaque, uint8_t *buf, int buf_size);
 - (BOOL) openDecoder: (NSString *) path
                error: (NSError **) perror;
 
-
 //视频码流切换
 -(void)switchP2PCode:(int)nCode;
 //设置超时时间，已停用

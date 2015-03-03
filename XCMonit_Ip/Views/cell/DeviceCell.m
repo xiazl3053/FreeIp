@@ -56,7 +56,6 @@
         [_imgView addGestureRecognizer:tapGesture];
         [_imgView setUserInteractionEnabled:YES];
         
-  //      self.contentView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"tmall_bg_main"]];
         UILabel *sLine1 = [[UILabel alloc] initWithFrame:CGRectMake(0, kTableviewDeviceCellHeight-1, kScreenWidth, 0.5)];
         sLine1.backgroundColor = [UIColor colorWithRed:198/255.0
                                                  green:198/255.0

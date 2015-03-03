@@ -25,10 +25,10 @@
 - (void)awakeFromNib
 {
     // Initialization code
-    _lblDevInfo = [[UILabel alloc] initWithFrame:CGRectMake(20, self.contentView.frame.size.height/2-10, 160, 20)];
-    _lblContext = [[UILabel alloc] initWithFrame:CGRectMake(kScreenWidth-160, self.contentView.frame.size.height/2-10, 145, 20)];
-    [_lblDevInfo setFont:[UIFont fontWithName:@"Helvetica" size:16.0f]];
-    [_lblContext setFont:[UIFont fontWithName:@"Helvetica" size:16.0f]];
+    _lblDevInfo = [[UILabel alloc] initWithFrame:CGRectMake(20, self.contentView.frame.size.height/2-10, 140, 20)];
+    _lblContext = [[UILabel alloc] initWithFrame:CGRectMake(kScreenWidth-170, self.contentView.frame.size.height/2-10, 145, 20)];
+    [_lblDevInfo setFont:[UIFont fontWithName:@"Helvetica" size:15.0f]];
+    [_lblContext setFont:[UIFont fontWithName:@"Helvetica" size:15.0f]];
     
     [_lblDevInfo setTextColor:RGB(180, 180, 180)];
     [_lblContext setTextColor:RGB(98, 98, 98)];

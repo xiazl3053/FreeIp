@@ -86,7 +86,7 @@
 "serialError" = "The device serial number does not exist";
 "addTimeout" = "Add device timeout";
 "Modify" = "Modify device name";
-"cameraLess" = "The length is less than 50";
+"cameraLess" = "The length is less than 64";
 "cameranull" = "The device name cannot be empty";
 "updateOK" = "Successful modification";
 "updateTimeOut" = "Modify device name timeout";
@@ -152,7 +152,8 @@
 "addrtsp"="Add Direct";
 "devName"="Device name";
 "devAddr"="IP";
-"devPort"="Port";
+"devPort"="RTSP Port";
+"dvrPort"="Server Port";
 "devUser"="Username";
 "devPwd"="Password";
 "devNameNULL"="The device name can not be empty";

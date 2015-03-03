@@ -32,7 +32,7 @@
 "deviceinfotimeout" = "获取设备信息超时";
 "updDevName" = "修改设备名称";
 "save" = "保存";
-"cameraName" = "设备名称(长度小于50)";
+"cameraName" = "设备名称(长度小于64)";
 "userAuth" = "用户名不能为空";
 "pwdAuth" = "密码不能为空";
 "logining" = "登录中...";
@@ -95,7 +95,7 @@
 "RegiAuth"="验证码";
 "Next"="Refresh";
 "UsernameAlready"="用户名已经注册";
-"TwoPwd"="两次输出的密码不一致";
+"TwoPwd"="密码不一致";
 "RegTimeout"="注册失败，连接超时";
 "RegData"="注册失败,数据错误";
 "RegPic"="注册失败,验证码错误";
@@ -115,7 +115,8 @@
 
 "devName"="设备名";
 "devAddr"="地  址";
-"devPort"="端  口";
+"devPort"="RTSP端口";
+"dvrPort"="Server端口";
 "devUser"="用户名";
 "devPwd"="密  码";
 
