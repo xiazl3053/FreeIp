@@ -416,6 +416,7 @@ NSData * copyFrameData(UInt8 *src, int linesize, int width, int height)
 #pragma mark 销毁Decode
 -(void)dealloc
 {
+    DLog(@"要结束");
     [self recordStop];
     if(recv)
     {

@@ -11,6 +11,7 @@
 #import "UpdRealService.h"
 #import "ProgressHUD.h"
 #import "Toast+UIView.h"
+
 #import "XCNotification.h"
 @interface UpdRealViewController ()
 
@@ -70,8 +71,11 @@
                     break;
             }
         };
+        dispatch_async(dispatch_get_main_queue(),
+        ^{
+            [ProgressHUD show:XCLocalized(@"updnicking")];
+        });
         [_updServer requestUpdReal:strEmail];
-        [ProgressHUD show:XCLocalized(@"updnicking")];
     }
 }
 
@@ -126,4 +130,18 @@
 }
 
 
+-(void)closeKeyBoard
+{
+    [_txtRealName resignFirstResponder];
+}
+-(void)viewDidAppear:(BOOL)animated
+{
+    [super viewDidAppear:animated];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(closeKeyBoard) name:NSKEY_BOARD_RETURN_VC object:nil];
+}
+-(void)viewDidDisappear:(BOOL)animated
+{
+    [super viewDidDisappear:animated];
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
 @end

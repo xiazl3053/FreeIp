@@ -24,6 +24,8 @@
 		<key>223cf592-68e2-7843-8673-3955c81043b3++5801</key>
 		<string>../..</string>
 	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://172.18.191.42:8443/svn/xzlProject</string>
 	<key>IDESourceControlProjectVersion</key>
 	<integer>111</integer>
 	<key>IDESourceControlProjectWCCIdentifier</key>
@@ -40,7 +42,7 @@
 		</dict>
 		<dict>
 			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
-			<string>public.vcs.subversion</string>
+			<string>public.vcs.git</string>
 			<key>IDESourceControlWCCIdentifierKey</key>
 			<string>223cf592-68e2-7843-8673-3955c81043b3++5801</string>
 			<key>IDESourceControlWCCName</key>
@@ -48,7 +50,7 @@
 		</dict>
 		<dict>
 			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
-			<string>public.vcs.git</string>
+			<string>public.vcs.subversion</string>
 			<key>IDESourceControlWCCIdentifierKey</key>
 			<string>223cf592-68e2-7843-8673-3955c81043b3++5801</string>
 			<key>IDESourceControlWCCName</key>

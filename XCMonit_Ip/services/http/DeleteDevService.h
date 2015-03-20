@@ -7,8 +7,9 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "HttpManager.h"
 typedef void(^HttpDelDev)(int nStatus);
-@interface DeleteDevService : NSObject
+@interface DeleteDevService : HttpManager
 
 @property (nonatomic,copy) HttpDelDev httpDelDevBlock;
 

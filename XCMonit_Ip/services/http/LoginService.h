@@ -7,10 +7,13 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "HttpManager.h"
+
 @class LoginInfo;
 typedef void(^HttpLoginBlock)(LoginInfo *login,int nstatus);
 
-@interface LoginService : NSObject
+@interface LoginService :HttpManager
+
 @property (nonatomic,copy) NSString *strKey;
 @property (nonatomic,copy) HttpLoginBlock httpBlock;
 

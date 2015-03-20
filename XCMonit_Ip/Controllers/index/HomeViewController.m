@@ -23,7 +23,7 @@
 #import "RecordDb.h"
 #import "QrcodeViewController.h"
 #import "DecodeJson.h"
-
+#import "PlayForP2PViewController.h"
 #define HOME_DEVICE_IDENTIFIER    @"deviceIdentifier"
 
 @interface HomeViewController ()<UITableViewDelegate,UITableViewDataSource,DeviceDelegate>
@@ -241,6 +241,8 @@
         //单通道播放视频
         PlayP2PViewController *playController = [[PlayP2PViewController alloc] initWithNO:devModel.strDevNO name:devModel.strDevName format:_nFormat];
         [self.parentViewController presentViewController:playController animated:YES completion:nil];
+//        PlayForP2PViewController *playFor = [[PlayForP2PViewController alloc] initWithNO:devModel.strDevNO name:devModel.strDevName format:_nFormat];
+//        [self.parentViewController presentViewController:playFor animated:YES completion:nil];
     }
     else
     {

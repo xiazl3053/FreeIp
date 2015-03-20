@@ -7,8 +7,11 @@
 //
 
 #import <Foundation/Foundation.h>
+
+#import "HttpManager.h"
+
 typedef void(^HttpUpdReal)(int nStatus);
-@interface UpdRealService : NSObject
+@interface UpdRealService : HttpManager
 
 @property (nonatomic,copy) HttpUpdReal httpBlock;
 

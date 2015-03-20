@@ -24,9 +24,9 @@ bool RecvFile::ProcessFrameData(char* aFrameData, int aFrameDataLength)
     {
         return YES;
     }
-    unsigned char *unFrame = (unsigned char *)aFrameData;
+//    unsigned char *unFrame = (unsigned char *)aFrameData;
     
-    DLog(@"%hhu--%hhu--%hhu--%hhu--%hhu--%d",unFrame[0],unFrame[1],unFrame[2],unFrame[3],unFrame[4],aFrameDataLength);
+//    DLog(@"%hhu--%hhu--%hhu--%hhu--%hhu--%d",unFrame[0],unFrame[1],unFrame[2],unFrame[3],unFrame[4],aFrameDataLength);
     
 //    if (!aryData)
 //    {
@@ -137,6 +137,7 @@ bool RecvFile::DeviceDisconnectNotify()
 
 void RecvFile::StopRecv()
 {
+    DLog(@"结束");
     sendheartinfoflag = NO;
     bDevDisConn = YES;
     if (conn)

@@ -17,6 +17,7 @@
 
 +(NSArray *)queryAllDevInfo;
 +(NSArray *)queryUserInfo;
+
 +(BOOL)insertUserInfo:(UserModel *)user;
 +(BOOL)insertDevInfo:(DevModel *)devModel;
 +(BOOL)deleteDevInfo:(DevModel*)devModel;

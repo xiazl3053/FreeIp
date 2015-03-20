@@ -7,9 +7,14 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "HttpManager.h"
+
+@class HttpManager;
 @class DeviceInfoModel;
+
 typedef void (^HttpDeviceBlock)(DeviceInfoModel *devInfo,NSInteger nCount);
-@interface DeviceService : NSObject
+
+@interface DeviceService : HttpManager
 
 @property (nonatomic,copy) HttpDeviceBlock httpDeviceBlock;
 

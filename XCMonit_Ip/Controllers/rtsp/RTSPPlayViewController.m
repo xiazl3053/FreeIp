@@ -16,6 +16,7 @@
 #import "PhoneDb.h"
 #import "Picture.h"
 #import "RtspInfo.h"
+#import "UIView+Extension.h"
 
 @interface RTSPPlayViewController ()
 {
@@ -27,6 +28,9 @@
     CGRect   frameCenter;
     UITapGestureRecognizer *_tapGestureRecognizer;
     UITapGestureRecognizer *_doubleRecognizer;
+    
+    UIPinchGestureRecognizer *pinchGesture;
+    UIPanGestureRecognizer *_panGesture;
     
     dispatch_queue_t _dispatchQueue;
     
@@ -40,7 +44,9 @@
     int _nCodeType;
     int _nChannel;
     int nCount;
-    
+    CGFloat lastX,lastY;
+    CGFloat lastScale;
+    CGFloat fWidth,fHeight;
 }
 @property (nonatomic,strong) NSString *devName;
 @property (nonatomic,strong) RtspDecoder *rtspDecoder;
@@ -92,6 +98,54 @@
     [self.view setUserInteractionEnabled:YES];
     _videoArray = [NSMutableArray array];
     [UIApplication sharedApplication].idleTimerDisabled = YES;
+    pinchGesture = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(pinchEvent:)];
+    _panGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(panEvent:)];
+}
+
+-(void)panEvent:(UIPanGestureRecognizer*)sender
+{
+    if ([sender state]== UIGestureRecognizerStateBegan)
+    {
+        CGPoint curPoint = [sender locationInView:self.view];
+        lastX = curPoint.x;
+        lastY = curPoint.y;
+        return ;
+    }
+    CGPoint curPoint = [sender locationInView:self.view];
+    CGFloat frameX = (_glView.x + (curPoint.x-lastX)) > 0 ? 0 : (abs(_glView.x+(curPoint.x-lastX))+fWidth >= _glView.width ? -(_glView.width-fWidth) : (_glView.x+(curPoint.x-lastX)));
+    CGFloat frameY =(_glView.y + (curPoint.y-lastY))>0?0: (abs(_glView.y+(curPoint.y-lastY))+fHeight >= _glView.height ? -(_glView.height-fHeight) : (_glView.y+(curPoint.y-lastY)));
+    _glView.frame = Rect(frameX,frameY , _glView.width, _glView.height);
+    lastX = curPoint.x;
+    lastY = curPoint.y;
+}
+
+-(void)pinchEvent:(UIPinchGestureRecognizer*)sender
+{
+    DLog(@"点击事件");
+    if([sender state] == UIGestureRecognizerStateBegan) {
+        //   lastScale = 1.0;
+        return;
+    }
+    CGFloat glWidth = _glView.frame.size.width;
+    CGFloat glHeight = _glView.frame.size.height;
+    CGFloat fScale = [sender scale];
+    
+    if (_glView.frame.size.width * [sender scale] <= fWidth)
+    {
+        lastScale = 1.0f;
+        _glView.frame = Rect(0, 0, fWidth, fHeight);
+    }
+    else
+    {
+        lastScale = 1.5f;
+        CGPoint point = [sender locationInView:self.view];
+        DLog(@"point:%f--%f",point.x,point.y);
+        CGFloat nowWidth = glWidth*fScale>fWidth*4?fWidth*4:glWidth*fScale;
+        CGFloat nowHeight =glHeight*fScale >fHeight* 4?fHeight*4:glHeight*fScale;
+        
+        _glView.frame = Rect(fWidth/2 - nowWidth/2,fHeight/2- nowHeight/2,nowWidth,nowHeight);
+        
+    }
 }
 
 -(void)viewDidAppear:(BOOL)animated
@@ -249,10 +303,13 @@
                 frameCenter = Rect(0, 0,kScreenHeight,kScreenWidth);
             }
         }
-        _glView = [[UIImageView alloc] initWithFrame:frameCenter];
-        _glView.contentMode = UIViewContentModeScaleAspectFit;
+        _glView = [[UIImageView alloc] initWithFrame:Rect(0, 0,fWidth, fHeight)];
+        _glView.contentMode = UIViewContentModeScaleToFill;
         _glView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleBottomMargin;
         [self.view insertSubview:_glView atIndex:0];
+        [_glView setUserInteractionEnabled:YES];
+        [_glView addGestureRecognizer:_panGesture];
+        [_glView addGestureRecognizer:pinchGesture];
         if (_nCodeType==1) {
             [_btnBD setEnabled:NO];
             [_btnHD setEnabled:YES];
@@ -700,44 +757,44 @@
 #pragma mark 横屏
 -(void)setVerticalFrame
 {
-    CGFloat width,height;
+
     if (IOS_SYSTEM_8)
     {
-        width = kScreenWidth;
-        height = kScreenHeight;
+        fWidth = kScreenWidth;
+        fHeight = kScreenHeight;
     }
     else
     {
-        width = kScreenSourchHeight;
-        height = kScreenSourchWidth;
+        fWidth = kScreenSourchHeight;
+        fHeight = kScreenSourchWidth;
     }
 
     
-    _topHUD.frame = Rect(0, 0, width, 49);
+    _topHUD.frame = Rect(0, 0, fWidth, 49);
     
     topViewBg.frame=_topHUD.bounds;
     
     [_topHUD insertSubview:topViewBg atIndex:0];
     
     [_lblName setTextColor:[UIColor whiteColor]];
-    _lblName.frame = Rect(50, 15, width - 160, 20);
-    _downHUD.frame = Rect(0, height-50, width, 50);
+    _lblName.frame = Rect(50, 15, fWidth - 160, 20);
+    _downHUD.frame = Rect(0, fHeight-50, fWidth, 50);
     [_lblName setTextAlignment:NSTextAlignmentLeft];
     
-    _btnBD.frame = Rect(width-120, 0, 60, 48);
-    _btnHD.frame = Rect(width-60, 0, 60, 48);
+    _btnBD.frame = Rect(fWidth-120, 0, 60, 48);
+    _btnHD.frame = Rect(fWidth-60, 0, 60, 48);
     
 
-    _glView.frame = Rect(0, 0,width, height);
+    _glView.frame = Rect(0, 0,fWidth, fHeight);
     _glView.contentMode = UIViewContentModeScaleToFill;
     
     
     [_downHUD insertSubview:downViewBg atIndex:0];
     downViewBg.frame = _downHUD.bounds;
     
-    _btnPlay.frame =   Rect(width-180, 0 , 60, 48);
-    _btnShoto.frame =  Rect(width-120, 0 , 60, 48);
-    _btnRecord.frame = Rect(width-60, 0 , 60, 48);
+    _btnPlay.frame =   Rect(fWidth-180, 0 , 60, 48);
+    _btnShoto.frame =  Rect(fWidth-120, 0 , 60, 48);
+    _btnRecord.frame = Rect(fWidth-60, 0 , 60, 48);
 
     [_btnShoto setImage:[UIImage imageNamed:@"full_snap"] forState:UIControlStateNormal];
     [_btnRecord setImage:[UIImage imageNamed:@"full_record"] forState:UIControlStateNormal];
@@ -766,7 +823,6 @@
 {
     [super viewDidLayoutSubviews];
 
-    [self setVerticalFrame];
 }
 
 
@@ -900,6 +956,10 @@
     }
 }
 
-
+-(void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    [self setVerticalFrame];
+}
 
 @end

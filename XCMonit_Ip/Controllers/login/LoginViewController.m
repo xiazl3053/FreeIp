@@ -5,7 +5,6 @@
 //  Created by xia zhonglin  on 14-5-19.
 //  Copyright (c) 2014年 xia zhonglin . All rights reserved.
 //
-
 #import "LoginViewController.h"
 #import "IndexViewController.h"
 #import "UtilsMacro.h"
@@ -23,6 +22,7 @@
 #import "FirstStepViewController.h"
 #import "GuessLoginService.h"
 #import "GuessListViewController.h"
+
 
 //FFMPEG 在程序开始中调用
 
@@ -49,6 +49,7 @@
 @property (nonatomic,strong) QCheckBox *autoLogin;
 @property (nonatomic,strong) UIButton *btnFind;
 @property (nonatomic,strong) UIImageView *imgGuess;
+
 
 @property (nonatomic,strong) GuessLoginService *guessLogin;
 
@@ -397,6 +398,17 @@
     int nLogin = _autoLogin.checked ? 1 : 0;
     __block int __nSave = nSave;
     __block int __nLogin = nLogin;
+#if 0
+    _nLoginService = [[NewLoginService alloc] init];
+    __weak LoginViewController *__weakSelf = self;
+    
+    _nLoginService.httpBlock = ^(LoginInfo *login,int nStatus)
+    {
+        DLog(@"nStatus:%d",nStatus);
+    };
+    [_nLoginService requestLogin:nsUser pwd:nsPwd];
+#endif
+#if 1
     _xcService = [[LoginService alloc] init];
     __weak LoginViewController *__weakSelf = self;
     //进入新的界面先
@@ -435,7 +447,7 @@
         __weakSelf.bLogin = NO;
     };
     [_xcService connectionHttpLogin:nsUser pwd:nsPwd];
-
+#endif
 }
 
 -(void)updatePwdInfo
@@ -494,6 +506,7 @@
 {
     _imgGuess = nil;
     _imgBg = nil;
+    
     _xcService = nil;
     _txtUser = nil;
     _txtPwd = nil;

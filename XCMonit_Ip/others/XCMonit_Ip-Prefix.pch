@@ -197,23 +197,154 @@ www.freeip.com
  
  
     zfe845251361     caoxi628688
-    
  
     3月2日
+    工作内容：1.修改http login
+    2.direct修改
+    3.视频放大缩小功能修改
+ 
     新增功能
     1.电子放大
     详解：最大将视频放大4.0
     加入scrollview
     
+    为什么要用设计模式?
+    开发要怎么进步?
+    1.阅读
+    2.编写另外的代码
+    3.查看开源代码
+
+ 
+    将解码库整理成一个第三方库的样本，方便统一查看
  
  
+    1.重新设计PlayP2PViewController
+    2.重新设计解码库
+    3.策略模式与工厂模式区分
+    1.解码库
+    A.根据单一
+    B.里氏替换
+    C.依赖倒置
+    D.开闭
+    E.接口隔离
+ 
+        解码库的属性-
+        解码库的业务-
+       
+        视频的帧、宽度、高度
+        码流来源、解码、视频编码
+ 
+    解码动作:初始化,解码
+    码流方式:P2P,RTSP,私有协议
+            共同点：获取一帧码流
+    java code by Source:
+    Interface ISource    utils
+    {
+         public boolean connection(NSString *strNO);   连接设备
+         public NSDate getNextFrame();   获取一帧数据
+         public void sendMessage();     发送通知
+    }
+ 
+    public P2PSource implements ISource
+    {
+        public boolean connection(NSString *strNO)
+        {
+            //P2P与转发同时建立
+        }
+    }
+ 
+    public class RTSPSource implements ISource
+    {
+        public boolean connection(NSString *rtspPath)
+        {
+            //建立rtsp连接，需要ffmpeg中的AVFormatContext
+            //av_open_path
+        }
+    }
+    
+    public class PrivateSource implements ISource
+    {
+        public boolean connection(NSString *strRTSP)
+        {
+ 
+        }
+    }
+ 
+    publci class RecordSource implements ISource
+    {
+        public boolean connection(NSString *strFile)
+        {
+        }
+ 
+    }
+ 
+    java code by decoder:
+    public Interface IDecoder   utils
+    {
+        public void init();
+        public NSArray decodeFrame();
+    }
+ 
+    public class XLDecoder implements IDecoder
+    {
+        public NSArray decodeFrame();
+        public void init();
+    }
+ 
+    java code by video:
+    public Interface IVideo
+    {
+        public CGFloat fWidth; 
+        publci CGFloat fHeight;
+        public CGFloat fps;
+    }
+ 
+    public class XLVideo
+    {
+        public CGFloat fWidth; 
+        publci CGFloat fHeight;
+        public CGFloat fps;
+    }
+ 
+    java code by service:
+    
+    public Interface IDecoderService   services
+    {
+        -(BOOL)connection(ISource*)source;
+        -(BOOL)decoder_init(IDecoder*)decode;
+        -(NSArray*)decodeFrame;
+        -(void)destory;
+        -(void)capture;
+        -(void)recording;
+    }
+    public class XCDecoderService
+    {
+         -(BOOL)connection(ISource*)source;
+         -(BOOL)decoder_init(IDecoder*)decode;
+         -(NSArray*)decodeFrame;
+         -(void)destory;
+         -(void)capture;
+         -(void)recording;
+    }
+      UI OOA:
+        所有类型:P2P单通道、P2P多通道、录像、RTSP单通道、RTSP多通道、私有协议单通道、私有协议多
+      共同点:
+      1.TOPHUD
+      2.DOWNHUD
+      3.解码器
+      不同点:
+      1.TOPHUD的按钮
+      2.DOWNHUD按钮
+      
+      封装方式:
+      TOPHUD:后退按钮、名称、高清、标清切换、云台显示按钮
+ 
+      DOWNHUD:大部分一致
+ 
+      解码器播放实现封装，使用基类方法
  
  
- 
- 
- 
- 
-*/
+ */
 
 
 

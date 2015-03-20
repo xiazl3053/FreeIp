@@ -7,10 +7,10 @@
 //
 
 #import <Foundation/Foundation.h>
-
+#import "HttpManager.h"
 typedef void(^HttpUpdPwd)(int nStatus);
 
-@interface UpdPwdService : NSObject
+@interface UpdPwdService : HttpManager
 
 @property (nonatomic,copy) HttpUpdPwd httpBlock;
 

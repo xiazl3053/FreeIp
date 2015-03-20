@@ -7,11 +7,13 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "HttpManager.h"
+
 
 typedef void(^HttpUpdNick)(int nStatus);
 
 
-@interface UpdNickService : NSObject
+@interface UpdNickService : HttpManager
 
 @property (nonatomic,copy) HttpUpdNick httpBlock;
 

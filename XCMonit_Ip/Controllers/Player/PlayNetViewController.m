@@ -21,7 +21,7 @@
 #import "XCNotification.h"
 #import "UtilsMacro.h"
 #import "CustomNaviBarView.h"
-
+#import "UIView+Extension.h"
 NSString * const KxMovieParameterMinBufferedDuration = @"KxMovieParameterMinBufferedDuration";
 NSString * const KxMovieParameterMaxBufferedDuration = @"KxMovieParameterMaxBufferedDuration";
 NSString * const KxMovieParameterDisableDeinterlacing = @"KxMovieParameterDisableDeinterlacing";
@@ -113,7 +113,8 @@ static NSMutableDictionary * gHistory;
     UIButton *_doneButton;
     UIView *_topHUD;
     UIView *_downHUD;
-    
+    UIPinchGestureRecognizer *pinchGesture;
+    UIPanGestureRecognizer *_panGesture;
     UILabel *_progressLabel;
     UILabel *_leftLabel;
     UILabel *_lblName;
@@ -121,6 +122,9 @@ static NSMutableDictionary * gHistory;
     UIButton *_playBtn;//播放  停止按钮
     UIButton *_rewindBtn;//快退与快进
     UIButton *_forwardBtn;
+    CGFloat lastX,lastY;
+    CGFloat lastScale;
+    CGFloat fWidth,fHeight;
 }
 @property (nonatomic,assign) BOOL pausing;//暂停
 @property (readwrite) BOOL playing;//播放标志
@@ -564,9 +568,54 @@ static NSMutableDictionary * gHistory;
      3.获取到视频流中，视频的宽与高，然后创建openglView,设置贴图类型
      4.
      */
-    
+    pinchGesture = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(pinchEvent:)];
+    _panGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(panEvent:)];
+}
+-(void)panEvent:(UIPanGestureRecognizer*)sender
+{
+    if ([sender state]== UIGestureRecognizerStateBegan)
+    {
+        CGPoint curPoint = [sender locationInView:self.view];
+        lastX = curPoint.x;
+        lastY = curPoint.y;
+        return ;
+    }
+    CGPoint curPoint = [sender locationInView:self.view];
+    CGFloat frameX = (_glView.x + (curPoint.x-lastX)) > 0 ? 0 : (abs(_glView.x+(curPoint.x-lastX))+fWidth >= _glView.width ? -(_glView.width-fWidth) : (_glView.x+(curPoint.x-lastX)));
+    CGFloat frameY =(_glView.y + (curPoint.y-lastY))>0?0: (abs(_glView.y+(curPoint.y-lastY))+fHeight >= _glView.height ? -(_glView.height-fHeight) : (_glView.y+(curPoint.y-lastY)));
+    _glView.frame = Rect(frameX,frameY , _glView.width, _glView.height);
+    lastX = curPoint.x;
+    lastY = curPoint.y;
 }
 
+-(void)pinchEvent:(UIPinchGestureRecognizer*)sender
+{
+    DLog(@"点击事件");
+    if([sender state] == UIGestureRecognizerStateBegan) {
+        //   lastScale = 1.0;
+        return;
+    }
+    CGFloat glWidth = _glView.frame.size.width;
+    CGFloat glHeight = _glView.frame.size.height;
+    CGFloat fScale = [sender scale];
+    
+    if (_glView.frame.size.width * [sender scale] <= fWidth)
+    {
+        lastScale = 1.0f;
+        _glView.frame = Rect(0, 0, fWidth, fHeight);
+    }
+    else
+    {
+        lastScale = 1.5f;
+        CGPoint point = [sender locationInView:self.view];
+        DLog(@"point:%f--%f",point.x,point.y);
+        CGFloat nowWidth = glWidth*fScale>fWidth*4?fWidth*4:glWidth*fScale;
+        CGFloat nowHeight =glHeight*fScale >fHeight* 4?fHeight*4:glHeight*fScale;
+        
+        _glView.frame = Rect(fWidth/2 - nowWidth/2,fHeight/2- nowHeight/2,nowWidth,nowHeight);
+        
+    }
+}
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
@@ -921,6 +970,7 @@ static NSMutableDictionary * gHistory;
 {
     [super viewWillAppear:animated];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(connect_p2p_fail:) name:NSCONNECT_P2P_FAIL_VC object:nil];
+    [self setVerticalFrame];
 }
 
 -(void)connect_p2p_fail:(NSNotification*)notify
@@ -966,28 +1016,15 @@ static NSMutableDictionary * gHistory;
     {
         return ;
     }
-    if (UIInterfaceOrientationPortrait == [UIApplication sharedApplication].statusBarOrientation)
-    {
-        //16:9   320 ：240
-        CGFloat fHeight = kScreenWidth/4*3;
-        frameCenter = Rect(0,kScreenHeight/2-fHeight/2, kScreenWidth, fHeight);
-    }
-    else
-    {
-        if(IOS_SYSTEM_8)
-        {
-            frameCenter = Rect(0, 0,kScreenWidth,kScreenHeight);
-        }
-        else
-        {
-            frameCenter = Rect(0, 0,kScreenHeight,kScreenWidth);
-        }
-    }
-    _glView = [[KxMovieGLView alloc] initWithFrame:frameCenter decoder:_decoder];
+
+    _glView = [[KxMovieGLView alloc] initWithFrame:Rect(0, 0,fWidth, fHeight) decoder:_decoder];
     _glView.contentMode = UIViewContentModeScaleAspectFit;//UIViewContentModeScaleAspectFill;UIViewContentModeScaleAspectFit
     _glView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleBottomMargin;
+    [_glView setUserInteractionEnabled:YES];
+    _glView.contentMode = UIViewContentModeScaleAspectFill;
     [self.view insertSubview:_glView atIndex:0];
-    
+    [_glView addGestureRecognizer:_panGesture];
+    [_glView addGestureRecognizer:pinchGesture];
     [_progressSlider addTarget:self
                         action:@selector(progressDidChange:)
               forControlEvents:UIControlEventValueChanged];
@@ -1071,25 +1108,20 @@ static NSMutableDictionary * gHistory;
 #pragma mark 横屏
 -(void)setVerticalFrame
 {
-    
-    CGFloat width,height;
-    
     if (IOS_SYSTEM_8)
     {
-        width = kScreenWidth;
-        height = kScreenHeight;
+        fWidth = kScreenWidth;
+        fHeight = kScreenHeight;
     }
     else
     {
-        width = kScreenSourchHeight;
-        height = kScreenSourchWidth;
+        fWidth = kScreenSourchHeight;
+        fHeight = kScreenSourchWidth;
     }
     
-    _lblName.frame = Rect(30, 13, width - 60, 15);
-    _downHUD.frame = Rect(0, height-80, width, 80);
-    _glView.frame = Rect(0, 0,width, height);
-    _glView.contentMode = UIViewContentModeScaleAspectFill;
-    
+    _lblName.frame = Rect(30, 13, fWidth - 60, 15);
+    _downHUD.frame = Rect(0, fHeight-80, fWidth, 80);
+    _topHUD.frame = Rect(0, 0, fWidth,49);
     [_topHUD viewWithTag:1008].frame = _topHUD.bounds;
     [_downHUD viewWithTag:1008].frame = _downHUD.bounds;
     
@@ -1097,10 +1129,10 @@ static NSMutableDictionary * gHistory;
     _playBtn.frame = Rect(95,  30, 40, 40);//30
     _forwardBtn.frame = Rect(140, 30, 40, 40);
     
-    _progressSlider.frame = Rect(0,5,width,20);
+    _progressSlider.frame = Rect(0,5,fWidth,20);
     
-    _progressLabel.frame = Rect(width/2-50, 40, 50, 20);
-    _leftLabel.frame = Rect(width/2,40,50,20);
+    _progressLabel.frame = Rect(fWidth/2-50, 40, 50, 20);
+    _leftLabel.frame = Rect(fWidth/2,40,50,20);
     
     
 }
@@ -1128,7 +1160,7 @@ static NSMutableDictionary * gHistory;
 -(void)viewDidLayoutSubviews
 {
     [super viewDidLayoutSubviews];
-    [self setVerticalFrame];
+//    [self setVerticalFrame];
 
 }
 

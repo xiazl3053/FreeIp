@@ -11,7 +11,7 @@
 
 "httpserver" = "http://www.freeip.com/";
 
-"p2pserver" = "www.freeipc.com";
+"p2pserver" = "heart.freeip.com";
 
 "offline" = "Off line";
 

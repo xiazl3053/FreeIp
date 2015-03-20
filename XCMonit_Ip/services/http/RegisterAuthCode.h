@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "HttpManager.h"
 #import "DecodeJson.h"
 typedef void(^HttpAuthCode)(NSString *strImg, int nStatus);
 
@@ -14,7 +15,7 @@ typedef void(^HttpAuthRegister)(int nStatus);
 
 typedef void(^HttpAuthUser)(int nStatus);
 
-@interface RegisterAuthCode : NSObject
+@interface RegisterAuthCode :HttpManager
 
 @property (nonatomic,copy) HttpAuthRegister httpReg;
 @property (nonatomic,copy) HttpAuthCode httpBlock;

@@ -90,6 +90,7 @@
         imgView.tag = 1001;
         
         UILabel *lblInfo = [[UILabel alloc] initWithFrame:Rect(0, imgView.frame.origin.y+imgView.frame.size.height+20.5, kScreenWidth, 39)];
+        
         [lblInfo setText:XCLocalized(@"noDevice")];
         [lblInfo setTextAlignment:NSTextAlignmentCenter];
         [_tableView addSubview:lblInfo];
@@ -108,7 +109,8 @@
     }
     else
     {
-        [[_tableView viewWithTag:1001] removeFromSuperview];
+
+        [[_tableView viewWithTag:1002] removeFromSuperview];
         [[_tableView viewWithTag:1002] removeFromSuperview];
         [[_tableView viewWithTag:1003] removeFromSuperview];
     }

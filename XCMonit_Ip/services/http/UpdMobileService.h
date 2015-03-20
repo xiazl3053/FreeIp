@@ -7,10 +7,10 @@
 //
 
 #import <Foundation/Foundation.h>
-
+#import "HttpManager.h"
 typedef void(^HttpUpdMobile)(int nStatus);
 
-@interface UpdMobileService : NSObject
+@interface UpdMobileService : HttpManager
 
 @property (nonatomic,copy) HttpUpdMobile httpBlock;
 

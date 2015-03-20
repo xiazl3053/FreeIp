@@ -7,11 +7,11 @@
 //
 
 #import <Foundation/Foundation.h>
-
+#import "HttpManager.h"
 #import "UserAllInfoModel.h"
 
 typedef void(^HttpUserinfo)(UserAllInfoModel *user,int nStatus);
-@interface UserInfoService : NSObject
+@interface UserInfoService :HttpManager
 
 @property (nonatomic,copy) HttpUserinfo httpBlock;
 

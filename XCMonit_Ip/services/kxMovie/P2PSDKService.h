@@ -72,7 +72,6 @@ public:
     long nFrameNum;
     void sendPtzControl(PtzControlMsg *ptzMsg);
     
-    
 public:
     int nChannel;
     int nCode;

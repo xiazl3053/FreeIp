@@ -6,10 +6,12 @@
 //  Copyright (c) 2014年 ___FULLUSERNAME___. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
 
+#import <Foundation/Foundation.h>
+#import "HttpManager.h"
+@class HttpManager;
 typedef void(^HttpAddDeviceBlock)(int nStatus);
-@interface AddDeviceService : NSObject
+@interface AddDeviceService : HttpManager
 
 @property (nonatomic,copy) HttpAddDeviceBlock addDeviceBlock;
 

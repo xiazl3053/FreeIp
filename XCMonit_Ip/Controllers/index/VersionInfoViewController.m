@@ -53,9 +53,10 @@
     _imgView.contentMode = UIViewContentModeScaleAspectFit;
     _imgView.image = [UIImage imageNamed:@"logo_info"];
     [self.view addSubview:_imgView];
-
+    NSString *strVersion = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
+    DLog(@"strVersion:%@",strVersion);
     _lblInfo = [[UILabel alloc] initWithFrame:Rect(0, [CustomNaviBarView barSize].height+270, kScreenWidth, 30)];
-    NSString *strInfo = [NSString stringWithFormat:@"V5.1.6"];
+    NSString *strInfo = [NSString stringWithFormat:@"V%@",strVersion];
     [_lblInfo setText:strInfo];
     [_lblInfo setFont:[UIFont fontWithName:@"Helvetica" size:20.0f]];
     [_lblInfo setTextAlignment:NSTextAlignmentCenter];

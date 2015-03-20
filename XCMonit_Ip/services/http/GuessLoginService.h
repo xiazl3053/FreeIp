@@ -7,10 +7,11 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "HttpManager.h"
 
 typedef void(^HttpGuessLogin)(int nstatus);
 
-@interface GuessLoginService : NSObject
+@interface GuessLoginService : HttpManager
 
 @property (nonatomic,copy) HttpGuessLogin httpGuessBlock;
 

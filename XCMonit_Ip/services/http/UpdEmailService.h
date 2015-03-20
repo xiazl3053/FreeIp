@@ -7,10 +7,12 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "HttpManager.h"
+
 
 typedef void(^HttpUpdEmail)(int nStatus);
 
-@interface UpdEmailService : NSObject
+@interface UpdEmailService :HttpManager
 
 
 @property (nonatomic,copy) HttpUpdEmail httpBlock;

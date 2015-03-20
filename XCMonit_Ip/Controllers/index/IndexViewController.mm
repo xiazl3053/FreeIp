@@ -81,7 +81,6 @@ DEFINE_SINGLETON_FOR_CLASS(IndexViewController);
         tb4.viewController = _rtspView;
         [self addChildViewController:_rtspView];
         
-        
         XCTabInfo *tb3 = [[XCTabInfo alloc] initWithTabInfo:XCLocalized(@"more") normal:@"about.png" high:@"about_h.png"];
         _moreView = [[MoreViewController alloc] init];
         tb3.viewController = _moreView;
@@ -114,7 +113,7 @@ DEFINE_SINGLETON_FOR_CLASS(IndexViewController);
          __viewController.view.frame = CGRectMake(0,0,kScreenWidth, kScreenHeight-_tabBar.frame.size.height+20);
          __viewController.view.tag = SELECTED_VIEW_CONTROLLER_TAG;
          [__weakSelf.view insertSubview:__viewController.view aboveSubview:__weakSelf.tabBar];
-//       [__weakSelf.view addSubview:__viewController.view];
+
     }];
 }
 #pragma mark 设置显示的viewController

@@ -17,19 +17,7 @@
 {
     NSString *strUrl = [[NSString alloc] initWithFormat:@"%@index.php?r=service/service/setemail&session_id=%@&email_addr=%@",
                         XCLocalized(@"httpserver"),[UserInfo sharedUserInfo].strSessionId,strEmail];
-    NSURL *url=[NSURL URLWithString:strUrl];//创建URL
-    NSMutableURLRequest *request=[[NSMutableURLRequest alloc]initWithURL:url];//通过URL创建网络请求
-    [request setTimeoutInterval:XC_HTTP_TIMEOUT];//设置超时时间
-    [request setHTTPMethod:@"POST"];//设置请求方式
-    __block UpdEmailService *weakSelf = self;
-    [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue mainQueue] completionHandler:
-     ^(NSURLResponse* response, NSData* data, NSError* connectionError){
-         UpdEmailService *strongLogin = weakSelf;
-         if (strongLogin) {
-             [strongLogin reciveLoginInfo:response data:data error:connectionError];
-         }
-     }];
-
+    [self sendRequest:strUrl];
 }
 -(void)reciveLoginInfo:(NSURLResponse*) response data:(NSData*)data error:(NSError*)connectionError
 {

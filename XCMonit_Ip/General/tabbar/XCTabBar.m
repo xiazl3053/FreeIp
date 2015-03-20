@@ -108,7 +108,8 @@
     btn.selected = YES;
     _nIndex = nIndex;
     XCTabInfo *tabInfo = [_buttonData objectAtIndex:nIndex];
-    if (_delegate && [_delegate respondsToSelector:@selector(selectIndex:)]) {
+    if (_delegate && [_delegate respondsToSelector:@selector(selectIndex:)])
+    {
         [_delegate selectIndex:tabInfo.viewController];
     }
 }

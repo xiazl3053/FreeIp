@@ -16,22 +16,11 @@
 {
     NSString *strUrl = [[NSString alloc] initWithFormat:@"%@index.php?r=service/service/setrealname&session_id=%@&real_name=%@"
                         ,XCLocalized(@"httpserver"),[UserInfo sharedUserInfo].strSessionId,[strReal stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+    [self sendRequest:strUrl];
     
-    NSURL *url=[NSURL URLWithString:strUrl];//创建URL
-    NSMutableURLRequest *request=[[NSMutableURLRequest alloc]initWithURL:url];//通过URL创建网络请求
-    [request setTimeoutInterval:XC_HTTP_TIMEOUT];//设置超时时间
-    [request setHTTPMethod:@"POST"];//设置请求方式
-    __block UpdRealService *weakSelf = self;
-    [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue mainQueue] completionHandler:
-     ^(NSURLResponse* response, NSData* data, NSError* connectionError){
-         UpdRealService *strongLogin = weakSelf;
-         if (strongLogin) {
-             [strongLogin reciveLoginInfo:response data:data error:connectionError];
-         }
-     }];
 }
 
--(void)reciveLoginInfo:(NSURLResponse*) response data:(NSData*)data error:(NSError*)connectionError
+-(void)reciveHttp:(NSURLResponse*) response data:(NSData*)data error:(NSError*)connectionError
 {
     NSInteger responseCode = [(NSHTTPURLResponse *)response statusCode];
     

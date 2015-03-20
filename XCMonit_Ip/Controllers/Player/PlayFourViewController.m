@@ -24,7 +24,7 @@
 #import "UserInfo.h"
 #import "PhoneDb.h"
 #import "PTZView.h"
-
+#import "UIView+Extension.h"
 #define kVideoFrame  (kScreenWidth/2 - 1)
 
 
@@ -75,11 +75,15 @@
     //UIView nIndex bPlay
     BOOL bScreen;
     dispatch_queue_t _dispatchQueue;
-    
+    UIPanGestureRecognizer *_panGesture;
+    UIPinchGestureRecognizer *_pinchGester;
+    CGFloat lastX,lastY;
+    CGFloat fWidth,fHeight;
     UIImageView *bgTopImg;
     UIImageView *bgDownImg;
     BOOL bExit;
     int nArray[32];
+    BOOL bNewStatus;//切换状态
 }
 
 @property (nonatomic,strong) PTZView *view_Ptz;
@@ -329,6 +333,8 @@
     leftRegcogn = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipeFrom:)];
     [leftRegcogn setDirection:UISwipeGestureRecognizerDirectionLeft];
     
+    _pinchGester = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(pinchEvent:)];
+    _panGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(panEvent:)];
 }
 
 
@@ -623,28 +629,31 @@
 #pragma mark 横屏
 -(void)setVerticalFrame
 {
-    CGFloat width,height;
-    width = kScreenHeight;
-    height = kScreenWidth;
+    if (bNewStatus) {
+        return ;
+    }
+//    CGFloat width,height;
+    fWidth = kScreenHeight;
+    fHeight = kScreenWidth;
     
-    _topHUD.frame = Rect(0, 0, width,50);
+    _topHUD.frame = Rect(0, 0, fWidth,50);
     
     [_topHUD insertSubview:bgTopImg atIndex:0];
     [bgTopImg setFrame:_topHUD.bounds];
     
     [_lblName setTextColor:[UIColor whiteColor]];
     
-    _lblName.frame = Rect(50, 15, width - 160, 20);
+    _lblName.frame = Rect(50, 15, fWidth- 160, 20);
     [_lblName setTextAlignment:NSTextAlignmentLeft];
     
-    _currentView.frame = Rect(0, 0, width, height);
+    _currentView.frame = Rect(0, 0,fWidth, fHeight);
     
-    _switchView.frame = Rect((width - 240)/2+180, height-(44+60), 60, 60);
+    _switchView.frame = Rect((fWidth - 240)/2+180, fHeight-(44+60), 60, 60);
     //    (width - 240)/2
-    _downHUD.frame = Rect(0, height-50, width, 50);
-    [_downHUD viewWithTag:1002].frame =  Rect(width-180, 0, 60, 48);
-    [_downHUD viewWithTag:1003].frame = Rect(width-120,  0, 60, 48);
-    [_downHUD viewWithTag:1004].frame =  Rect(width-60, 0, 60, 48);
+    _downHUD.frame = Rect(0, fHeight-50, fWidth, 50);
+    [_downHUD viewWithTag:1002].frame =  Rect(fWidth-180, 0, 60, 48);
+    [_downHUD viewWithTag:1003].frame = Rect(fWidth-120,  0, 60, 48);
+    [_downHUD viewWithTag:1004].frame =  Rect(fWidth-60, 0, 60, 48);
     
     [(UIButton*)[_downHUD viewWithTag:1002] setImage:[UIImage imageNamed:@"full_stop"] forState:UIControlStateNormal];
     [(UIButton*)[_downHUD viewWithTag:1002] setImage:[UIImage imageNamed:@"full_stop"] forState:UIControlStateHighlighted];
@@ -654,25 +663,31 @@
     [_downHUD insertSubview:bgDownImg atIndex:0];
     [bgDownImg setFrame:_downHUD.bounds];
     
-    [_btnPtz setFrame:Rect(width-60, 0, 60, 49)];
+    [_btnPtz setFrame:Rect(fWidth-60, 0, 60, 49)];
     [_topHUD addSubview:_btnPtz];
     
-    _view_Ptz.frame = Rect(width-164, height/2-57,164, 114);
+    _view_Ptz.frame = Rect(fWidth-164, fHeight/2-57,164, 114);
     
     [_downHUD viewWithTag:10013].backgroundColor = RGB(198, 198, 198);;
     [_downHUD viewWithTag:10014].backgroundColor = [UIColor whiteColor];
     
     [_currentView addGestureRecognizer:leftRegcogn];
     [_currentView addGestureRecognizer:rightRecogn];
-    
+    [_currentView addGestureRecognizer:_pinchGester];
+//    [_currentView addGestureRecognizer:_panGesture];
+    bNewStatus = YES;
 }
 
 #pragma mark 竖屏
 -(void)setHorizontalFrame
 {
+    bNewStatus = NO;
     //删除移屏手势
     [_currentView removeGestureRecognizer:leftRegcogn];
     [_currentView removeGestureRecognizer:rightRecogn];
+    [_currentView removeGestureRecognizer:_pinchGester];
+    [_currentView removeGestureRecognizer:_panGesture];
+    
     
     [_btnPtz removeFromSuperview];
     _view_Ptz.hidden = YES;
@@ -1258,7 +1273,7 @@
 #pragma mark 全屏与四屏画面切换
 -(void)switchFullVideo:(BOOL)bFlag
 {
-    
+    bNewStatus = NO;
     int nTemp = bFlag ? 1 : -1;
     while (YES)
     {
@@ -1276,7 +1291,8 @@
             //移除手势
             [playOldView.mainView removeGestureRecognizer:leftRegcogn];
             [playOldView.mainView removeGestureRecognizer:rightRecogn];
-      
+            [playOldView.mainView removeGestureRecognizer:_pinchGester];
+            
             //设置当前frame位置
             _currentView = playView.mainView ;
             [playView.mainView setHidden:NO];
@@ -1293,10 +1309,6 @@
             }
             //设置全屏位置
             [playView.mainView setFrame:Rect(0, 0, width, height)];
-            //添加手势
-            [_currentView addGestureRecognizer:leftRegcogn];
-            [_currentView addGestureRecognizer:rightRecogn];
-            //变换选中
             break;
         }
         bFlag ? nTemp++ : nTemp--;
@@ -1442,7 +1454,7 @@
 -(void)playMovieWithChannel:(NSString*)strKey
 {
     PlayControlModel *playInfo = [_decoderInfo valueForKey:strKey];
-    if(playInfo.decode.playing)//判断解码器状态
+   if(playInfo.decode.playing)//判断解码器状态
     {
         CGFloat interval = 0;
         KxVideoFrame *frame = nil;
@@ -1480,6 +1492,53 @@
             [weakSelf playMovieWithChannel:__strKey];
         });
     }
+}
+
+
+-(void)panEvent:(UIPanGestureRecognizer*)sender
+{
+    if ([sender state]== UIGestureRecognizerStateBegan)
+    {
+        CGPoint curPoint = [sender locationInView:self.view];
+        lastX = curPoint.x;
+        lastY = curPoint.y;
+       return ;
+    }
+    CGPoint curPoint = [sender locationInView:self.view];
+    CGFloat frameX = (_currentView.x + (curPoint.x-lastX)) > 0 ? 0 : (abs(_currentView.x+(curPoint.x-lastX))+fWidth >= _currentView.width ? -(_currentView.width-fWidth) : (_currentView.x+(curPoint.x-lastX)));
+    CGFloat frameY =(_currentView.y + (curPoint.y-lastY))>0?0: (abs(_currentView.y+(curPoint.y-lastY))+fHeight >= _currentView.height ? -(_currentView.height-fHeight) : (_currentView.y+(curPoint.y-lastY)));
+    _currentView.frame = Rect(frameX,frameY , _currentView.width, _currentView.height);
+    lastX = curPoint.x;
+    lastY = curPoint.y;
+}
+
+-(void)pinchEvent:(UIPinchGestureRecognizer*)sender
+{
+    DLog(@"点击事件");
+    if([sender state] == UIGestureRecognizerStateBegan) {
+     //   lastScale = 1.0;
+        return;
+    }
+    CGFloat glWidth = _currentView.frame.size.width;
+    CGFloat glHeight = _currentView.frame.size.height;
+    CGFloat fScale = [sender scale];
+    
+    if (_currentView.frame.size.width * [sender scale] <= fWidth)
+    {
+//        lastScale = 1.0f;
+        _currentView.frame = Rect(0, 0, fWidth, fHeight);
+       [_currentView removeGestureRecognizer:_panGesture];
+    }
+    else
+    {
+        [_currentView addGestureRecognizer:_panGesture];
+        CGPoint point = [sender locationInView:self.view];
+        DLog(@"point:%f--%f",point.x,point.y);
+        CGFloat nowWidth = glWidth*fScale>fWidth*4?fWidth*4:glWidth*fScale;
+        CGFloat nowHeight =glHeight*fScale >fHeight* 4?fHeight*4:glHeight*fScale;
+        _currentView.frame = Rect(fWidth/2 - nowWidth/2,fHeight/2- nowHeight/2,nowWidth,nowHeight);
+    }
+
 }
 
 
