@@ -16,6 +16,7 @@
     CGFloat lastX,lastY,lastScale;
     CGFloat fWidth,fHeight;
 }
+
 @property (nonatomic,copy) NSString *strNO;
 @property (nonatomic,copy) NSString *strName;
 
@@ -181,7 +182,7 @@
         BOOL bGood = YES;
         while (bGood)
         {
-            NSArray *array = [_decodeImpl decodeFrame];
+            NSArray *array = [__weakSelf.decodeImpl decodeFrame];
             bGood = NO;
             if (array && array.count>0)
             {

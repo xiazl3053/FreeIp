@@ -23,6 +23,10 @@
 #include <unistd.h>
 #include "LongseDes.h"
 #import "RtspInfo.h"
+#include <netdb.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <arpa/inet.h>
 #import "P2PInitService.h"
 
 extern "C"
@@ -245,6 +249,36 @@ Release_format_input:
     return kxMovieErrorStreamNotFound;
 }
 
+
+
+-(NSString *)getIPWithHostName:(const NSString *)hostName
+{
+    NSString *_strAddress;
+    const char *hostN= [hostName UTF8String];
+    struct hostent* phot;
+    @try
+    {
+        phot = gethostbyname(hostN);
+    }
+    @catch (NSException *exception)
+    {
+        return nil;
+    }
+    struct in_addr ip_addr;
+    if(phot)
+    {
+        memcpy(&ip_addr, phot->h_addr_list[0], 4);
+        char ip[20] = {0};
+        inet_ntop(AF_INET, &ip_addr, ip, sizeof(ip));
+        _strAddress = [NSString stringWithUTF8String:ip];
+        return _strAddress;
+    }
+    else
+    {
+        return nil;
+    }
+}
+
 #pragma mark 私有协议
 -(int)protocolInit:(RtspInfo*)rtspInfo path:(NSString *)strPath channel:(int)nChannel code:(int)nCode
 {
@@ -259,7 +293,16 @@ Release_format_input:
     DLog(@"start login");
     @synchronized(self)
     {
-        ret = private_protocol_login(info, inet_addr([rtspInfo.strAddress UTF8String]), (int)rtspInfo.nPort, (char*)[rtspInfo.strUser UTF8String], (char*)[rtspInfo.strPwd UTF8String]);
+        //新加入解析
+        NSString *strAddress = [self getIPWithHostName:rtspInfo.strAddress];
+        if (strAddress)
+        {
+           ret = private_protocol_login(info, inet_addr([strAddress UTF8String]), (int)rtspInfo.nPort, (char*)[rtspInfo.strUser UTF8String], (char*)[rtspInfo.strPwd UTF8String]);
+        }
+        else
+        {
+            ret = private_protocol_login(info, inet_addr([rtspInfo.strAddress UTF8String]), (int)rtspInfo.nPort, (char*)[rtspInfo.strUser UTF8String], (char*)[rtspInfo.strPwd UTF8String]);
+        }
     }
     if(ret < 0)
     {
