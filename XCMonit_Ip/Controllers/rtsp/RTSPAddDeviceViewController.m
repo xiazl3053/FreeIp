@@ -8,20 +8,31 @@
 
 #import "RTSPAddDeviceViewController.h"
 #import "CustomNaviBarView.h"
+#import "ProgressHUD.h"
+#import "RtspWlanCell.h"
+#import "XCNotification.h"
 #import "IQKeyboardManager.h"
 #import "XCNotification.h"
 #import "Toast+UIView.h"
-
+#import "UIView+Extension.h"
 #import "RtspInfoDb.h"
 #import "RtspInfo.h"
+#import "discovery.h"
 
-@interface RTSPAddDeviceViewController ()
+#import "devdiscovery.h"
+
+@interface RTSPAddDeviceViewController ()<UITableViewDataSource,UITableViewDelegate,RTSPLanDelegate>
 {
     NSArray *segmentedArray;
     NSArray *segmentedArray1;
+    NSMutableArray *aryDevice;
     UIButton *btnSelect;
     UIView *downView;
     RtspInfo *_rtspInfo;
+    UIButton *btnManua,*btnSearch;
+    UIView *searchView;
+    UIView *srcView;
+    
 }
 
 @property (nonatomic,strong) UITextField *txtName;
@@ -35,7 +46,7 @@
 @property (nonatomic,strong) UIButton *btnDVR;
 @property (nonatomic,strong) UIButton *btnNVR;
 @property (nonatomic,strong) UIImageView *imgTab;
-
+@property (nonatomic,strong) UITableView *tableView;
 
 @end
 
@@ -66,7 +77,13 @@
 {
     [super viewDidLoad];
     [self initUI];
+    [self addType];
     [self initViewInfo];
+    [self.view setBackgroundColor:RGB(236, 236, 236)];
+    if(aryDevice==nil)
+    {
+        aryDevice = [NSMutableArray array];
+    }
     if (_rtspInfo)
     {
         _txtAddress.text = _rtspInfo.strAddress;
@@ -99,11 +116,14 @@
     }
 }
 
+
 -(void)viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
     [IQKeyboardManager sharedManager].shouldShowTextFieldPlaceholder = YES;
 }
+
+
 -(void)viewDidDisappear:(BOOL)animated
 {
     [super viewDidDisappear:animated];
@@ -114,12 +134,34 @@
 {
     [super viewWillAppear:animated];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(doneKeyBoard) name:NSKEY_BOARD_RETURN_VC object:nil];
+    [[NSNotificationCenter  defaultCenter] postNotificationName:NS_SEARCH_DEVICE_FOR_WLAN_VC object:nil];
+    [[NSNotificationCenter  defaultCenter] addObserver:self selector:@selector(updateSearchData:) name:NS_SEARCH_DEVICE_FOR_WLAN_VC object:nil];
 }
 -(void)viewWillDisappear:(BOOL)animated
 {
     [super viewWillDisappear:animated];
     [[NSNotificationCenter defaultCenter]removeObserver:self];
 }
+
+-(void)updateSearchData:(NSNotification*)notify
+{
+    NSMutableArray *aryTemp = notify.object;
+    DLog(@"aryDevice:%@---count:%d",aryTemp,(int)aryTemp.count);
+    if (aryTemp.count == 0 ) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            //提示没有搜索到设备
+            
+        });
+    }
+    [aryDevice removeAllObjects];
+    [aryDevice addObjectsFromArray:aryTemp];
+    __weak RTSPAddDeviceViewController *__self = self;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [__self.view addSubview:__self.tableView];
+        [__self.tableView reloadData];
+    });
+}
+
 -(void)doneKeyBoard
 {
     if([_txtPwd isFirstResponder])
@@ -152,7 +194,7 @@
     {
         if (nTag != nIndex+1001)
         {
-            ((UIButton*)[self.view viewWithTag:nIndex+1001]).selected = NO;
+            ((UIButton*)[srcView viewWithTag:nIndex+1001]).selected = NO;
         }
     }
     if (nTag==1002)
@@ -166,19 +208,95 @@
     
     btnSelect = btnType;
     btnType.selected = YES;
-    _imgTab.frame = Rect((btnType.tag-1001)*kScreenWidth/3.0,[CustomNaviBarView barSize].height+39, kScreenWidth/3.0, 3);
+    _imgTab.frame = Rect((btnType.tag-1001)*kScreenWidth/3.0,39, kScreenWidth/3.0, 3);
     [self segmentAction:nTag];
+}
+
+-(void)addType
+{
+    btnManua = [UIButton buttonWithType:UIButtonTypeCustom];
+    [btnManua setTitleColor:RGB(189, 189, 189) forState:UIControlStateNormal];
+    [btnManua setTitleColor:RGB(15, 173, 225) forState:UIControlStateSelected];
+    [btnManua setTitle:XCLocalized(@"Manually") forState:UIControlStateNormal];
+    [btnManua setBackgroundColor:RGB(255, 255, 255)];
+    
+    btnSearch = [UIButton buttonWithType:UIButtonTypeCustom];
+    [btnSearch setTitleColor:RGB(189, 189, 189) forState:UIControlStateNormal];
+    [btnSearch setTitleColor:RGB(15, 173, 225) forState:UIControlStateSelected];
+    [btnSearch setTitle:XCLocalized(@"search") forState:UIControlStateNormal];
+    [btnSearch setBackgroundColor:RGB(255, 255, 255)];
+    
+    [self.view addSubview:btnSearch];
+    [self.view addSubview:btnManua];
+    
+    btnSearch.frame = Rect(0, [CustomNaviBarView barSize].height, kScreenWidth/2, 44);
+    btnManua.frame = Rect(kScreenWidth/2, [CustomNaviBarView barSize].height, kScreenWidth/2, 44);
+    [btnManua addTarget:self action:@selector(setManua) forControlEvents:UIControlEventTouchUpInside];
+    [btnSearch addTarget:self action:@selector(setSearchInfo) forControlEvents:UIControlEventTouchUpInside];
+}
+
+-(void)setManua
+{
+    btnManua.selected = YES;
+    btnSearch.selected = NO;
+    [searchView removeFromSuperview];
+    [self.view addSubview:srcView];
+}
+
+-(void)setSearchInfo
+{
+    btnSearch.selected = YES;
+    btnManua.selected = NO;
+    [_tableView removeFromSuperview];
+    [srcView removeFromSuperview];
+    [self.view addSubview:searchView];
+}
+
+-(void)printSearchDev
+{
+    discovery();
+    DD_SearchDev();
+    [self.view makeToast:XCLocalized(@"searching")];
 }
 
 -(void)initViewInfo
 {
+    
+    srcView = [[UIView alloc] initWithFrame:Rect(0, 135, kScreenWidth, kScreenSourchHeight-135)];
+    [self.view addSubview:srcView];
+   
+    searchView = [[UIView alloc] initWithFrame:Rect(0, 135, kScreenWidth, kScreenSourchHeight-135)];
+    UIImageView *imgView =[[UIImageView alloc] initWithFrame:Rect(kScreenWidth/2-49, 87, 99, 69)];
+    [imgView setImage:[UIImage imageNamed:@"WIFI"]];
+    [searchView addSubview:imgView];
+    UIButton *btnSearchAction = [UIButton buttonWithType:UIButtonTypeCustom];
+    [searchView addSubview:btnSearchAction];
+    [btnSearchAction setTitle:@"搜索" forState:UIControlStateNormal];
+    [btnSearchAction setTitleColor:RGB(255,255,255) forState:UIControlStateNormal];
+    [btnSearchAction addTarget:self action:@selector(printSearchDev) forControlEvents:UIControlEventTouchUpInside];
+    [btnSearchAction setFrame:Rect(50, imgView.height+imgView.y+80, kScreenWidth-100, 40)];
+    [btnSearchAction setBackgroundImage:[UIImage imageNamed:@"btnBG"] forState:UIControlStateNormal];
+    [btnSearchAction setBackgroundImage:[UIImage imageNamed:@"btnCl"] forState:UIControlStateHighlighted];
+    
+    UILabel *lblInfo = [[UILabel alloc] initWithFrame:Rect(10, imgView.y+imgView.height+20, kScreenWidth-20, 20)];
+    [searchView addSubview:lblInfo];
+    [lblInfo setText:@"请确认网络连接正常"];
+    [lblInfo setTextAlignment:NSTextAlignmentCenter];
+    [lblInfo setTextColor:RGB(165, 165, 165)];
+    [lblInfo setFont:[UIFont fontWithName:@"Helvetica" size:14]];
+    
+    _tableView = [[UITableView alloc] initWithFrame:Rect(0, 135, kScreenWidth, kScreenSourchHeight-135)];
+    _tableView.delegate = self;
+    _tableView.dataSource = self ;
+    _tableView.separatorStyle = UITableViewCellAccessoryNone;
+    
     _btnIPC = [UIButton buttonWithType:UIButtonTypeCustom];
     _btnDVR = [UIButton buttonWithType:UIButtonTypeCustom];
     _btnNVR = [UIButton buttonWithType:UIButtonTypeCustom];
-    [self.view addSubview:_btnIPC];
-    [self.view addSubview:_btnDVR];
-    [self.view addSubview:_btnNVR];
-    [self.view setBackgroundColor:[UIColor whiteColor]];
+    [srcView addSubview:_btnIPC];
+    [srcView addSubview:_btnDVR];
+    [srcView addSubview:_btnNVR];
+    [srcView setBackgroundColor:[UIColor whiteColor]];
     
     _btnIPC.tag = 1001;
     _btnDVR.tag = 1002;
@@ -200,12 +318,12 @@
     [_btnDVR setTitleColor:RGB(15, 173, 225) forState:UIControlStateSelected];
     [_btnNVR setTitleColor:RGB(15, 173, 225) forState:UIControlStateSelected];
     
-    _btnIPC.frame = Rect(0, [CustomNaviBarView barSize].height, kScreenWidth/3.0, 42);
-    _btnDVR.frame = Rect(kScreenWidth/3.0, [CustomNaviBarView barSize].height, kScreenWidth/3.0, 42);
-    _btnNVR.frame = Rect(2*kScreenWidth/3.0, [CustomNaviBarView barSize].height, kScreenWidth/3.0, 42);
+    _btnIPC.frame = Rect(0, 0, kScreenWidth/3.0, 42);
+    _btnDVR.frame = Rect(kScreenWidth/3.0, 0, kScreenWidth/3.0, 42);
+    _btnNVR.frame = Rect(2*kScreenWidth/3.0,0, kScreenWidth/3.0, 42);
     
-    _imgTab = [[UIImageView alloc] initWithFrame:Rect(0, [CustomNaviBarView barSize].height+39, kScreenWidth/3.0, 3)];
-    [self.view addSubview:_imgTab];
+    _imgTab = [[UIImageView alloc] initWithFrame:Rect(0,39, kScreenWidth/3.0, 3)];
+    [srcView addSubview:_imgTab];
     [_imgTab setImage:[UIImage imageNamed:@"btnBG"]];
     
     
@@ -213,30 +331,30 @@
     [_btnDVR setTitle:@"DVR" forState:UIControlStateNormal];
     [_btnNVR setTitle:@"NVR" forState:UIControlStateNormal];
     
-    UIView *view = [[UIView alloc] initWithFrame:Rect(0, [CustomNaviBarView barSize].height+42, kScreenWidth, 25)];
+    UIView *view = [[UIView alloc] initWithFrame:Rect(0, 42, kScreenWidth, 25)];
     [view setBackgroundColor:RGB(236, 236, 236)];
-    [self.view addSubview:view];
-    [self addViewLine:[CustomNaviBarView barSize].height+67 x:0];
+    [srcView addSubview:view];
+    [self addViewLine:67 x:0];
     
-    _txtName = [[UITextField alloc] initWithFrame:Rect(19, [CustomNaviBarView barSize].height+69, kScreenWidth-19, 45)];
+    _txtName = [[UITextField alloc] initWithFrame:Rect(19, 69, kScreenWidth-19, 45)];
     
-    [self addViewLine:[CustomNaviBarView barSize].height+114 x:19];
+    [self addViewLine:114 x:19];
     
     _txtAddress = [[UITextField alloc] initWithFrame:Rect(19, _txtName.frame.origin.y+47, kScreenWidth-19, 45)];
     
-    [self addViewLine:[CustomNaviBarView barSize].height+161 x:19];
+    [self addViewLine:161 x:19];
     
     _txtPort = [[UITextField alloc] initWithFrame:Rect(19, _txtAddress.frame.origin.y+47, kScreenWidth-19, 45)];
     
-    [self addViewLine:[CustomNaviBarView barSize].height+208 x:19];
+    [self addViewLine:208 x:19];
     
     _txtUser = [[UITextField alloc] initWithFrame:Rect(19, _txtPort.frame.origin.y+47, kScreenWidth-19, 45)];
     
-    [self addViewLine:[CustomNaviBarView barSize].height+255 x:19];
+    [self addViewLine:255 x:19];
     
     _txtPwd = [[UITextField alloc] initWithFrame:Rect(19, _txtUser.frame.origin.y+47, kScreenWidth-19, 45)];
     
-    [self addViewLine:[CustomNaviBarView barSize].height+302 x:0];
+    [self addViewLine:302 x:0];
     
     [_txtName setPlaceholder:XCLocalized(@"devName")];
     [_txtAddress setPlaceholder:XCLocalized(@"devAddr")];
@@ -271,19 +389,17 @@
     [_txtUser setBackgroundColor:[UIColor whiteColor]];
     [_txtPwd setBackgroundColor:[UIColor whiteColor]];
     
-    [self.view addSubview:_txtName];
-    [self.view addSubview:_txtAddress];
-    [self.view addSubview:_txtPort];
-    [self.view addSubview:_txtUser];
-    [self.view addSubview:_txtPwd];
-    
-    
+    [srcView addSubview:_txtName];
+    [srcView addSubview:_txtAddress];
+    [srcView addSubview:_txtPort];
+    [srcView addSubview:_txtUser];
+    [srcView addSubview:_txtPwd];
     
     
     segmentedArray1 = [[NSArray alloc]initWithObjects:@"4",@"8",@"16",@"24",@"32",nil];
     //初始化UISegmentedControl
     _segChannel = [[UISegmentedControl alloc]initWithItems:segmentedArray1];
-    _segChannel.frame = CGRectMake(20.0, 380.0, 280.0, 30.0);
+    _segChannel.frame = CGRectMake(20.0,_txtPwd.y+_txtPwd.height+10, 280.0, 30.0);
     _segChannel.selectedSegmentIndex = 0;//设置默认选择项索引
     _segChannel.segmentedControlStyle = UISegmentedControlStyleBezeled;
     
@@ -292,7 +408,7 @@
     [_segChannel setEnabled:NO forSegmentAtIndex:2];
     [_segChannel setEnabled:NO forSegmentAtIndex:1];
     
-    [self.view addSubview:_segChannel];
+    [srcView addSubview:_segChannel];
     btnSelect = _btnIPC;
     btnSelect.selected = YES;
     [self segmentAction:btnSelect.tag];
@@ -300,7 +416,8 @@
 
     downView = [[UIView alloc] initWithFrame:Rect(0, _txtPwd.frame.origin.y+_txtPwd.frame.size.height, kScreenWidth, kScreenHeight-(_txtPwd.frame.origin.y+_txtPwd.frame.size.height)+HEIGHT_MENU_VIEW(20, 0))];
     [downView setBackgroundColor:RGB(236, 236, 236)];
-    [self.view addSubview:downView];
+    [srcView addSubview:downView];
+//    [srcView setBackgroundColor:RGB(236, 236, 236)];
 }
 
 -(void)addViewLine:(CGFloat)fHeight x:(CGFloat)nX
@@ -312,8 +429,8 @@
                                              alpha:1.0];
     UILabel *sLine4 = [[UILabel alloc] initWithFrame:CGRectMake(nX, fHeight+1, kScreenWidth, 0.5)] ;
     sLine4.backgroundColor = [UIColor whiteColor];
-    [self.view addSubview:sLine3];
-    [self.view addSubview:sLine4];
+    [srcView addSubview:sLine3];
+    [srcView addSubview:sLine4];
 }
 
 -(void)segmentAction:(NSInteger)nTag
@@ -329,7 +446,7 @@
         default:
         {
             _segChannel.hidden = NO;
-            downView.frame = Rect(0, 420, kScreenWidth, kScreenHeight-420+HEIGHT_MENU_VIEW(20, 0));
+            downView.frame = Rect(0, _txtPwd.y+_txtPwd.height+50, kScreenWidth, kScreenHeight-(_txtPwd.y+_txtPwd.height+50)+HEIGHT_MENU_VIEW(20, 0));
             [_segChannel setEnabled:YES forSegmentAtIndex:4];
             [_segChannel setEnabled:YES forSegmentAtIndex:3];
             [_segChannel setEnabled:YES forSegmentAtIndex:2];
@@ -433,7 +550,7 @@
 }
 
 /*
-#pragma mark - Navigation
+ #pragma mark - Navigation
 
 // In a storyboard-based application, you will often want to do a little preparation before navigation
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
@@ -450,4 +567,46 @@
 {
     return UIInterfaceOrientationMaskPortrait;
 }
+
+
+
+-(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    return aryDevice.count;
+}
+
+-(UITableViewCell*)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    static NSString *strRtspWlan = @"RTSP_WLAN_IDENTIFIER";
+    RtspWlanCell *cell = [tableView dequeueReusableCellWithIdentifier:strRtspWlan];
+    if(cell==nil)
+    {
+        cell = [[RtspWlanCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:strRtspWlan];
+    }
+    [cell setDevInfo:[aryDevice objectAtIndex:indexPath.row]];
+    UIView *view = [[UIView alloc] initWithFrame:cell.bounds];
+    view.backgroundColor = [UIColor clearColor];
+    [cell setSelectedBackgroundView:view];
+    cell.delegate = self;
+    return cell;
+}
+
+
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return 91;
+}
+
+-(void)addDeviceInfo:(RtspInfo *)rtsp
+{
+    [RtspInfoDb addRtsp:rtsp];
+    
+    [aryDevice removeObject:rtsp];
+    __weak RTSPAddDeviceViewController *__self = self;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [__self.tableView reloadData];
+    });
+    
+}
+
 @end

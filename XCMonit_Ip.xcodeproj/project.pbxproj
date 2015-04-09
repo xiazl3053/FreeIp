@@ -192,6 +192,7 @@
 		BB5640821941CE92007CF682 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BB5640451941C1D6007CF682 /* CFNetwork.framework */; };
 		BB5640831941CEA2007CF682 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 160133B81921BC54003DB845 /* Foundation.framework */; };
 		BB7BDBAA1A35980700E92C00 /* PTZView.m in Sources */ = {isa = PBXBuildFile; fileRef = BB7BDBA91A35980700E92C00 /* PTZView.m */; };
+		BB7CFE921AD65A630021C15A /* RtspWlanCell.m in Sources */ = {isa = PBXBuildFile; fileRef = BB7CFE911AD65A630021C15A /* RtspWlanCell.m */; };
 		BB9F47791AB97E8E002AF594 /* LoginUserDB.m in Sources */ = {isa = PBXBuildFile; fileRef = BB9F47781AB97E8E002AF594 /* LoginUserDB.m */; };
 		BBA940961A47C6FA009837EA /* LongseDes.c in Sources */ = {isa = PBXBuildFile; fileRef = BBA940921A47C6FA009837EA /* LongseDes.c */; };
 		BBA940971A47C6FA009837EA /* private_protocol.m in Sources */ = {isa = PBXBuildFile; fileRef = BBA940941A47C6FA009837EA /* private_protocol.m */; };
@@ -201,6 +202,7 @@
 		BBCB2DA91A846C8500AD8C23 /* XCPhotoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BBCB2DA81A846C8500AD8C23 /* XCPhotoViewController.m */; };
 		BBCB2DAC1A8470B000AD8C23 /* XCPhoto.m in Sources */ = {isa = PBXBuildFile; fileRef = BBCB2DAB1A8470B000AD8C23 /* XCPhoto.m */; };
 		BBD153CB1A2D9C5E000E3253 /* libzbar.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BBD153CA1A2D9C5E000E3253 /* libzbar.a */; };
+		BBD550DF1AD60B7C0098B75B /* devdiscovery.m in Sources */ = {isa = PBXBuildFile; fileRef = BBD550DC1AD60B7C0098B75B /* devdiscovery.m */; };
 		BBDC51381AB8273400C81D00 /* XLVideo.m in Sources */ = {isa = PBXBuildFile; fileRef = BBDC51211AB8273400C81D00 /* XLVideo.m */; };
 		BBDC51391AB8273400C81D00 /* IDecoderService.m in Sources */ = {isa = PBXBuildFile; fileRef = BBDC51241AB8273400C81D00 /* IDecoderService.m */; };
 		BBDC513A1AB8273400C81D00 /* XLDecoderServiceImpl.m in Sources */ = {isa = PBXBuildFile; fileRef = BBDC51261AB8273400C81D00 /* XLDecoderServiceImpl.m */; };
@@ -561,6 +563,8 @@
 		BB5640801941C812007CF682 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		BB7BDBA81A35980700E92C00 /* PTZView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PTZView.h; sourceTree = "<group>"; };
 		BB7BDBA91A35980700E92C00 /* PTZView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PTZView.m; sourceTree = "<group>"; };
+		BB7CFE901AD65A630021C15A /* RtspWlanCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RtspWlanCell.h; sourceTree = "<group>"; };
+		BB7CFE911AD65A630021C15A /* RtspWlanCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RtspWlanCell.m; sourceTree = "<group>"; };
 		BB8BD6751A5A8D5B00E81412 /* pt-PT */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "pt-PT"; path = "pt-PT.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		BB8BD6771A5A94C300E81412 /* pt */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pt; path = pt.lproj/Localizable.strings; sourceTree = "<group>"; };
 		BB97F8E41A6F4C8500EC7703 /* UIButton+Extension.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "UIButton+Extension.h"; sourceTree = "<group>"; };
@@ -603,6 +607,9 @@
 		BBD153CA1A2D9C5E000E3253 /* libzbar.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libzbar.a; sourceTree = "<group>"; };
 		BBD4D4101A7B6E55004C0407 /* P2PSDK.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = P2PSDK.h; sourceTree = "<group>"; };
 		BBD4D4111A7B6E55004C0407 /* P2PSDKClient.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; path = P2PSDKClient.h; sourceTree = "<group>"; };
+		BBD550DC1AD60B7C0098B75B /* devdiscovery.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = devdiscovery.m; sourceTree = "<group>"; };
+		BBD550DD1AD60B7C0098B75B /* devdiscovery.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = devdiscovery.h; sourceTree = "<group>"; };
+		BBD550DE1AD60B7C0098B75B /* discovery.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = discovery.h; sourceTree = "<group>"; };
 		BBDC511F1AB8273400C81D00 /* IVideo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IVideo.h; sourceTree = "<group>"; };
 		BBDC51201AB8273400C81D00 /* XLVideo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XLVideo.h; sourceTree = "<group>"; };
 		BBDC51211AB8273400C81D00 /* XLVideo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XLVideo.m; sourceTree = "<group>"; };
@@ -1293,6 +1300,8 @@
 				BB2FD0CB19C2C59500288D2F /* RecordNOCell.m */,
 				BB230E5A19E8E15500EF79AB /* UserInfoCell.h */,
 				BB230E5B19E8E15500EF79AB /* UserInfoCell.m */,
+				BB7CFE901AD65A630021C15A /* RtspWlanCell.h */,
+				BB7CFE911AD65A630021C15A /* RtspWlanCell.m */,
 			);
 			path = cell;
 			sourceTree = "<group>";
@@ -1372,6 +1381,9 @@
 		BBA940911A47C6FA009837EA /* dvr_rtsp */ = {
 			isa = PBXGroup;
 			children = (
+				BBD550DC1AD60B7C0098B75B /* devdiscovery.m */,
+				BBD550DD1AD60B7C0098B75B /* devdiscovery.h */,
+				BBD550DE1AD60B7C0098B75B /* discovery.h */,
 				BBA940921A47C6FA009837EA /* LongseDes.c */,
 				BBA940931A47C6FA009837EA /* LongseDes.h */,
 				BBA940941A47C6FA009837EA /* private_protocol.m */,
@@ -1657,6 +1669,7 @@
 				BB1F84EB19A4A950004BE9AA /* UserModel.m in Sources */,
 				BB1F850319A4A950004BE9AA /* KxAudioManager.m in Sources */,
 				BB1F850B19A4A950004BE9AA /* DeviceCell.m in Sources */,
+				BB7CFE921AD65A630021C15A /* RtspWlanCell.m in Sources */,
 				BB1F84E119A4A950004BE9AA /* ProgressHUD.m in Sources */,
 				BB3CE33719B86255006435AA /* UIView+screenshot.m in Sources */,
 				BB257AFE19B6B5AC00076B0F /* RegisterViewController.m in Sources */,
@@ -1788,6 +1801,7 @@
 				BB1F84A719A4A950004BE9AA /* RTSPPlayViewController.m in Sources */,
 				BB230E5019E8C06400EF79AB /* UpdMobileViewController.m in Sources */,
 				BB1F84B119A4A950004BE9AA /* FMDatabaseQueue.m in Sources */,
+				BBD550DF1AD60B7C0098B75B /* devdiscovery.m in Sources */,
 				BB230E5319E8C1D200EF79AB /* UpdRealService.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1930,7 +1944,7 @@
 					"${SRCROOT}/FFmpeg",
 				);
 				INFOPLIST_FILE = "$(PROJECT_DIR)/XCMonit_Ip/others/XCMonit_Ip-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/libs",
@@ -1946,7 +1960,7 @@
 				PROVISIONING_PROFILE = "32945d9f-826e-486a-88ad-bb89587d479f";
 				SDKROOT = iphoneos8.1;
 				TARGETED_DEVICE_FAMILY = 1;
-				VALID_ARCHS = armv7;
+				VALID_ARCHS = "armv7 arm64";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -1971,7 +1985,7 @@
 					"${SRCROOT}/FFmpeg",
 				);
 				INFOPLIST_FILE = "$(PROJECT_DIR)/XCMonit_Ip/others/XCMonit_Ip-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/libs",
@@ -1984,10 +1998,10 @@
 					_FOR_DEBUG_,
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "84147359-0bed-4a29-aa76-413022688191";
+				PROVISIONING_PROFILE = "32945d9f-826e-486a-88ad-bb89587d479f";
 				SDKROOT = iphoneos8.1;
 				TARGETED_DEVICE_FAMILY = 1;
-				VALID_ARCHS = armv7;
+				VALID_ARCHS = "armv7 arm64";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;

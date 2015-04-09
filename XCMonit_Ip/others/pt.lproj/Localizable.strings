@@ -223,9 +223,11 @@
 "nickThan64" = "Nome de utilizador comprimento não pode ser maior do que 64";
 "realThan64" = "O nome não pode ser maior do que 64";
 
+"Manually"="adicionar manualmente";
 
+"search"="LAN Pesquisa";
 
-
+"searching"="Pesquisando";
 
 
 

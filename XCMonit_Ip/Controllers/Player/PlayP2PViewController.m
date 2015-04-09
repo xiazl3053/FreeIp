@@ -960,7 +960,7 @@
     {
         dispatch_async(dispatch_get_main_queue(),
         ^{
-                [ProgressHUD show:XCLocalized(@"videoSwitch") viewInfo:__weakSelf.view];
+             [ProgressHUD show:XCLocalized(@"videoSwitch") viewInfo:__weakSelf.view];
         });
     }
     else

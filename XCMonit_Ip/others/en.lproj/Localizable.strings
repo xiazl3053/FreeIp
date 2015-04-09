@@ -261,9 +261,10 @@
 "realThan64"="Name length must be less than 64";
 
 
+"Manually"="Manually add";
+"search"="LAN Search";
 
-
-
+"searching"="Searching";
 
 
 

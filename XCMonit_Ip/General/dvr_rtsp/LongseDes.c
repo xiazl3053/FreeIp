@@ -234,7 +234,7 @@ void move_right(uint8 * p_input, uint8 bit_start, uint8 bit_end, uint8 offset)
 //缓冲区移位
 //offset大于0时左移
 //offset小于0时右移
-void move_bits(uint8 * p_input, uint8 bit_start, uint8 bit_end, char offset)
+void move_bits(uint8 * p_input, uint8 bit_start, uint8 bit_end,signed char offset)
 {
     if(0 < offset)	//左移
     {
@@ -252,8 +252,6 @@ void Permutation(uint8 * p_input, uint8 * p_output, const uint8 * Table, uint8 b
 {
     uint8 b_val = FALSE;
     uint8 bit_index = 0;
-
-//    PP_PrintBit((char*)p_input,bits/8);
 
     for(bit_index = 0; bit_index < bits; bit_index++)
     {
@@ -374,7 +372,7 @@ void PP_Des(const char * p_data, const char * p_key, const char * p_output, PP_D
 
 
 /*outData 大小必须大于len 并且是8的整数倍*/
-void DES_Encode(char *outData, char *inData, char *key, int len)
+void PP_DES_Encode(char *outData, char *inData, char *key, int len)
 {
     int num;
     int i;
@@ -389,7 +387,7 @@ void DES_Encode(char *outData, char *inData, char *key, int len)
 }
 
 /*outData 大小必须大于len 并且是8的整数倍*/
-void DES_Decode(char *outData, char *inData, char *key, int len)
+void PP_DES_Decode(char *outData, char *inData, char *key, int len)
 {
     g_index = 0;
 

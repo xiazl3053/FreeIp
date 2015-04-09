@@ -32,8 +32,6 @@
 @property (nonatomic,strong) UIButton *btnDel;
 @property (nonatomic,strong) NSMutableDictionary *tableDic;
 
-
-
 @end
 
 @implementation RTSPListViewController

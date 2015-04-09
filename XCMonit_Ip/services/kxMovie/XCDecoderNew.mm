@@ -99,7 +99,7 @@ NSData* copyFrameDataNew(UInt8 *src, int linesize, int width, int height)
     AVCodecContext      *pSubtitleCodecCtx;
     AVCodecContext      *pAudioCodecCtx;
     AVCodecContext      *pCodecCtx;
-    struct SwsContext   *_swsContext;
+    struct  SwsContext   *_swsContext;
     AVPicture           _picture;
     BOOL                _pictureValid;
     
@@ -108,7 +108,7 @@ NSData* copyFrameDataNew(UInt8 *src, int linesize, int width, int height)
     int                 _videoStream;
     //
     AVFrame            *pVideoFrame;
-    
+    CGFloat fSrcWidth,fSrcHeight;
     BOOL               _bIsDecoding;
     BOOL               bFirst;
     CGFloat            _videoTimeBase;
@@ -142,16 +142,19 @@ NSData* copyFrameDataNew(UInt8 *src, int linesize, int width, int height)
     nFFMpegStatus = 0;
     return self;
 }
--(id)initWithFormat:(KxVideoFrameFormat)format
+
+-(id)initWithFormat:(KxVideoFrameFormat)format codeType:(int)nCodeType
 {
     self = [super init];
     _bNotify = YES;
     nFormat = 1;
-    _destorySDK = NO;
+    _nCodeType = nCodeType;
+    DLog(@"请求类型:%d",_nCodeType);
     nFFMpegStatus = 0;
     _videoFrameFormat = format;
     return self;
 }
+
 -(void)startConnect:(NSString *)strNo
 {
     __weak XCDecoderNew *weakSelf = self;
@@ -163,6 +166,7 @@ NSData* copyFrameDataNew(UInt8 *src, int linesize, int width, int height)
         [weakSelf initVideoParam];
     });
 }
+
 -(void)startConnectWithChan:(NSString *)strNo channel:(int)nChannel
 {
     _nChannel = nChannel;
@@ -174,7 +178,6 @@ NSData* copyFrameDataNew(UInt8 *src, int linesize, int width, int height)
        [weakSelf initVideoParam];
     });
 }
-
 
 -(void)stopVideo
 {
@@ -476,11 +479,14 @@ Release_avformat_open_input:
                                          pVideoFrame->height / 2);
         frame = yuvFrame;
         
-    } else {
-        
-        if (!_swsContext && ![self setupScaler])
+    } else
+    {
+        if (fSrcWidth != pCodecCtx->width || fSrcHeight != pCodecCtx->height)
         {
-            DLog(@"fail setup video scaler");
+            avcodec_flush_buffers(pCodecCtx);
+            [self setupScaler];
+            fSrcWidth = pCodecCtx->width;
+            fSrcHeight = pCodecCtx->height;
             return nil;
         }
         sws_scale(_swsContext,
@@ -496,7 +502,7 @@ Release_avformat_open_input:
                                       length:rgbFrame.linesize * pCodecCtx->height];
         frame = rgbFrame;
     }
-    
+
     frame.width = pCodecCtx->width;
     frame.height = pCodecCtx->height;
     frame.duration = 1.0 / _fFPS;
@@ -555,9 +561,10 @@ Release_avformat_open_input:
     }
     recv->peerName = [nsDevId UTF8String];
     __weak XCDecoderNew *_weakSelf = self;
+    __block int __nCodeType = _nCodeType ;
     dispatch_async(dispatch_get_global_queue(0, 0),
     ^{
-       BOOL bReturn = recv->threadP2P(2);
+       BOOL bReturn = recv->threadP2P(__nCodeType);
        if (bReturn)
        {
            _weakSelf.bP2P = YES;
@@ -600,7 +607,7 @@ Release_avformat_open_input:
 
    dispatch_async(dispatch_get_global_queue(0, 0),
    ^{
-       BOOL bReturn = recv->threadTran(2);
+       BOOL bReturn = recv->threadTran(__nCodeType);
        if (bReturn)
        {
            _weakSelf.bTran = YES;
@@ -638,28 +645,29 @@ Release_avformat_open_input:
    });
 }
 #pragma mark 码流切换
--(void)switchP2PCode:(int)nCode
+-(BOOL)switchP2PCode:(int)nCode
 {
     _bSwitch = NO;
-    __weak XCDecoderNew *_weakSelf = self;
+    _nCodeType = nCode;
     if(recv)
     {
-        dispatch_async(dispatch_get_global_queue(0, 0), ^{
-            BOOL bReturn = recv->swichCode(nCode);
-            if(bReturn)
-            {
-                _weakSelf.bSwitch = YES;
-                [self initVideoParam];
-            }
-            else
-            {
-                self.nError = 2;
-                self.strError = XCLocalized(@"streamSetFail");
-                [[NSNotificationCenter defaultCenter] postNotificationName:NSCONNECT_P2P_DVR_FAIL_VC object:self];
-            }
-        });
-        
+         BOOL bReturn = recv->swichCode(nCode);
+         if(bReturn)
+         {
+             _playing = YES;
+             _bSwitch = YES;
+//             avcodec_flush_buffers(pCodecCtx);
+             return YES;
+         }
+         else
+         {
+             self.nError = 2;
+             self.strError = XCLocalized(@"streamSetFail");
+             [[NSNotificationCenter defaultCenter] postNotificationName:NSCONNECT_P2P_DVR_FAIL_VC object:self];
+             return NO;
+         }
     }
+    return NO;
 }
 
 -(CGFloat)frameWidth
@@ -739,8 +747,8 @@ Release_avformat_open_input:
                                     PIX_FMT_RGB24,
                                     pCodecCtx->width,
                                     pCodecCtx->height) == 0;
-    if (!_pictureValid)
-        return NO;
+//    if (!_pictureValid)
+//        return NO;
     
     _swsContext = sws_getCachedContext(_swsContext,
                                        pCodecCtx->width,
@@ -762,9 +770,9 @@ Release_avformat_open_input:
         _swsContext = NULL;
     }
     
-    if (_pictureValid) {
+    if (&_picture)
+    {
         avpicture_free(&_picture);
-        _pictureValid = NO;
     }
 }
 
@@ -808,6 +816,16 @@ Release_avformat_open_input:
     }
 }
 
-
+-(int)getRealType
+{
+    if(_bP2P)
+    {
+        return 1;
+    }
+    else
+    {
+        return 2;
+    }
+}
 
 @end

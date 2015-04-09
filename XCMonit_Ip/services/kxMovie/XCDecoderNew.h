@@ -21,14 +21,16 @@
 -(void)destorySDK;
 -(void)releaseDecode;
 -(BOOL)setupVideoFrameFormat: (KxVideoFrameFormat) format;
--(id)initWithFormat:(KxVideoFrameFormat)format;
+-(id)initWithFormat:(KxVideoFrameFormat)format codeType:(int)nCodeType;
+
 -(void)recordStart:(NSString*)strPath name:(NSString*)strDevName;
 -(void)recordStop;
--(void)switchP2PCode:(int)nCode;
+-(BOOL)switchP2PCode:(int)nCode;
 -(void)sendPtzCmd:(int)nPtzCmd;
 -(NSMutableArray*)decodeFrames;
+-(int)getRealType;
 
-
+@property (nonatomic,assign) int nCodeType;
 @property (nonatomic,strong) NSMutableArray *videoArray;
 @property (nonatomic,assign) CGFloat fFPS;
 @property (nonatomic,assign) CGFloat frameWidth;

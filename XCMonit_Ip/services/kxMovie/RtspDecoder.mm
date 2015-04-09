@@ -78,9 +78,9 @@ int getNextFrame(void *userData,unsigned char *cFrame,int nLength)
     do{
         struct timeval result;
         gettimeofday(&result,NULL);
-        @synchronized(aryVideo)
+        if(aryVideo.count>0)
         {
-            if (aryVideo.count>0)
+            @synchronized(aryVideo)
             {
                 NSData *data = [aryVideo objectAtIndex:0];
                 size = (int)data.length;
@@ -358,7 +358,6 @@ Release_format_input:
             return NO;
         }
     }
-
     bConnect = YES;
     bOpening = YES;
     DLog(@"找到视频信息");
@@ -565,8 +564,8 @@ Release_format_input:
         return nil;
     KxVideoFrame *frame;
     if (!_swsContext &&
-        ![self setupScaler]) {
-        
+        ![self setupScaler])
+    {
         DLog(@"fail setup video scaler");
         return nil;
     }

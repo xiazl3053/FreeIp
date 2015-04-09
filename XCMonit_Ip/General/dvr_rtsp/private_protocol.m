@@ -140,6 +140,7 @@ void* private_protocol_stop(private_protocol_info_t **pStreamInfo)
     private_protocol_logout(*pStreamInfo);
 	PP_CLOSE_FD((*pStreamInfo)->cmdSocketFd);
 	PP_CLOSE_FD((*pStreamInfo)->streamSocketFd);
+    
     while(1)
     {
         if((*pStreamInfo)->usercount ==0)
@@ -148,15 +149,12 @@ void* private_protocol_stop(private_protocol_info_t **pStreamInfo)
             printf("break\n");
             break;
         }
-        DLog(@"1111111111");
-        [NSThread sleepForTimeInterval:0.25f];
 //        else
 //        {
 //            DLog(@"这里释放");
 //            if(count<5)
 //            {
 //                count++;
-//           //     sleep(1);
 //                continue;
 //            }
 //            else
@@ -165,6 +163,8 @@ void* private_protocol_stop(private_protocol_info_t **pStreamInfo)
 //                break;
 //            }
 //        }
+        DLog(@"(*pStreamInfo)usercount :%d",(*pStreamInfo)->usercount);
+        [NSThread sleepForTimeInterval:0.25f];
     }
     
 	if(iRet != 0)
@@ -438,8 +438,6 @@ void* private_protocol_recvHeartbeat(void *arg)
     return NULL;
 }
 
-
-
 int private_protocol_sendCmd(private_protocol_info_t* pStreamInfo, int cmdType, char *inData, int inLen, char *outData, int *outLen)
 {
    
@@ -554,8 +552,8 @@ int private_protocol_login(private_protocol_info_t *pStreamInfo, unsigned int ip
 
         sprintf((char*)userInfo.ucUsername,"%s",name);
         sprintf(passwdBuff,"%s",passwd);
-        DES_Encode((char*)userInfo.ucPassWord,passwdBuff,serialNum,16);
-        DES_Encode((char*)userInfo.ucSerialNum,serialNum,serialNum,ARG_SERIALNUM_LEN);
+        PP_DES_Encode((char*)userInfo.ucPassWord,passwdBuff,serialNum,16);
+        PP_DES_Encode((char*)userInfo.ucSerialNum,serialNum,serialNum,ARG_SERIALNUM_LEN);
         
         rsl = private_protocol_sendCmd(pStreamInfo,CMD_ACT_LOGIN,(char*)&userInfo,sizeof(USER_INFO),0,0);
         

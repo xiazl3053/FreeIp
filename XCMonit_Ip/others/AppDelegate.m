@@ -98,22 +98,18 @@ typedef struct testSturct
     }
 }
 
-- (NSUInteger)application:(UIApplication *)application supportedInterfaceOrientationsForWindow:(UIWindow *)window
+-(NSUInteger)application:(UIApplication *)application supportedInterfaceOrientationsForWindow:(UIWindow *)window
 {
     return UIInterfaceOrientationMaskAll;
 }
-- (void)applicationWillResignActive:(UIApplication *)application
+-(void)applicationWillResignActive:(UIApplication *)application
 {
-    //等待当前可能同步无法完成的线程结束
-//    [self performSelector:@selector(willResignActive) withObject:self afterDelay:5.0f];
-  //  sleep(5);
     [[NSNotificationCenter defaultCenter] postNotificationName:NS_APPLITION_ENTER_BACK object:nil];
 }
 
 -(void)willResignActive
 {
     //先判断应用状态
-    
     //发送立即结束通知
 //    [[NSNotificationCenter defaultCenter] postNotificationName:NS_APPLITION_ENTER_BACK object:nil];
 //    DLog(@"程序挂起");
