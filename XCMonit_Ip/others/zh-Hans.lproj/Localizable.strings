@@ -99,6 +99,10 @@
 "RegTimeout"="注册失败，连接超时";
 "RegData"="注册失败,数据错误";
 "RegPic"="注册失败,验证码错误";
+"regNameLength"="邮箱长度不要超过64";
+
+
+
 "RegSuc"="注册成功";
 "Registering"="正在注册";
 "EnterImg"="验证码不能为空";
@@ -246,7 +250,11 @@
 "pwdThan64"="密码长度不能大于64";
 "realThan64"="姓名长度不能大于64";
 
-
+"versionCheck"="版本检测";
+"versionLaster"="当前版本是最新的";
+"versionUpdate"="你确定更新版本?";
+"versionUpdate"="确定版本更新吗?";
 "Manually"="手动添加";
 "search"="局域网搜索";
 "searching"="正在搜索...";
+"WIFIOK"="请确认WIFI连接正常";

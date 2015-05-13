@@ -321,11 +321,6 @@
     playModel.bDecoding = YES;
     //停止视频
     __weak PlayControllerView *__playView = playView;
-
-//        dispatch_async(dispatch_get_main_queue(),
-//       ^{
-//           [__playView.mainView makeToast:XCLocalized(@"videoSwitch")];
-//       });
     __weak PlayFourViewController *__self = self;
     dispatch_async(dispatch_get_main_queue(),
     ^{
@@ -510,7 +505,6 @@
         _mainView4.frame = Rect(kVideoFrame+2,_mainView3.frame.origin.y, kVideoFrame, 120);
     }
     
-    
     [self.view insertSubview:_mainView1 atIndex:0];
     _mainView1.delegate = self;
     _mainView1.nCursel = 0;
@@ -546,12 +540,10 @@
     play4.mainView = _mainView4;
     
     _array = [NSMutableArray array];
-    
     [_array addObject:play1];
     [_array addObject:play2];
     [_array addObject:play3];
     [_array addObject:play4];
-    
 }
 #pragma mark 滚动条初始化
 -(void)initScrollView
@@ -635,7 +627,6 @@
     _scroll.scrollEnabled = NO;
     _scroll.showsHorizontalScrollIndicator = NO;
     [_scroll setScrollEnabled:YES];
-    
     if(nNumber>1)
     {
         UIPageControl *pageControl = [[UIPageControl alloc] init];
@@ -675,7 +666,6 @@
                                              green:198/255.0
                                               blue:198/255.0
                                              alpha:1.0];
-    
     UILabel *sLine4 = [[UILabel alloc] initWithFrame:CGRectMake(0, 0.3, kScreenWidth, 0.2)] ;
     sLine4.backgroundColor = [UIColor whiteColor];
     sLine3.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleBottomMargin;
@@ -829,19 +819,11 @@
     [btnHD removeFromSuperview];
 }
 
-
-
-
 #pragma mark 点击视频框
 -(void)updateClickView
 {
     [self clickView:((PlayControllerView*)[_array objectAtIndex:nIndex]).mainView];
 }
-
-
-//
-
-
 
 #pragma mark 停止选择的视频
 -(void)stopCurVideo
@@ -1009,8 +991,6 @@
     [playModel.decode recordStop];
 }
 
-
-
 -(void)connect_channelPlay:(UIButton*)sender
 {
     int nChannel = (int)[sender.titleLabel.text integerValue]-1;
@@ -1041,15 +1021,14 @@
             ^{
                 [weakSelf closePlayForKey:__strKey];
             });
-            
         }
         else
         {
             //提示当前视频框正在连接通道
-            dispatch_async(dispatch_get_main_queue(), ^{
+            dispatch_async(dispatch_get_main_queue(),
+            ^{
                 [weakSelf.view makeToast:XCLocalized(@"connectionDevice")];
             });
-            
             return ;
         }
     }
@@ -1063,13 +1042,16 @@
         playConOld.bPlay = NO;
         playConOld.strKey = @"";
         
+        
         PlayControllerView *playView = ((PlayControllerView*)[_array objectAtIndex:nIndex]);
         playCon.nPlayIndex = nIndex;
         playView.bPlay = YES;
         playView.strKey = strChannel;
+        playView.bRecord = playConOld.bRecord;
+        
+        playConOld.bRecord = NO;
         __weak PlayControllerView *__playView = playView;
         __weak PlayControlModel *__playModel = playCon;
-
         dispatch_async(dispatch_get_main_queue(),
         ^{
             [__playView.mainView insertSubview:__playModel.glView atIndex:0];
@@ -1082,7 +1064,8 @@
         //在空的视频框连接一个通道
         __weak PlayFourViewController *__self = self;
         __block int __nIndex = nIndex;
-        dispatch_async(dispatch_get_global_queue(0, 0), ^{
+        dispatch_async(dispatch_get_global_queue(0, 0),
+        ^{
             [__self startNewWindow:__nIndex channel:__strChannel];
         });
     }
@@ -1151,7 +1134,7 @@
     [_borderLabel setFrame:view.frame];
     nIndex = (int)view.nCursel;
     PlayControllerView *playView = [_array objectAtIndex:nIndex];
-    PlayControlModel *playModel = [_decoderInfo objectForKey:playView.strKey];//[playView.strKey ]
+    PlayControlModel *playModel = [_decoderInfo objectForKey:playView.strKey];
     if(![UserInfo sharedUserInfo].bGuess && playView.bPlay && playModel && playModel.glView)
     {
         ((UIButton*)[_downHUD viewWithTag:1002]).enabled = YES;
@@ -1179,7 +1162,6 @@
         [btnBD setEnabled:NO];
         [btnHD setEnabled:NO];
     }
-    
     if (bScreen)
     {
         if (!playView.bPlay)
@@ -1193,7 +1175,6 @@
            _topHUD.alpha = _topHUD.alpha ? 0 : 1;
         }
     }
-
 }
 -(void)doubleClickVideo:(id)sender
 {
@@ -1647,22 +1628,15 @@
     
     if (_currentView.frame.size.width * [sender scale] <= fWidth)
     {
-//        lastScale = 1.0f;
         _currentView.frame = Rect(0, 0, fWidth, fHeight);
        [_currentView removeGestureRecognizer:_panGesture];
     }
     else
     {
         [_currentView addGestureRecognizer:_panGesture];
-        CGPoint point = [sender locationInView:self.view];
-        DLog(@"point:%f--%f",point.x,point.y);
         CGFloat nowWidth = glWidth*fScale>fWidth*4?fWidth*4:glWidth*fScale;
         CGFloat nowHeight =glHeight*fScale >fHeight* 4?fHeight*4:glHeight*fScale;
         _currentView.frame = Rect(fWidth/2 - nowWidth/2,fHeight/2- nowHeight/2,nowWidth,nowHeight);
     }
-
 }
-
-
-
 @end

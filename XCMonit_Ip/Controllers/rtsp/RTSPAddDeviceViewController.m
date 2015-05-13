@@ -146,16 +146,19 @@
 -(void)updateSearchData:(NSNotification*)notify
 {
     NSMutableArray *aryTemp = notify.object;
+    __weak RTSPAddDeviceViewController *__self = self;
     DLog(@"aryDevice:%@---count:%d",aryTemp,(int)aryTemp.count);
     if (aryTemp.count == 0 ) {
-        dispatch_async(dispatch_get_main_queue(), ^{
+        dispatch_async(dispatch_get_main_queue(),
+        ^{
             //提示没有搜索到设备
-            
+            [__self.view makeToast:@""];
         });
     }
-    [aryDevice removeAllObjects];
-    [aryDevice addObjectsFromArray:aryTemp];
-    __weak RTSPAddDeviceViewController *__self = self;
+    for (RtspInfo *rtsp in aryTemp)
+    {
+        [aryDevice addObject:rtsp];
+    }
     dispatch_async(dispatch_get_main_queue(), ^{
         [__self.view addSubview:__self.tableView];
         [__self.tableView reloadData];
@@ -256,7 +259,8 @@
 {
     discovery();
     DD_SearchDev();
-    [self.view makeToast:XCLocalized(@"searching")];
+    [self.view makeToast:XCLocalized(@"searching") duration:1.0 position:@"center"];
+    [aryDevice removeAllObjects];
 }
 
 -(void)initViewInfo
@@ -271,7 +275,7 @@
     [searchView addSubview:imgView];
     UIButton *btnSearchAction = [UIButton buttonWithType:UIButtonTypeCustom];
     [searchView addSubview:btnSearchAction];
-    [btnSearchAction setTitle:@"搜索" forState:UIControlStateNormal];
+    [btnSearchAction setTitle:XCLocalized(@"search") forState:UIControlStateNormal];
     [btnSearchAction setTitleColor:RGB(255,255,255) forState:UIControlStateNormal];
     [btnSearchAction addTarget:self action:@selector(printSearchDev) forControlEvents:UIControlEventTouchUpInside];
     [btnSearchAction setFrame:Rect(50, imgView.height+imgView.y+80, kScreenWidth-100, 40)];
@@ -280,14 +284,14 @@
     
     UILabel *lblInfo = [[UILabel alloc] initWithFrame:Rect(10, imgView.y+imgView.height+20, kScreenWidth-20, 20)];
     [searchView addSubview:lblInfo];
-    [lblInfo setText:@"请确认网络连接正常"];
+    [lblInfo setText:XCLocalized(@"WIFIOK")];
     [lblInfo setTextAlignment:NSTextAlignmentCenter];
     [lblInfo setTextColor:RGB(165, 165, 165)];
     [lblInfo setFont:[UIFont fontWithName:@"Helvetica" size:14]];
     
     _tableView = [[UITableView alloc] initWithFrame:Rect(0, 135, kScreenWidth, kScreenSourchHeight-135)];
     _tableView.delegate = self;
-    _tableView.dataSource = self ;
+    _tableView.dataSource = self;
     _tableView.separatorStyle = UITableViewCellAccessoryNone;
     
     _btnIPC = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -549,16 +553,6 @@
 
 }
 
-/*
- #pragma mark - Navigation
-
-// In a storyboard-based application, you will often want to do a little preparation before navigation
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
-{
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
-}
-*/
 -(BOOL)shouldAutorotate
 {
     return NO;
@@ -567,8 +561,6 @@
 {
     return UIInterfaceOrientationMaskPortrait;
 }
-
-
 
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
@@ -590,7 +582,6 @@
     cell.delegate = self;
     return cell;
 }
-
 
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {

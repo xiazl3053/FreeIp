@@ -26,12 +26,4 @@
 #define HEIGHT_MENU_VIEW(x,y) ([[[UIDevice currentDevice] systemVersion] floatValue] >= 7.0 ? x : y)
 #define PHP_HOST_URL   @"http://www.freeip.com/"
 
-//#define PHP_HOST_URL   @"http://183.57.82.43/ys/"
-//http://www.freeip.com/
-//http://183.57.82.43/ys/
-/*http service*/
-//"httpserver" = "http://www.freeip.com/";
-
-/*P2P service*/
-//"p2pserver" = "www.freeipc.com";
 #endif

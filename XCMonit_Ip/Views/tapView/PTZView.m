@@ -34,12 +34,6 @@
     
     _btnZoomOut = [[PTZButton alloc] initCreateButton:@"zoomOut" high:@"zoomOut_d" start:PTZCONTROLTYPE_ZOOMTELE_START stop:PTZCONTROLTYPE_ZOOMTELE_STOP];
     
-//    _btnLeft = [self ptzCreateButton:@"left" high:@"left_d"];
-//    _btnUp = [self ptzCreateButton:@"up" high:@"up_d"];
-//    _btnDown = [self ptzCreateButton:@"down" high:@"down_d"];
-//    _btnZoomIn = [self ptzCreateButton:@"zoomIn" high:@"zoomIn_d"];
-//    _btnZoomOut = [self ptzCreateButton:@"zoomOut" high:@"zoomOut_d"];
-    
     [self addSubview:_btnRight];
     [self addSubview:_btnLeft];
     [self addSubview:_btnUp];

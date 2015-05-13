@@ -736,7 +736,7 @@ static NSMutableDictionary * gHistory;
     {
         return;
     }
-    self.playing = YES;
+    _playing = YES;
     _decoding = NO;
     _tickCorrectionTime = 0;
     _tickCounter = 0;
@@ -753,7 +753,7 @@ static NSMutableDictionary * gHistory;
     }
     [self asyncDecodeFrames];
     __weak PlayNetViewController *wearSelf = self;
-    dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, 0.1 * NSEC_PER_SEC);
+    dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, 0.6 * NSEC_PER_SEC);
     dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
         [wearSelf tick];
     });
@@ -762,12 +762,16 @@ static NSMutableDictionary * gHistory;
 - (void) pause
 {
     if (!self.playing)
+    {
         return;
+    }
     __weak UIButton *btnPlay = _playBtn;
     dispatch_async(dispatch_get_main_queue(), ^{
         btnPlay.selected = NO;
     });
     self.playing = NO;
+    self.decoding = YES;
+    
     DLog(@"pause movie");
 }
 
@@ -823,7 +827,7 @@ static NSMutableDictionary * gHistory;
             });
             return ;
         }
-        dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (1/_decoder.fps) * NSEC_PER_SEC);
+        dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, 0.038 * NSEC_PER_SEC);
         dispatch_after(popTime, dispatch_get_main_queue(), ^(void)
         {
            [wearSelf tick];
@@ -1049,9 +1053,9 @@ static NSMutableDictionary * gHistory;
     _moviePosition = position;
     __weak PlayNetViewController *_weakSelf =self;
     dispatch_async(dispatch_get_global_queue(0, 0), ^(void)
-                   {
-                       [_weakSelf updatePosition:position];
-                   });
+   {
+       [_weakSelf updatePosition:position];
+   });
 }
 
 - (void) updatePosition: (CGFloat) position
@@ -1060,15 +1064,18 @@ static NSMutableDictionary * gHistory;
     position = MIN(_record.allTime, MAX(0, position));
     __weak PlayNetViewController *weakSelf = self;
     dispatch_async(dispatch_get_global_queue(0, 0),
-                   ^{
-                       [weakSelf setDecoderPosition: position];
-                       [weakSelf setMoviePositionFromDecoder];
-                       [weakSelf updateHUD];
-                       if(!weakSelf.pausing)
-                       {
-                           [weakSelf play];
-                       }
-                   });
+   ^{
+       [weakSelf setDecoderPosition: position];
+       [weakSelf setMoviePositionFromDecoder];
+       [weakSelf updateHUD];
+       if(!weakSelf.pausing)
+       {
+           __strong PlayNetViewController *__strongSelf = weakSelf;
+           dispatch_after(dispatch_time(DISPATCH_TIME_NOW,0.3 * NSEC_PER_SEC),dispatch_get_global_queue(0, 0),^{
+              [__strongSelf play];
+           });
+       }
+   });
     
 }
 
@@ -1118,23 +1125,18 @@ static NSMutableDictionary * gHistory;
         fWidth = kScreenSourchHeight;
         fHeight = kScreenSourchWidth;
     }
-    
     _lblName.frame = Rect(30, 13, fWidth - 60, 15);
     _downHUD.frame = Rect(0, fHeight-80, fWidth, 80);
     _topHUD.frame = Rect(0, 0, fWidth,49);
     [_topHUD viewWithTag:1008].frame = _topHUD.bounds;
     [_downHUD viewWithTag:1008].frame = _downHUD.bounds;
-    
     _rewindBtn.frame = Rect(50, 30, 40, 40);
-    _playBtn.frame = Rect(95,  30, 40, 40);//30
+    _playBtn.frame = Rect(95,  30, 40, 40);
     _forwardBtn.frame = Rect(140, 30, 40, 40);
     
     _progressSlider.frame = Rect(0,5,fWidth,20);
-    
     _progressLabel.frame = Rect(fWidth/2-50, 40, 50, 20);
     _leftLabel.frame = Rect(fWidth/2,40,50,20);
-    
-    
 }
 
 #pragma mark 竖屏
@@ -1152,7 +1154,6 @@ static NSMutableDictionary * gHistory;
     [_downHUD viewWithTag:1002].frame = Rect(kScreenWidth/2-50, 2, 30, 30);
     [_downHUD viewWithTag:1003].frame = Rect(kScreenWidth/2+50, 2, 30, 30);
     
-    
     _glView.frame = frameCenter;
     _glView.contentMode = UIViewContentModeScaleAspectFit ;
 }
@@ -1160,8 +1161,6 @@ static NSMutableDictionary * gHistory;
 -(void)viewDidLayoutSubviews
 {
     [super viewDidLayoutSubviews];
-//    [self setVerticalFrame];
-
 }
 
 

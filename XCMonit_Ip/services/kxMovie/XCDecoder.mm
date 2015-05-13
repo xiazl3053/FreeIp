@@ -364,11 +364,9 @@ NSData * copyFrameData(UInt8 *src, int linesize, int width, int height)
     _videoArray = [NSMutableArray array];
     pFormatCtx = NULL;
     _bIsDecoding = NO;
-
-    AVCodec         *pCodec = NULL;
-
     pFormatCtx = avformat_alloc_context();
 
+    AVCodec         *pCodec = NULL;
     pCodec = avcodec_find_decoder(AV_CODEC_ID_H264);
     pCodecCtx = avcodec_alloc_context3(pCodec);
     if(avcodec_open2(pCodecCtx, pCodec, NULL) < 0)
@@ -936,7 +934,7 @@ Release_open_input:
         frame = yuvFrame;
         memcpy(pNewVideoFrame, pVideoFrame, sizeof(AVFrame));
         frame.width = pVideoFrame->width;
-        frame.height = pVideoFrame->height;
+        frame.height = pVideoFrame->height;//21+38*x
     }
     else
     {

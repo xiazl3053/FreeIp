@@ -11,6 +11,7 @@
 #import "UIFolderTableView.h"
 @interface RTSPListViewController : CustomViewController
 
-//@property (strong, nonatomic) UIFolderTableView *tableView;
 @property (strong, nonatomic) UIFolderTableView *tableView;
+
 @end
+

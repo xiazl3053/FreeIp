@@ -656,7 +656,6 @@ Release_avformat_open_input:
          {
              _playing = YES;
              _bSwitch = YES;
-//             avcodec_flush_buffers(pCodecCtx);
              return YES;
          }
          else

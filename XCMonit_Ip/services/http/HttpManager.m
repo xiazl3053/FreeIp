@@ -21,6 +21,7 @@
     [request setTimeoutInterval:XC_HTTP_TIMEOUT];//设置超时时间
     [request setHTTPMethod:@"POST"];//设置请求方式
     __block HttpManager *weakSelf = self;
+    DLog(@"strUrl:%@",strPath);
     [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue mainQueue] completionHandler:
      ^(NSURLResponse* response, NSData* data, NSError* connectionError){
          HttpManager *strongLogin = weakSelf;

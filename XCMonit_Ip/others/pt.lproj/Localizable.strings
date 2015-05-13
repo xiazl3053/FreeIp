@@ -229,6 +229,14 @@
 
 "searching"="Pesquisando";
 
+"versionCheck"="A detecção de versão";
+
+"WIFIOK"="Verifique se a conexão wi-fi é normal";
+
+"versionLaster"="A versão atual é a mais recente";
+
+"versionUpdate"="Tem certeza de uma versão atualizada ?";
 
 
-//Nome de usuário não pode ser maior do que 64
+"regNameLength"="Caixa de Correio não mais do que 64";
+

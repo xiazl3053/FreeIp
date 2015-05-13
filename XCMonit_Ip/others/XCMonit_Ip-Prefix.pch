@@ -32,15 +32,15 @@
  /Users/xiazhonglin/Desktop/iosp2p/armv7s/libenet.a -output
  /Users/xiazhonglin/Desktop/iosp2p/new/libenet.a
  
+lipo -create armv7/libavcodec.a arm64/libavcodec.a -output universal/libavcodec.a
+lipo -create armv7/libavformat.a arm64/libavformat.a -output universal/libavformat.a
+lipo -create armv7/libavutil.a arm64/libavutil.a -output universal/libavutil.a
+lipo -create armv7/libswscale.a arm64/libswscale.a -output universal/libswscale.a
+ 
 lipo -create armv7/lib/libavcodec.a arm64/lib/libavcodec.a -output universal/libavcodec.a
 lipo -create armv7/lib/libavformat.a arm64/lib/libavformat.a -output universal/libavformat.a
 lipo -create armv7/lib/libavutil.a arm64/lib/libavutil.a -output universal/libavutil.a
 lipo -create armv7/lib/libswscale.a arm64/lib/libswscale.a -output universal/libswscale.a
- 
- lipo -create i386/lib/libavcodec.a x86_64/lib/libavcodec.a -output universal/libavcodec.a
- lipo -create i386/lib/libavformat.a x86_64/lib/libavformat.a -output universal/libavformat.a
- lipo -create i386/lib/libavutil.a x86_64/lib/libavutil.a -output universal/libavutil.a
- lipo -create i386/lib/libswscale.a x86_64/lib/libswscale.a -output universal/libswscale.a
  
 lipo -create armv7/libenet.a arm64/libenet.a -output universal/libenet.a
 
@@ -343,6 +343,8 @@ www.freeip.com
  
       解码器播放实现封装，使用基类方法
  
+ 
+ 131 138 150 165 189 191
  
  */
 

@@ -29,7 +29,8 @@ typedef enum DD_TASKTYPE_TYPE{
     DD_TASKTYPE_MODIFY,
 }DD_TASKTYPE_TYPE;
 
-typedef enum DD_TASKSTATE_TYPE{
+typedef enum DD_TASKSTATE_TYPE
+{
     DD_TASKSTATE_UNDO      = 0,
     DD_TASKSTATE_WAIT      = 1,
     DD_TASKSTATE_TIMEOUT   = 2,
@@ -49,7 +50,8 @@ typedef struct task_t{
     unsigned int        dataLen;
 }task_t;
 
-typedef struct mender_t{
+typedef struct mender_t
+{
     int sockFd;
     int time;
     unsigned char ucIpAddr[DSC_IPV4ADDR_LEN];

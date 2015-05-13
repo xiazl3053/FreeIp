@@ -298,6 +298,11 @@
         return;
     }
     
+    if ([strName length]>64) {
+        [self.view makeToast:XCLocalized(@"regNameLength")];
+        return ;
+    }
+    
     NSString *strPwd = _txtPwd.text;
     if ([strPwd isEqualToString:@""]) {
         [self.view makeToast:XCLocalized(@"pwdNull")];
@@ -315,17 +320,17 @@
         [self.view makeToast:XCLocalized(@"picNull")];
         return ;
     }
-    if (!_bError)
+    if (![DecodeJson validateEmail:_txtName.text])
     {
-        [self.view makeToast:XCLocalized(@"UsernameAlready")];
+        [self.view makeToast:XCLocalized(@"emailError")];
         return;
     }
-    else if(!_bPwdLength)
+    else if([strPwd length] <6 || [strAuthPwd length] < 6)
     {
         [self.view makeToast:XCLocalized(@"pwdLength")];
         return;
     }
-    else if(!_bPwd)
+    else if(![strPwd isEqualToString:strAuthPwd])
     {
         [self.view makeToast:XCLocalized(@"TwoPwd")];
         return ;
@@ -414,9 +419,7 @@
             });
             return ;
         }
-        
         //authUser
-        
         dispatch_async(dispatch_get_global_queue(0, 0),
         ^{
             [weakSelf authUsername];
@@ -453,7 +456,6 @@
     }
 }
 
-
 -(void)authUsername
 {
     __weak RegisterViewController *weakSelf =self;
@@ -485,6 +487,7 @@
 {
     return NO;
 }
+
 -(NSUInteger)supportedInterfaceOrientations
 {
     return UIInterfaceOrientationMaskPortrait;

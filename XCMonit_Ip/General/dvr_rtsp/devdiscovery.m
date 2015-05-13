@@ -288,6 +288,7 @@ int DD_SearchDev()
         }
         return 0;
     }while(0);
+    
     DD_DeleteTask(pTask);
     return -1;
 }
@@ -903,8 +904,10 @@ int DD_InitNetworkInfo(DSC_NETWORK_INFO *pInfo)
         inet_sock = socket(AF_INET, SOCK_DGRAM, 0);
         strcpy(ifr.ifr_name, "en0");
         if (ioctl(inet_sock, SIOCGIFADDR, &ifr) < 0)
-               perror("ioctl");
-
+        {
+             perror("ioctl");
+        }
+        close(inet_sock);
         snprintf((char*)pInfo->ucIpAddr,DSC_IPV4ADDR_LEN,"%s", inet_ntoa(((struct sockaddr_in*)&(ifr.ifr_addr))->sin_addr));
 //		snprintf((char*)pInfo->ucIpAddr,DSC_IPV4ADDR_LEN,"%s", "172.18.191.41");
         pInfo->ulMemberIsValid |= DSC_NETWORK_IP_VALID;

@@ -8,12 +8,18 @@
 
 #import "VersionInfoViewController.h"
 #import "CustomNaviBarView.h"
+#import "ProgressHUD.h"
 #import "NSDate+convenience.h"
+#import "VersionCheckService.h"
+#import "Toast+UIView.h"
 
-
-@interface VersionInfoViewController ()
-
+@interface VersionInfoViewController ()<UIAlertViewDelegate>
+{
+    VersionCheckService *versionService;
+    
+}
 @property (nonatomic,strong) UIImageView *imgView;
+
 @property (nonatomic,strong) UILabel *lblInfo;
 @end
 
@@ -63,6 +69,73 @@
     
     [self.view  addSubview:_lblInfo];
     
+    UIButton *btnCheck = [UIButton buttonWithType:UIButtonTypeCustom];
+    
+    [btnCheck setTitle:XCLocalized(@"versionCheck") forState:UIControlStateNormal];
+    [btnCheck setBackgroundImage:[UIImage imageNamed:@"delete_btn"] forState:UIControlStateNormal];
+    [btnCheck setBackgroundImage:[UIImage imageNamed:@"delete_btn_onpress"] forState:UIControlStateHighlighted];
+    [self.view addSubview:btnCheck];
+    
+    btnCheck.frame = Rect(50, _lblInfo.frame.origin.y+60, kScreenWidth-100, 45);
+    [btnCheck addTarget:self action:@selector(queryVersion) forControlEvents:UIControlEventTouchUpInside];
+}
+
+-(void)queryVersion
+{
+    if(versionService==nil)
+    {
+        versionService = [[VersionCheckService alloc] init];
+    }
+    __weak VersionInfoViewController *__self = self;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [__self.view makeToastActivity];
+    });
+    versionService.httpBlock = ^(NSString *strVersion)
+    {
+        DLog(@"strVersion:%@",strVersion);
+        [__self.view hideToastActivity];
+        if([strVersion isEqualToString:[[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]])
+        {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [__self.view makeToast:XCLocalized(@"versionLaster")];
+            });
+        }
+        else
+        {
+            __strong VersionInfoViewController *__strongSelf = __self;
+            dispatch_async(dispatch_get_main_queue(), ^{
+                UIAlertView *alert = [[UIAlertView alloc] initWithTitle:nil message:XCLocalized(@"versionUpdate") delegate:__strongSelf cancelButtonTitle:XCLocalized(@"cancel")
+                                                      otherButtonTitles:XCLocalized(@"confirm"), nil];
+                alert.tag = 100;
+                [alert show];
+            });
+        }
+    };
+    __weak VersionCheckService *__versionCheck = versionService;
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1.0*NSEC_PER_SEC), dispatch_get_global_queue(0, 0), ^{
+        [__versionCheck requestVersion];
+    });
+    
+    
+}
+
+-(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    if (alertView.tag == 100) {
+        switch (buttonIndex)
+        {
+            case 1:
+                [self updateVersion];
+                break;
+            default:
+                break;
+        }
+    }
+}
+
+-(void)updateVersion
+{
+   [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"itms-apps://itunes.apple.com/cn/app/freeip/id898690336?mt=8"]];
 }
 
 -(void)navBack

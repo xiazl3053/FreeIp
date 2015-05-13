@@ -13,7 +13,7 @@
 #import "XCNotification.h"
 #import "UpdNameService.h"
 #import "ProgressHUD.h"
-@interface UpdDevNameViewController ()
+@interface UpdDevNameViewController ()<UITextViewDelegate>
 {
     UITextView *_txtView;
 }
@@ -58,10 +58,12 @@
     [lblContent setText:XCLocalized(@"cameraName")];
     _txtView = [[UITextView alloc] initWithFrame:Rect(10,lblContent.frame.origin.y+30, kScreenWidth-20, 160)];
     [self.view addSubview:_txtView];
+    _txtView.delegate = self;
     [_txtView setBackgroundColor:RGB(244, 244, 244)];
     [_txtView setFont:[UIFont fontWithName:@"Helvetica" size:14.0f]];
-    
 }
+
+
 -(void)navBack
 {
     [self dismissViewControllerAnimated:YES completion:^{}];
@@ -74,7 +76,7 @@
         [self.view makeToast:XCLocalized(@"cameranull")];
         return ;
     }
-    if ([strInfo length]>kUSER_INFO_MAX_LENGTH)
+    if ([strInfo length]>=kUSER_INFO_MAX_LENGTH)
     {
         [self.view makeToast:XCLocalized(@"cameraLess")];
         return ;
@@ -113,7 +115,7 @@
                    });
         }
     };
-    _strName = strInfo;
+    _strName = [strInfo stringByReplacingOccurrencesOfString:@"\n" withString:@" "];
     [_updNameService requestUpdName:_strNo name:_strName];
 }
 

@@ -225,24 +225,17 @@
 "Manually"="adicionar manualmente";
 
 "search"="LAN Pesquisa";
-
 "searching"="Pesquisando";
+"WIFIOK"="Verifique se a conexão wi-fi é normal";
 
 
 
+"versionCheck"="A detecção de versão";
+"versionLaster"="A versão atual é a mais recente";
+"versionUpdate"="Tem certeza de uma versão atualizada ?";
 
 
-
-
-
-
-
-
-
-
-
-
-
+"regNameLength"="Caixa de Correio não mais do que 64";
 
 
 

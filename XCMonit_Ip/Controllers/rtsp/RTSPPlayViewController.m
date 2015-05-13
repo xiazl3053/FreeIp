@@ -277,7 +277,6 @@
         [weakSelf.btnPlay setSelected:YES];
         [weakSelf.btnShoto setEnabled:YES];
         [weakSelf.btnRecord setEnabled:YES];
-        
         [ProgressHUD dismiss];
         [weakSelf initGlView];
         [weakSelf playMovie];

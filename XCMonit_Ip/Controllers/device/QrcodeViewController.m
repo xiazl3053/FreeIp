@@ -223,12 +223,12 @@
 {
     NSString *codeData = [[NSString alloc] init];;
     for (ZBarSymbol *sym in symbols) {
-        codeData = sym.data;
+        codeData = [[sym.data stringByReplacingOccurrencesOfString:@"\r" withString:@""] stringByReplacingOccurrencesOfString:@"\n" withString:@""];
         break;
     }
     AddDevViewController *addDev = [[AddDevViewController alloc] init];
     __weak AddDevViewController *__addDev = addDev;
-    __block NSString *__strInfo = codeData;
+    __block NSString *__strInfo = [codeData stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
     [self presentViewController:addDev animated:YES completion:
     ^{
           [__addDev authNO:__strInfo];

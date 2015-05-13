@@ -260,11 +260,20 @@
 "nickThan64" = "Nick name length must be less than 64";
 "realThan64"="Name length must be less than 64";
 
-
 "Manually"="Manually add";
-"search"="LAN Search";
 
+"search"="LAN Search";
 "searching"="Searching";
+"WIFIOK"="Make sure the wifi connection is normal";
+
+"versionCheck"="Version detection";
+"versionUpdate"="Are you sure an updated version?";
+"versionLaster"="The current version is the latest";
+
+
+
+
+"regNameLength"="Mailbox not longer than 64";
 
 
 

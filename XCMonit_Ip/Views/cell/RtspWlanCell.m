@@ -93,8 +93,6 @@
     NSString *strSource = [NSString stringWithFormat:@"%@:%d",rtsp.strAddress,(int)rtsp.nPort];
     
     [((UILabel*)[self.contentView viewWithTag:10003]) setText:strSource];
-   
-    
 }
 
 @end
