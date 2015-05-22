@@ -38,14 +38,15 @@
     for(NSString *key in params)
     {
         id content = [params objectForKey:key];
-        if ([content isKindOfClass:[NSString class]] || [content isKindOfClass:[NSNumber class]]) {
+        if ([content isKindOfClass:[NSString class]] || [content isKindOfClass:[NSNumber class]])
+        {
             NSString *param = [NSString stringWithFormat:@"--%@\r\nContent-Disposition: form-data; name=\"%@\"\r\n\r\n%@\r\n",BOUNDARY,key,content,nil];
             [body appendData:[param dataUsingEncoding:NSUTF8StringEncoding]];
             
-        } else if([content isKindOfClass:[FileDetail class]]) {
-            
+        }
+        else if([content isKindOfClass:[FileDetail class]])
+        {
             FileDetail *file = (FileDetail *)content;
-            
             NSString *param = [NSString stringWithFormat:@"--%@\r\nContent-Disposition: form-data; name=\"%@\";filename=\"%@\"\r\nContent-Type: application/octet-stream\r\n\r\n",BOUNDARY,key,file.name,nil];
             [body appendData:[param dataUsingEncoding:NSUTF8StringEncoding]];
             [body appendData:file.data];

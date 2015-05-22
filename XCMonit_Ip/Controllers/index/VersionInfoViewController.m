@@ -69,15 +69,6 @@
     
     [self.view  addSubview:_lblInfo];
     
-    UIButton *btnCheck = [UIButton buttonWithType:UIButtonTypeCustom];
-    
-    [btnCheck setTitle:XCLocalized(@"versionCheck") forState:UIControlStateNormal];
-    [btnCheck setBackgroundImage:[UIImage imageNamed:@"delete_btn"] forState:UIControlStateNormal];
-    [btnCheck setBackgroundImage:[UIImage imageNamed:@"delete_btn_onpress"] forState:UIControlStateHighlighted];
-    [self.view addSubview:btnCheck];
-    
-    btnCheck.frame = Rect(50, _lblInfo.frame.origin.y+60, kScreenWidth-100, 45);
-    [btnCheck addTarget:self action:@selector(queryVersion) forControlEvents:UIControlEventTouchUpInside];
 }
 
 -(void)queryVersion

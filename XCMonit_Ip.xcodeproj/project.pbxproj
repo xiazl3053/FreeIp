@@ -26,6 +26,7 @@
 		BB12DFE11962B5B2001E3764 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BB12DFE01962B5B2001E3764 /* Accelerate.framework */; };
 		BB12DFE31962B84C001E3764 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BB12DFE21962B84C001E3764 /* AudioToolbox.framework */; };
 		BB12DFE51962B85D001E3764 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BB12DFE41962B85D001E3764 /* CoreAudio.framework */; };
+		BB1801DC1B0B0BA6001BDAEE /* CloudViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BB1801DB1B0B0BA6001BDAEE /* CloudViewController.m */; };
 		BB1932EF1A0860B900511A7C /* HelpViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BB1932EE1A0860B900511A7C /* HelpViewController.m */; };
 		BB19649A19F77B6000D03492 /* RSKImageCropViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BB19649319F77B6000D03492 /* RSKImageCropViewController.m */; };
 		BB19649B19F77B6000D03492 /* RSKImageScrollView.m in Sources */ = {isa = PBXBuildFile; fileRef = BB19649519F77B6000D03492 /* RSKImageScrollView.m */; };
@@ -184,6 +185,7 @@
 		BB3CE33F19B86DB7006435AA /* tmall_bg_main.png in Resources */ = {isa = PBXBuildFile; fileRef = BB3CE33D19B86DB7006435AA /* tmall_bg_main.png */; };
 		BB3CE34019B86DB7006435AA /* tmall_bg_main@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = BB3CE33E19B86DB7006435AA /* tmall_bg_main@2x.png */; };
 		BB3EF4C61AEE090A00F9D765 /* VersionCheckService.m in Sources */ = {isa = PBXBuildFile; fileRef = BB3EF4C51AEE090A00F9D765 /* VersionCheckService.m */; };
+		BB42019A1B0C3F88004059AC /* TimeProView.m in Sources */ = {isa = PBXBuildFile; fileRef = BB4201991B0C3F88004059AC /* TimeProView.m */; };
 		BB4B5EBD19AAD00600BA1E8B /* PhoneDb.m in Sources */ = {isa = PBXBuildFile; fileRef = BB4B5EBC19AAD00600BA1E8B /* PhoneDb.m */; };
 		BB4B5EC019AAD07800BA1E8B /* Picture.m in Sources */ = {isa = PBXBuildFile; fileRef = BB4B5EBF19AAD07800BA1E8B /* Picture.m */; };
 		BB5640421941C1BF007CF682 /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BB5640411941C1BF007CF682 /* MobileCoreServices.framework */; };
@@ -252,6 +254,8 @@
 		BB12DFE01962B5B2001E3764 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
 		BB12DFE21962B84C001E3764 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		BB12DFE41962B85D001E3764 /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
+		BB1801DA1B0B0BA6001BDAEE /* CloudViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CloudViewController.h; sourceTree = "<group>"; };
+		BB1801DB1B0B0BA6001BDAEE /* CloudViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CloudViewController.m; sourceTree = "<group>"; };
 		BB1932ED1A0860B900511A7C /* HelpViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HelpViewController.h; sourceTree = "<group>"; };
 		BB1932EE1A0860B900511A7C /* HelpViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HelpViewController.m; sourceTree = "<group>"; };
 		BB19649119F77B6000D03492 /* RSKImageCropper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RSKImageCropper.h; sourceTree = "<group>"; };
@@ -555,6 +559,8 @@
 		BB3CE33E19B86DB7006435AA /* tmall_bg_main@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "tmall_bg_main@2x.png"; sourceTree = "<group>"; };
 		BB3EF4C41AEE090A00F9D765 /* VersionCheckService.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VersionCheckService.h; sourceTree = "<group>"; };
 		BB3EF4C51AEE090A00F9D765 /* VersionCheckService.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VersionCheckService.m; sourceTree = "<group>"; };
+		BB4201981B0C3F88004059AC /* TimeProView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TimeProView.h; path = cloud/TimeProView.h; sourceTree = "<group>"; };
+		BB4201991B0C3F88004059AC /* TimeProView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TimeProView.m; path = cloud/TimeProView.m; sourceTree = "<group>"; };
 		BB4B5EBB19AAD00600BA1E8B /* PhoneDb.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PhoneDb.h; sourceTree = "<group>"; };
 		BB4B5EBC19AAD00600BA1E8B /* PhoneDb.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PhoneDb.m; sourceTree = "<group>"; };
 		BB4B5EBE19AAD07800BA1E8B /* Picture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Picture.h; sourceTree = "<group>"; };
@@ -766,6 +772,15 @@
 			path = XCMonit_Ip;
 			sourceTree = "<group>";
 		};
+		BB1801D91B0AD8B3001BDAEE /* Cloud */ = {
+			isa = PBXGroup;
+			children = (
+				BB1801DA1B0B0BA6001BDAEE /* CloudViewController.h */,
+				BB1801DB1B0B0BA6001BDAEE /* CloudViewController.m */,
+			);
+			path = Cloud;
+			sourceTree = "<group>";
+		};
 		BB19649019F77B6000D03492 /* RSKImageCropper */ = {
 			isa = PBXGroup;
 			children = (
@@ -798,6 +813,7 @@
 		BB1F837719A4A950004BE9AA /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
+				BB1801D91B0AD8B3001BDAEE /* Cloud */,
 				BB1F837819A4A950004BE9AA /* device */,
 				BB1F838119A4A950004BE9AA /* image */,
 				BB1F838419A4A950004BE9AA /* index */,
@@ -1274,6 +1290,7 @@
 		BB1F847E19A4A950004BE9AA /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				BB4201941B0C3F2C004059AC /* cloud */,
 				BBDFCAD71AB2C908004B0E0F /* video */,
 				BB2647FC19C1A6610019CFAB /* Record */,
 				BB1F847F19A4A950004BE9AA /* cell */,
@@ -1381,6 +1398,15 @@
 				BB3CE33419B86255006435AA /* UIView+screenshot.m */,
 			);
 			path = Floder;
+			sourceTree = "<group>";
+		};
+		BB4201941B0C3F2C004059AC /* cloud */ = {
+			isa = PBXGroup;
+			children = (
+				BB4201981B0C3F88004059AC /* TimeProView.h */,
+				BB4201991B0C3F88004059AC /* TimeProView.m */,
+			);
+			name = cloud;
 			sourceTree = "<group>";
 		};
 		BBA940911A47C6FA009837EA /* dvr_rtsp */ = {
@@ -1702,6 +1728,7 @@
 				BB257B0119B711CB00076B0F /* RegisterAuthCode.m in Sources */,
 				BB230E5919E8C1F100EF79AB /* UpdNickService.m in Sources */,
 				BB1F84F819A4A950004BE9AA /* RecordDb.m in Sources */,
+				BB42019A1B0C3F88004059AC /* TimeProView.m in Sources */,
 				BB9F47791AB97E8E002AF594 /* LoginUserDB.m in Sources */,
 				BBAC41681AAE74FB00EB1F8B /* PlayViewController.m in Sources */,
 				BB2647FF19C1A8620019CFAB /* RecordView.m in Sources */,
@@ -1720,6 +1747,7 @@
 				BB1F84CC19A4A950004BE9AA /* XCPhotoToolBar.m in Sources */,
 				BB1F84AA19A4A950004BE9AA /* CustomNaviBarView.m in Sources */,
 				BB1F84B819A4A950004BE9AA /* NSArray+Sort.m in Sources */,
+				BB1801DC1B0B0BA6001BDAEE /* CloudViewController.m in Sources */,
 				BB1F850A19A4A950004BE9AA /* CellForLabel.m in Sources */,
 				BB1F850519A4A950004BE9AA /* P2PInitService.mm in Sources */,
 				BBDFCADD1AB2D470004B0E0F /* VideoDownHud.m in Sources */,
@@ -2004,7 +2032,7 @@
 					_FOR_DEBUG_,
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "3a2154b5-8e83-4696-afe5-5203dd2e6f2d";
+				PROVISIONING_PROFILE = "43f78d24-de0e-422b-aba3-e9f1b1b39ed7";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = 1;
 				VALID_ARCHS = "armv7 arm64";

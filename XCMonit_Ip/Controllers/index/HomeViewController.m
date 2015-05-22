@@ -8,6 +8,7 @@
 
 #import "HomeViewController.h"
 #import "CustomNaviBarView.h"
+#import "CloudViewController.h"
 #import "DeviceInfoDb.h"
 #import "XCNotification.h"
 #import "DevModel.h"
@@ -241,8 +242,6 @@
         //单通道播放视频
         PlayP2PViewController *playController = [[PlayP2PViewController alloc] initWithNO:devModel.strDevNO name:devModel.strDevName format:_nFormat];
         [self.parentViewController presentViewController:playController animated:YES completion:nil];
-//        PlayForP2PViewController *playFor = [[PlayForP2PViewController alloc] initWithNO:devModel.strDevNO name:devModel.strDevName format:_nFormat];
-//        [self.parentViewController presentViewController:playFor animated:YES completion:nil];
     }
     else
     {
@@ -257,18 +256,21 @@
     return kTableviewDeviceCellHeight;
 }
 
-
+#pragma mark 修改
 -(void)recordVideo:(NSString *)strNO name:(NSString *)strDevName line:(int)nLine
 {
-    NSArray *aryRecord = [RecordDb queryRecord:strNO];
-    if (aryRecord.count<1)
-    {
-        [self.view makeToast:XCLocalized(@"noRecords")];
-        return;
-    }
-
-    RecordViewController *record = [[RecordViewController alloc] initWithNo:strNO status:nLine];
-    [self presentViewController:record animated:YES completion:nil];
+    
+    CloudViewController *cloundView = [[CloudViewController alloc] init];
+    [self presentViewController:cloundView animated:YES completion:nil];
+//    NSArray *aryRecord = [RecordDb queryRecord:strNO];
+//    if (aryRecord.count<1)
+//    {
+//        [self.view makeToast:XCLocalized(@"noRecords")];
+//        return;
+//    }
+//
+//    RecordViewController *record = [[RecordViewController alloc] initWithNo:strNO status:nLine];
+//    [self presentViewController:record animated:YES completion:nil];
 }
 -(void)playVideo:(NSString*)strNO name:(NSString*)strDevName type:(NSInteger)nType
 {

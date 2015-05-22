@@ -351,12 +351,12 @@
         __weak PlayFourViewController *__self = self;
         dispatch_group_t group = dispatch_group_create();
         int nChannel = [playView.strKey intValue];
+        DLog(@"nChannel:%d",nChannel);
         dispatch_group_async(group, dispatch_get_global_queue(0, 0),
-         ^{
+        ^{
              [__self closePlayForKey:__playView.strKey];
-         });
+        });
         dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
-        
         __block int __nChannel = nChannel;
         __block int __nCodeType = nCodeType;
         DLog(@"码流类型:%d",nCodeType);
@@ -1455,6 +1455,7 @@
           [weakdecode startConnectWithChan:__strNO channel:[__strChannel intValue]];
     });
     _bPlay = YES;
+    playModel.nPlayIndex = nIndex;
     dispatch_async(dispatch_get_global_queue(0, 0),
     ^{
         while (!weakdecode.fFPS)

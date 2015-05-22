@@ -99,7 +99,6 @@ DEFINE_SINGLETON_FOR_CLASS(CaptureService);
 //+(BOOL)captureToPhotoYUV:(UIView *)_glView name:(NSString*)devName width:(CGFloat)fWidth height:(CGFloat)fHeight;
 +(BOOL)captureToPhotoYUV:(UIImage *)image name:(NSString*)devName // width:(CGFloat)fWidth height:(CGFloat)fHeight
 {
- //   UIImage *image = [CaptureService glToUIImage:_glView];//修改方式
     NSDateFormatter *fileformatter=[[NSDateFormatter alloc] init];
     [fileformatter setDateFormat:@"YYYY-MM-dd"];
     //每天的记录创建一个
@@ -120,6 +119,7 @@ DEFINE_SINGLETON_FOR_CLASS(CaptureService);
                                                               forKey: NSURLIsExcludedFromBackupKey error:nil];
     picture.strFile = fileName;
     picture.strDevName = devName;
+    
     if (result&&success)
     {
         [PhoneDb insertRecord:picture];
@@ -129,7 +129,6 @@ DEFINE_SINGLETON_FOR_CLASS(CaptureService);
     {
         return NO;
     }
-
 }
 
 #pragma mark 新加入
