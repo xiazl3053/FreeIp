@@ -23,6 +23,7 @@ extern "C"
 }
 
 #define P2PSHAREDINIT  [P2PInitService sharedP2PInitService]
+
 using namespace std;
 int nTimeOut;
 
@@ -674,7 +675,7 @@ int nInfoNum = 0;
             }
             if (0 == len || -1 == len)
             {
-                DLog(@"PSP PPS");
+//                DLog(@"PSP PPS");
                 continue;
             }
         }

@@ -18,7 +18,6 @@
 #import "RtspInfoDb.h"
 #import "RtspInfo.h"
 #import "discovery.h"
-
 #import "devdiscovery.h"
 
 @interface RTSPAddDeviceViewController ()<UITableViewDataSource,UITableViewDelegate,RTSPLanDelegate>

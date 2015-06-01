@@ -1,0 +1,258 @@
+翻译方式：
+翻译 "="右边部分内容，左边的不修改
+/*Loginbtn */
+"Loginbtn" = "Войти";
+/*Loginuser */
+"Loginuser" = "Введите имя пользователя";
+"regUser"="Введите адрес почты";
+/*Loginpwd */
+"Loginpwd" = "Введите пароль"
+"LoginpwdAgain" = "Подтвердите пароль";
+/*Loginregister */
+"Loginregister" = "Регистрация";
+/*offline*/
+"offline" = "Не в сети";
+/*online*/
+"online" = "В сети";
+/*device status*/
+"statu" = "Статус";
+/*device type*/
+"type" = "Тип устройства";
+/*devNO*/
+"devNO" = "Серийный номер";
+/*devDel*/
+"devDel" = "Удалить";
+/*home*/
+"home" = "Домой";
+/*device*/
+"device" = "Устройство";
+/*more*/
+"more" = "Ещё";
+"rtsp" = " RTSP поток";
+/*picture*/
+"picture" = "Изображение";
+/*userinfo*/
+"userinfo" = "Информация пользователя";
+/*aboutus*/
+"aboutus" = "О нас";
+/*version*/
+"version" = "Версия";
+/*cancel*/
+"cancel" = "Выход";
+/*confirm*/
+"confirm" = "Подтвердить";
+/*delete device request*/
+"delDeviceQuq" = "Удалить устройство? ";
+/*logout*/
+"logout" = "Выйти";
+/*DeviceDetails*/
+"devDetails" = "Устройство";
+/*loading*/
+"loading" = "Загрузка... ";
+/*connectFail*/
+"connectFail" = "Устройство не подключено";
+/*Disconnect*/
+"Disconnect" = "Подключение устройства прервано";
+/*deviceinfotimeout*/
+"deviceinfotimeout" = "подключение устройство, время вышло";
+/*updDevName*/
+"updDevName" = "Модификация";
+/*save*/
+"save" = "Сохранить";
+/*cameraName*/
+"cameraName" = "Имя устройства (не более 50символов) ";
+/*userAuth*/
+"userAuth" = "Имя пользователя не может быть пустым";
+/*pwdAuth*/
+"pwdAuth" = "Пароль не может быть пустым";
+/*logining*/
+"logining" = "Вход... ";
+/*authError*/
+"authError" = "Имя пользователя или пароль не правильны";
+/*loginTime*/
+"loginTime" = "время подключения истекло";
+/*ServerException*/
+"ServerException" = "Исключение сервера";
+"Remind" = "Напомнить";
+"logoutRemind" = "Выйти? ";
+"AddCamera" = "Добавить устройство";
+"inputNO" = "Введите серийный номер пожалуйста";
+"serialLength" = "длина серийного номера 13 знаков";
+"addOk" ="Успешно добавлено";
+"bindingError" = "Устройство было связано";
+"serialError" = "Такой серийный номер не существует";
+"addTimeout" = "Добавление устройства, время вышло";
+"Modify" = "Изменить имя устройства";
+"cameraLess" = "Длина меньше 50 символов";
+"cameranull" = "Имя устройства не может быть пустым";
+"updateOK" = "Успешно изменено";
+"updateTimeOut" = "Время смены имени истекло";
+"nostream" = "Нет доступа к потоку";
+"streamSetFail"="Не удалось настроить видео поток";
+"switchError" = "Ошибка потока";
+"picturesView" = "Изображение";
+"Nickname" = "Псевдоним";
+"Useravatar" = "Аватар";
+"RealName" = "Настоящее имя";
+"email" = " Email";
+"mobile" = "Мобильный";
+"userType" = "Тип устройства";
+"familyType" = "Родственный пользователь";
+"recordInfo" = "Запись";
+"RecordDelete" = "Удалить";
+"RecordConfirm" = "Хорошо";
+"videoLow" = " BD";
+"videoHight" = "HD";
+"NULLInfo" = "Ноль";
+"videoSwitch" = "Настройки видео патока";
+"userTimeout" = "Время добавления пользователя истекло";
+"rtspList" = " RTSP список";
+"deviceList" = "Список устройств";
+"versionInfo" = "Версия устройства";
+"startTime"="Начальное время";
+"endTime"="Конечное время";
+"allTime"="Все время";
+"ipcType"=" IPC";
+"DVR4"="DVR-4";
+"DVR8"="DVR-8";
+"DVR16"="DVR-16";
+"DVR24"="DVR-24";
+
+"DVR32"="DVR-32";
+"DVRError"=" DVR-ошибка";
+"NVR4"="NVR-4";
+"NVR8"="NVR-8";
+"NVR16"="NVR-16";
+"NVR24"="NVR-24";
+"NVR32"="NVR-32";
+"NVRError"=" NVR-ошибка";
+"deviceNULL" = "Нет устройства";
+"Next"="Обновить";
+"RegisterView" = "Регистрация";
+"RegiAuth"="Введите текст выше";
+"UsernameAlready"="Имя пользователя уже занято";
+"TwoPwd"="Пароль не совпадает";
+"RegTimeout"="Регистрация не завершена, время вышло";
+"RegData"="Регистрация не завершена, ошибка данных";
+"RegPic"="Регистрация не завершена, ошибка содержимого изображения";
+"RegSuc"="Регистрация завершена";
+"Registering"="Регистрация";
+"EnterImg"="Введите текст с картинки";
+"confirmPwd"="Подтвердите пароль, он не может быть пустым";
+"pwdNull"="Пароль не может быть пустым";
+"userNull"="Имя пользователя не может быть пустым";
+"picNull"="Текст изображения не может быть пустым";
+"ImageFail"="Ошибка запроса изображения";
+"auth_ico"=" auth_default_en";
+"help"="помощь";
+"saveLogin"="Сохранить";
+"input"="Ввод";
+"addrtsp"="Добавьте RTSP";
+"devName"="Добавьте Имя устройства";
+"devAddr"=" IP";
+"devPort"="Порт";
+"devUser"="Имя пользователя";
+"devPwd"="пароль";
+"devNameNULL"="имя устройства не может быть пустым";
+"devAddrNULL"=" IP не может быть пустым";
+"devPortNULL"="Порт не может быть пустым";
+"devAddOk"="Успешно добавлено";
+"startTime" = "Старт";
+"endTime" = "Конец";
+"noRecords"="Нет записи";
+"devName_info"="Имя устройства";
+"rtspinterrup"="Соединение прервано";
+"startRecord"="Начало записи";
+"stopRecord"="Конец записи";
+"captureS"="Захват кадра успешно осуществлен";
+"captureF"="провал захвата";
+"playOK"="Воспроизведение завершено";
+"deleteDevice"="Удаление устройства";
+"deleteDeviceOK"="Удаление завершено";
+"deleteDeviceFail"="Не удалось удалить";
+"deleteDeviceFail_server"="Ошибка сервера";
+"keyboardFirst"="предыдущий";
+"keyboardEnd"="Следующий";
+"keyboardDone"="Окончание";
+"dateLang"=" en_us";
+"startOEnd"="Начало позже конца, ошибка";
+"endOStart"="Конец раньше начала, ошибка";
+"updateEmail"="Сменить почту";
+"updateReal"="Сменит реальное имя";
+"nickUpd"="Сменить псевдоним (Nickname) ";
+"oldPwd"="Старый пароль";
+"updpwd"="Смена пароля";
+"newpwd"="Новый пароль";
+"pwdCom"="Подтвердить пароль";
+"oldEmpty"="Старый пароль не может быть пустым";
+"newEmpty"="Новый пароль не может быть пустым";
+"nickEmpty"="Псевдоним не может быть пустым";
+"comEmpty"="Пароль пуст";
+"oldError"="Ошибка старого пароля";
+"newError"="Новый пароль не совпадает";
+"pwdLength"="Длина пароля не может быть менее 6 знаков";
+"updpwding"="Изменить пароль";
+"updnicking"="Изменить псевдоним";
+"updemailing"="Изменить почту";
+"updemailing"="Изменить реальное имя";
+"emailEmpty"="Почта не может быть пуста";
+"emailError"="Почта не корректна";
+"emailBind"="Почта связана";
+"email"="Email";
+"noDevice"="Устройство не добавлено";
+"deviceInfo"="Текущий номер устройства";
+"devfresh"="Загрузка";
+"releaseRefresh"="Перезагрузите для обновления";
+"pullto"="Тяните для обновления";
+"pulltomore"="Тяните для обновления ещё";
+"releasemore"="Отпустите для обновления";
+"devDone"="Устройства загружено";
+"unFindStream"="Не возможно найти поток";
+"autoLogin"="Авто логин";
+"savePhoto"="Сохранить";
+"qrResult"="Не от сканирован серийный номер";
+"qrcode_h"=" qrcode_h";
+"qrcode"=" qrcode_en";
+"noRecording"="Нет фото или видео";
+"helpicon"=" help_en";
+"find_pwd"="Забыли пароль";
+"next_find"="Далее";
+"UserInfoNotExits"="Нет информации о пользователе";
+"NewPwd"="Введите новый пароль";
+"confirmNewPwd"="Подтвердите новый пароль";
+"resend"="Переслать
+"VerifyAccount"="Подтверждение учетной записи... ";
+"VertifySucc"="Код подтверждения выслан на почту";
+"VertifyExits"="Имя пользователя не существует";
+"VertifyEmail"="Почта не связана";
+"vertifyCode"="Код подтверждения";
+"sendCode"="Отправка кода подтверждения... ";
+"vertifyError"="Ошибка кода подтверждения";
+"vertifyEmpty"="Пароль пуст";
+"vertifyTimeout"="Время вышло";
+"vertifyUser"="Не совпадение имени пользователя";
+"vertiEmpty"="Код подтверждения не может быть пуст";
+"guessImg"=" guess_en";
+"alSend"="Было отправлено на почту";
+"photos"="фотографии";
+"camera"="камера";
+"uploadDone"="Загрузка успешна";
+"savePhotos"="Сохранить снимок";
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

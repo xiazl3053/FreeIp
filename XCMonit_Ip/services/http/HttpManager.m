@@ -25,7 +25,8 @@
     [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue mainQueue] completionHandler:
      ^(NSURLResponse* response, NSData* data, NSError* connectionError){
          HttpManager *strongLogin = weakSelf;
-         if (strongLogin) {
+         if (strongLogin)
+         {
              [strongLogin reciveHttp:response data:data error:connectionError];
          }
      }];

@@ -1208,7 +1208,6 @@
                 [_weakSelf.borderLabel setFrame:view.frame];
             });
         }
-        
         _currentView = playView.mainView;
         [self fullPlayMode];
         _borderLabel.hidden = !bFull;
@@ -1342,15 +1341,16 @@
     {
         nType= 1;
         UIButton *btnSender = (UIButton*)[_downHUD viewWithTag:1006];
-        btnSender.enabled = YES;
+        btnSender.enabled = NO;
     }
     else if(btn.tag == 1006)
     {
         nType = 2;
         UIButton *btnSender = (UIButton*)[_downHUD viewWithTag:1005];
-        btnSender.enabled = YES;
+        btnSender.enabled = NO;
     }
 //    [self switchVideoCode:nType];
+//    [self set]
     btn.enabled = NO;
 }
 

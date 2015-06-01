@@ -221,15 +221,12 @@
         CGFloat nowHeight =glHeight*fScale >fHeight* 4?fHeight*4:glHeight*fScale;
         
         _glView.frame = Rect(fWidth/2 - nowWidth/2,fHeight/2- nowHeight/2,nowWidth,nowHeight);
-
     }
 }
 
 -(void)viewDidAppear:(BOOL)animated
 {
-    
     [super viewDidAppear:animated];
-
     bIsFull = NO;
     _dispatchQueue = dispatch_queue_create("decoder", DISPATCH_QUEUE_SERIAL);
     _videoFrames    = [NSMutableArray array];
@@ -240,13 +237,11 @@
     nWidth = 0;
     nHeight = 0;
     [self playVideo];
-    
 }
 
 -(void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    
     [self setNewVerticalFrame];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(connect_p2p_fail:) name:NSCONNECT_P2P_FAIL_VC object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(enter_background) name:NS_APPLITION_ENTER_BACK object:nil];
@@ -459,14 +454,15 @@
     if(btn.tag==1005)
     {
         nType= 2;
-        _btnHD.enabled = YES;
+        _btnHD.enabled = NO;
     }
     else if(btn.tag == 1006)
     {
         nType = 1;
-        _btnBD.enabled = YES;
+        _btnBD.enabled = NO;
     }
     [self switchVideoCode:nType];
+    [self setPlayMode:NO];
     btn.enabled = NO;
 }
 
@@ -633,6 +629,7 @@
     _tickCorrectionTime = 0;
     _playing = YES;    
     [self asyncDecodeFrames];
+    
     dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (1.0/100) * NSEC_PER_SEC);
     dispatch_after(popTime, dispatch_get_global_queue(0, 0), ^(void)
     {
@@ -641,8 +638,11 @@
             [wearSelf tick];
         }
     });
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [wearSelf setPlayMode:YES];
+    });
 }
-- (void) tick
+-(void)tick
 {
     CGFloat interval = 0;
     interval = [self presentFrame]*0.2;
@@ -989,6 +989,7 @@
                {
                    [NSThread sleepForTimeInterval:0.1f];
                }
+               __weakSelf.nCodeType = __nCode;
                [__weakSelf play];
                @synchronized(__weakSelf.videoFrames)
                {
@@ -1209,6 +1210,7 @@
         ((UIButton*)[_downHUD viewWithTag:1004]).enabled = NO;
         _btnHD.enabled = NO;
         _btnBD.enabled = NO;
+        
     }
     else
     {

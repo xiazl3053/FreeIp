@@ -60,6 +60,7 @@
 {
     NSString *strUrl = [[NSString alloc] initWithFormat:@"%@index.php?r=service/service/updatedevice&session_id=%@&device_id=%@&new_device_name=%@",XCLocalized(@"httpserver"),
                         [UserInfo sharedUserInfo].strSessionId,strDevNO,[strDevName stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+    DLog(@"strUrl:%@",strUrl);
     [self sendRequest:strUrl];
 }
 

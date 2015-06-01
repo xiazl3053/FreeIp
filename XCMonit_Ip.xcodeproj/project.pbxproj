@@ -39,6 +39,8 @@
 		BB1BC4D919BEEFD000C27572 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BB1BC4D819BEEFD000C27572 /* AVFoundation.framework */; };
 		BB1BC4DB19BEEFD600C27572 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BB1BC4DA19BEEFD600C27572 /* CoreMedia.framework */; };
 		BB1BC4DD19BEEFE700C27572 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BB1BC4DC19BEEFE700C27572 /* CoreVideo.framework */; };
+		BB1C1C251B14774A00F93F5A /* TimeView.m in Sources */ = {isa = PBXBuildFile; fileRef = BB1C1C241B14774A00F93F5A /* TimeView.m */; };
+		BB1C1C281B14778000F93F5A /* PlayCloudViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BB1C1C271B14778000F93F5A /* PlayCloudViewController.m */; };
 		BB1D290E19C820D500B1F4EF /* RtspRecordViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BB1D290D19C820D500B1F4EF /* RtspRecordViewController.m */; };
 		BB1D291119C839E200B1F4EF /* PictureView.m in Sources */ = {isa = PBXBuildFile; fileRef = BB1D291019C839E200B1F4EF /* PictureView.m */; };
 		BB1DB3511A1AF722009B5E84 /* GuessLoginService.m in Sources */ = {isa = PBXBuildFile; fileRef = BB1DB3501A1AF722009B5E84 /* GuessLoginService.m */; };
@@ -185,7 +187,6 @@
 		BB3CE33F19B86DB7006435AA /* tmall_bg_main.png in Resources */ = {isa = PBXBuildFile; fileRef = BB3CE33D19B86DB7006435AA /* tmall_bg_main.png */; };
 		BB3CE34019B86DB7006435AA /* tmall_bg_main@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = BB3CE33E19B86DB7006435AA /* tmall_bg_main@2x.png */; };
 		BB3EF4C61AEE090A00F9D765 /* VersionCheckService.m in Sources */ = {isa = PBXBuildFile; fileRef = BB3EF4C51AEE090A00F9D765 /* VersionCheckService.m */; };
-		BB42019A1B0C3F88004059AC /* TimeProView.m in Sources */ = {isa = PBXBuildFile; fileRef = BB4201991B0C3F88004059AC /* TimeProView.m */; };
 		BB4B5EBD19AAD00600BA1E8B /* PhoneDb.m in Sources */ = {isa = PBXBuildFile; fileRef = BB4B5EBC19AAD00600BA1E8B /* PhoneDb.m */; };
 		BB4B5EC019AAD07800BA1E8B /* Picture.m in Sources */ = {isa = PBXBuildFile; fileRef = BB4B5EBF19AAD07800BA1E8B /* Picture.m */; };
 		BB5640421941C1BF007CF682 /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BB5640411941C1BF007CF682 /* MobileCoreServices.framework */; };
@@ -197,15 +198,12 @@
 		BB7BDBAA1A35980700E92C00 /* PTZView.m in Sources */ = {isa = PBXBuildFile; fileRef = BB7BDBA91A35980700E92C00 /* PTZView.m */; };
 		BB7CFE921AD65A630021C15A /* RtspWlanCell.m in Sources */ = {isa = PBXBuildFile; fileRef = BB7CFE911AD65A630021C15A /* RtspWlanCell.m */; };
 		BB9F47791AB97E8E002AF594 /* LoginUserDB.m in Sources */ = {isa = PBXBuildFile; fileRef = BB9F47781AB97E8E002AF594 /* LoginUserDB.m */; };
-		BBA940961A47C6FA009837EA /* LongseDes.c in Sources */ = {isa = PBXBuildFile; fileRef = BBA940921A47C6FA009837EA /* LongseDes.c */; };
-		BBA940971A47C6FA009837EA /* private_protocol.m in Sources */ = {isa = PBXBuildFile; fileRef = BBA940941A47C6FA009837EA /* private_protocol.m */; };
 		BBAC41681AAE74FB00EB1F8B /* PlayViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BBAC41671AAE74FB00EB1F8B /* PlayViewController.m */; };
 		BBB600711A5392610084E1F1 /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = BBB600701A5392610084E1F1 /* Reachability.m */; };
 		BBBF899C1A761E8E0052580A /* XCDirect_InfoView.m in Sources */ = {isa = PBXBuildFile; fileRef = BBBF899B1A761E8E0052580A /* XCDirect_InfoView.m */; };
 		BBCB2DA91A846C8500AD8C23 /* XCPhotoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BBCB2DA81A846C8500AD8C23 /* XCPhotoViewController.m */; };
 		BBCB2DAC1A8470B000AD8C23 /* XCPhoto.m in Sources */ = {isa = PBXBuildFile; fileRef = BBCB2DAB1A8470B000AD8C23 /* XCPhoto.m */; };
 		BBD153CB1A2D9C5E000E3253 /* libzbar.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BBD153CA1A2D9C5E000E3253 /* libzbar.a */; };
-		BBD550DF1AD60B7C0098B75B /* devdiscovery.m in Sources */ = {isa = PBXBuildFile; fileRef = BBD550DC1AD60B7C0098B75B /* devdiscovery.m */; };
 		BBDC51381AB8273400C81D00 /* XLVideo.m in Sources */ = {isa = PBXBuildFile; fileRef = BBDC51211AB8273400C81D00 /* XLVideo.m */; };
 		BBDC51391AB8273400C81D00 /* IDecoderService.m in Sources */ = {isa = PBXBuildFile; fileRef = BBDC51241AB8273400C81D00 /* IDecoderService.m */; };
 		BBDC513A1AB8273400C81D00 /* XLDecoderServiceImpl.m in Sources */ = {isa = PBXBuildFile; fileRef = BBDC51261AB8273400C81D00 /* XLDecoderServiceImpl.m */; };
@@ -219,7 +217,15 @@
 		BBDC51421AB8273400C81D00 /* XLDecoder.mm in Sources */ = {isa = PBXBuildFile; fileRef = BBDC51371AB8273400C81D00 /* XLDecoder.mm */; };
 		BBDFCADA1AB2C908004B0E0F /* VideoTopHud.m in Sources */ = {isa = PBXBuildFile; fileRef = BBDFCAD91AB2C908004B0E0F /* VideoTopHud.m */; };
 		BBDFCADD1AB2D470004B0E0F /* VideoDownHud.m in Sources */ = {isa = PBXBuildFile; fileRef = BBDFCADC1AB2D470004B0E0F /* VideoDownHud.m */; };
+		BBE93A7B1B15528D00200E79 /* CloudDecode.mm in Sources */ = {isa = PBXBuildFile; fileRef = BBE93A7A1B15528D00200E79 /* CloudDecode.mm */; };
+		BBE93A7E1B15970F00200E79 /* P2PSDK_New.mm in Sources */ = {isa = PBXBuildFile; fileRef = BBE93A7D1B15970F00200E79 /* P2PSDK_New.mm */; };
 		BBF6EF721AB66672000ACC68 /* PlayForP2PViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BBF6EF711AB66672000ACC68 /* PlayForP2PViewController.m */; };
+		BBFE29691B1BEF6A00E08D17 /* devdiscovery.m in Sources */ = {isa = PBXBuildFile; fileRef = BBFE29591B1BEF6A00E08D17 /* devdiscovery.m */; };
+		BBFE296A1B1BEF6A00E08D17 /* DIrectDVR.m in Sources */ = {isa = PBXBuildFile; fileRef = BBFE295B1B1BEF6A00E08D17 /* DIrectDVR.m */; };
+		BBFE296B1B1BEF6A00E08D17 /* linklist.c in Sources */ = {isa = PBXBuildFile; fileRef = BBFE295D1B1BEF6A00E08D17 /* linklist.c */; };
+		BBFE296D1B1BEF6A00E08D17 /* LongseDes.c in Sources */ = {isa = PBXBuildFile; fileRef = BBFE29611B1BEF6A00E08D17 /* LongseDes.c */; };
+		BBFE296E1B1BEF6A00E08D17 /* pteClient.m in Sources */ = {isa = PBXBuildFile; fileRef = BBFE29651B1BEF6A00E08D17 /* pteClient.m */; };
+		BBFE296F1B1BEF6A00E08D17 /* systool.c in Sources */ = {isa = PBXBuildFile; fileRef = BBFE29671B1BEF6A00E08D17 /* systool.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -278,6 +284,10 @@
 		BB1BC4D819BEEFD000C27572 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		BB1BC4DA19BEEFD600C27572 /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
 		BB1BC4DC19BEEFE700C27572 /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
+		BB1C1C231B14774A00F93F5A /* TimeView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TimeView.h; path = cloud/TimeView.h; sourceTree = "<group>"; };
+		BB1C1C241B14774A00F93F5A /* TimeView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TimeView.m; path = cloud/TimeView.m; sourceTree = "<group>"; };
+		BB1C1C261B14778000F93F5A /* PlayCloudViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlayCloudViewController.h; sourceTree = "<group>"; };
+		BB1C1C271B14778000F93F5A /* PlayCloudViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PlayCloudViewController.m; sourceTree = "<group>"; };
 		BB1D290C19C820D500B1F4EF /* RtspRecordViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RtspRecordViewController.h; sourceTree = "<group>"; };
 		BB1D290D19C820D500B1F4EF /* RtspRecordViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RtspRecordViewController.m; sourceTree = "<group>"; };
 		BB1D290F19C839E200B1F4EF /* PictureView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PictureView.h; sourceTree = "<group>"; };
@@ -559,8 +569,6 @@
 		BB3CE33E19B86DB7006435AA /* tmall_bg_main@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "tmall_bg_main@2x.png"; sourceTree = "<group>"; };
 		BB3EF4C41AEE090A00F9D765 /* VersionCheckService.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VersionCheckService.h; sourceTree = "<group>"; };
 		BB3EF4C51AEE090A00F9D765 /* VersionCheckService.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VersionCheckService.m; sourceTree = "<group>"; };
-		BB4201981B0C3F88004059AC /* TimeProView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TimeProView.h; path = cloud/TimeProView.h; sourceTree = "<group>"; };
-		BB4201991B0C3F88004059AC /* TimeProView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TimeProView.m; path = cloud/TimeProView.m; sourceTree = "<group>"; };
 		BB4B5EBB19AAD00600BA1E8B /* PhoneDb.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PhoneDb.h; sourceTree = "<group>"; };
 		BB4B5EBC19AAD00600BA1E8B /* PhoneDb.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PhoneDb.m; sourceTree = "<group>"; };
 		BB4B5EBE19AAD07800BA1E8B /* Picture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Picture.h; sourceTree = "<group>"; };
@@ -579,10 +587,6 @@
 		BB97F8E41A6F4C8500EC7703 /* UIButton+Extension.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "UIButton+Extension.h"; sourceTree = "<group>"; };
 		BB9F47771AB97E8E002AF594 /* LoginUserDB.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoginUserDB.h; sourceTree = "<group>"; };
 		BB9F47781AB97E8E002AF594 /* LoginUserDB.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LoginUserDB.m; sourceTree = "<group>"; };
-		BBA940921A47C6FA009837EA /* LongseDes.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = LongseDes.c; sourceTree = "<group>"; };
-		BBA940931A47C6FA009837EA /* LongseDes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LongseDes.h; sourceTree = "<group>"; };
-		BBA940941A47C6FA009837EA /* private_protocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = private_protocol.m; sourceTree = "<group>"; };
-		BBA940951A47C6FA009837EA /* private_protocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = private_protocol.h; sourceTree = "<group>"; };
 		BBAC41661AAE74FB00EB1F8B /* PlayViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlayViewController.h; sourceTree = "<group>"; };
 		BBAC41671AAE74FB00EB1F8B /* PlayViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PlayViewController.m; sourceTree = "<group>"; };
 		BBB6006F1A5392610084E1F1 /* Reachability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Reachability.h; sourceTree = "<group>"; };
@@ -614,11 +618,8 @@
 		BBD153C81A2D9C5E000E3253 /* ZBarSDK.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZBarSDK.h; sourceTree = "<group>"; };
 		BBD153C91A2D9C5E000E3253 /* ZBarSymbol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZBarSymbol.h; sourceTree = "<group>"; };
 		BBD153CA1A2D9C5E000E3253 /* libzbar.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libzbar.a; sourceTree = "<group>"; };
-		BBD4D4101A7B6E55004C0407 /* P2PSDK.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = P2PSDK.h; sourceTree = "<group>"; };
+		BBD4D4101A7B6E55004C0407 /* P2PSDK.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = P2PSDK.h; sourceTree = "<group>"; };
 		BBD4D4111A7B6E55004C0407 /* P2PSDKClient.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; path = P2PSDKClient.h; sourceTree = "<group>"; };
-		BBD550DC1AD60B7C0098B75B /* devdiscovery.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = devdiscovery.m; sourceTree = "<group>"; };
-		BBD550DD1AD60B7C0098B75B /* devdiscovery.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = devdiscovery.h; sourceTree = "<group>"; };
-		BBD550DE1AD60B7C0098B75B /* discovery.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = discovery.h; sourceTree = "<group>"; };
 		BBDC511F1AB8273400C81D00 /* IVideo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IVideo.h; sourceTree = "<group>"; };
 		BBDC51201AB8273400C81D00 /* XLVideo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XLVideo.h; sourceTree = "<group>"; };
 		BBDC51211AB8273400C81D00 /* XLVideo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XLVideo.m; sourceTree = "<group>"; };
@@ -646,8 +647,29 @@
 		BBDFCAD91AB2C908004B0E0F /* VideoTopHud.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VideoTopHud.m; sourceTree = "<group>"; };
 		BBDFCADB1AB2D470004B0E0F /* VideoDownHud.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VideoDownHud.h; sourceTree = "<group>"; };
 		BBDFCADC1AB2D470004B0E0F /* VideoDownHud.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VideoDownHud.m; sourceTree = "<group>"; };
+		BBE93A791B15528D00200E79 /* CloudDecode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CloudDecode.h; sourceTree = "<group>"; };
+		BBE93A7A1B15528D00200E79 /* CloudDecode.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CloudDecode.mm; sourceTree = "<group>"; };
+		BBE93A7C1B15970F00200E79 /* P2PSDK_New.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = P2PSDK_New.h; sourceTree = "<group>"; };
+		BBE93A7D1B15970F00200E79 /* P2PSDK_New.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = P2PSDK_New.mm; sourceTree = "<group>"; };
 		BBF6EF701AB66672000ACC68 /* PlayForP2PViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlayForP2PViewController.h; sourceTree = "<group>"; };
 		BBF6EF711AB66672000ACC68 /* PlayForP2PViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PlayForP2PViewController.m; sourceTree = "<group>"; };
+		BBFE29571B1BEF6A00E08D17 /* agreement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = agreement.h; sourceTree = "<group>"; };
+		BBFE29581B1BEF6A00E08D17 /* devdiscovery.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = devdiscovery.h; sourceTree = "<group>"; };
+		BBFE29591B1BEF6A00E08D17 /* devdiscovery.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = devdiscovery.m; sourceTree = "<group>"; };
+		BBFE295A1B1BEF6A00E08D17 /* DIrectDVR.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DIrectDVR.h; sourceTree = "<group>"; };
+		BBFE295B1B1BEF6A00E08D17 /* DIrectDVR.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DIrectDVR.m; sourceTree = "<group>"; };
+		BBFE295C1B1BEF6A00E08D17 /* discovery.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = discovery.h; sourceTree = "<group>"; };
+		BBFE295D1B1BEF6A00E08D17 /* linklist.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = linklist.c; sourceTree = "<group>"; };
+		BBFE295E1B1BEF6A00E08D17 /* linklist.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = linklist.h; sourceTree = "<group>"; };
+		BBFE29611B1BEF6A00E08D17 /* LongseDes.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = LongseDes.c; sourceTree = "<group>"; };
+		BBFE29621B1BEF6A00E08D17 /* LongseDes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LongseDes.h; sourceTree = "<group>"; };
+		BBFE29631B1BEF6A00E08D17 /* netCommon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = netCommon.h; sourceTree = "<group>"; };
+		BBFE29641B1BEF6A00E08D17 /* platform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = platform.h; sourceTree = "<group>"; };
+		BBFE29651B1BEF6A00E08D17 /* pteClient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = pteClient.m; sourceTree = "<group>"; };
+		BBFE29661B1BEF6A00E08D17 /* pteClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pteClient.h; sourceTree = "<group>"; };
+		BBFE29671B1BEF6A00E08D17 /* systool.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = systool.c; sourceTree = "<group>"; };
+		BBFE29681B1BEF6A00E08D17 /* systool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = systool.h; sourceTree = "<group>"; };
+		BBFE29701B1C661D00E08D17 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/Localizable.strings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -900,6 +922,8 @@
 				BBAC41671AAE74FB00EB1F8B /* PlayViewController.m */,
 				BBF6EF701AB66672000ACC68 /* PlayForP2PViewController.h */,
 				BBF6EF711AB66672000ACC68 /* PlayForP2PViewController.m */,
+				BB1C1C261B14778000F93F5A /* PlayCloudViewController.h */,
+				BB1C1C271B14778000F93F5A /* PlayCloudViewController.m */,
 			);
 			path = Player;
 			sourceTree = "<group>";
@@ -947,10 +971,10 @@
 		BB1F83A319A4A950004BE9AA /* General */ = {
 			isa = PBXGroup;
 			children = (
+				BBFE29561B1BEF6A00E08D17 /* Direct_New */,
 				BBDC511D1AB8273400C81D00 /* XZLDecode */,
 				BBD4D40F1A7B6E55004C0407 /* p2p */,
 				BBB6006E1A5392610084E1F1 /* reach */,
-				BBA940911A47C6FA009837EA /* dvr_rtsp */,
 				BBD153B21A2D9C5E000E3253 /* ZBarSDK */,
 				BB19649019F77B6000D03492 /* RSKImageCropper */,
 				BB1EDAD319B9A3FA0005098B /* QCheckbox */,
@@ -1283,6 +1307,10 @@
 				BB1F847B19A4A950004BE9AA /* XCDecoder.mm */,
 				BB1F847C19A4A950004BE9AA /* XCDecoderNew.h */,
 				BB1F847D19A4A950004BE9AA /* XCDecoderNew.mm */,
+				BBE93A791B15528D00200E79 /* CloudDecode.h */,
+				BBE93A7A1B15528D00200E79 /* CloudDecode.mm */,
+				BBE93A7C1B15970F00200E79 /* P2PSDK_New.h */,
+				BBE93A7D1B15970F00200E79 /* P2PSDK_New.mm */,
 			);
 			path = kxMovie;
 			sourceTree = "<group>";
@@ -1403,24 +1431,10 @@
 		BB4201941B0C3F2C004059AC /* cloud */ = {
 			isa = PBXGroup;
 			children = (
-				BB4201981B0C3F88004059AC /* TimeProView.h */,
-				BB4201991B0C3F88004059AC /* TimeProView.m */,
+				BB1C1C231B14774A00F93F5A /* TimeView.h */,
+				BB1C1C241B14774A00F93F5A /* TimeView.m */,
 			);
 			name = cloud;
-			sourceTree = "<group>";
-		};
-		BBA940911A47C6FA009837EA /* dvr_rtsp */ = {
-			isa = PBXGroup;
-			children = (
-				BBD550DC1AD60B7C0098B75B /* devdiscovery.m */,
-				BBD550DD1AD60B7C0098B75B /* devdiscovery.h */,
-				BBD550DE1AD60B7C0098B75B /* discovery.h */,
-				BBA940921A47C6FA009837EA /* LongseDes.c */,
-				BBA940931A47C6FA009837EA /* LongseDes.h */,
-				BBA940941A47C6FA009837EA /* private_protocol.m */,
-				BBA940951A47C6FA009837EA /* private_protocol.h */,
-			);
-			path = dvr_rtsp;
 			sourceTree = "<group>";
 		};
 		BBB6006E1A5392610084E1F1 /* reach */ = {
@@ -1559,6 +1573,29 @@
 			path = video;
 			sourceTree = "<group>";
 		};
+		BBFE29561B1BEF6A00E08D17 /* Direct_New */ = {
+			isa = PBXGroup;
+			children = (
+				BBFE29571B1BEF6A00E08D17 /* agreement.h */,
+				BBFE29581B1BEF6A00E08D17 /* devdiscovery.h */,
+				BBFE29591B1BEF6A00E08D17 /* devdiscovery.m */,
+				BBFE295A1B1BEF6A00E08D17 /* DIrectDVR.h */,
+				BBFE295B1B1BEF6A00E08D17 /* DIrectDVR.m */,
+				BBFE295C1B1BEF6A00E08D17 /* discovery.h */,
+				BBFE295D1B1BEF6A00E08D17 /* linklist.c */,
+				BBFE295E1B1BEF6A00E08D17 /* linklist.h */,
+				BBFE29611B1BEF6A00E08D17 /* LongseDes.c */,
+				BBFE29621B1BEF6A00E08D17 /* LongseDes.h */,
+				BBFE29631B1BEF6A00E08D17 /* netCommon.h */,
+				BBFE29641B1BEF6A00E08D17 /* platform.h */,
+				BBFE29651B1BEF6A00E08D17 /* pteClient.m */,
+				BBFE29661B1BEF6A00E08D17 /* pteClient.h */,
+				BBFE29671B1BEF6A00E08D17 /* systool.c */,
+				BBFE29681B1BEF6A00E08D17 /* systool.h */,
+			);
+			path = Direct_New;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -1623,6 +1660,7 @@
 				"zh-Hans",
 				"pt-PT",
 				pt,
+				ru,
 			);
 			mainGroup = 160133AC1921BC54003DB845;
 			productRefGroup = 160133B61921BC54003DB845 /* Products */;
@@ -1677,11 +1715,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				BB1F84E219A4A950004BE9AA /* Toast+UIView.m in Sources */,
+				BBFE296A1B1BEF6A00E08D17 /* DIrectDVR.m in Sources */,
 				BBDC513F1AB8273400C81D00 /* RecordSource.m in Sources */,
 				BB1F84B419A4A950004BE9AA /* IQKeyboardManager.m in Sources */,
 				BB4B5EC019AAD07800BA1E8B /* Picture.m in Sources */,
 				BB1F850719A4A950004BE9AA /* RtspDecoder.mm in Sources */,
 				BB1F84EC19A4A950004BE9AA /* AppDelegate.m in Sources */,
+				BBE93A7B1B15528D00200E79 /* CloudDecode.mm in Sources */,
 				BB1F84A219A4A950004BE9AA /* PlayFourViewController.m in Sources */,
 				BB1F84C319A4A950004BE9AA /* UIView+Extension.m in Sources */,
 				BB2193DA1A1444AF00CCFE5E /* FirstStepViewController.m in Sources */,
@@ -1690,6 +1730,7 @@
 				BB1B5D701A1B17C900CBE165 /* GuessListViewController.mm in Sources */,
 				BB1F850C19A4A950004BE9AA /* DeviceInfoCell.m in Sources */,
 				BB1F850119A4A950004BE9AA /* CaptureService.m in Sources */,
+				BBFE296D1B1BEF6A00E08D17 /* LongseDes.c in Sources */,
 				BBDC513D1AB8273400C81D00 /* PrivateSource.m in Sources */,
 				BB1F850619A4A950004BE9AA /* P2PSDKService.mm in Sources */,
 				BB230E5619E8C1E300EF79AB /* UpdMobileService.m in Sources */,
@@ -1703,6 +1744,7 @@
 				BB3EF4C61AEE090A00F9D765 /* VersionCheckService.m in Sources */,
 				BB7CFE921AD65A630021C15A /* RtspWlanCell.m in Sources */,
 				BB1F84E119A4A950004BE9AA /* ProgressHUD.m in Sources */,
+				BB1C1C251B14774A00F93F5A /* TimeView.m in Sources */,
 				BB3CE33719B86255006435AA /* UIView+screenshot.m in Sources */,
 				BB257AFE19B6B5AC00076B0F /* RegisterViewController.m in Sources */,
 				BB1F84B219A4A950004BE9AA /* FMResultSet.m in Sources */,
@@ -1722,18 +1764,19 @@
 				BB1D291119C839E200B1F4EF /* PictureView.m in Sources */,
 				BBDC51411AB8273400C81D00 /* UIControl+BlocksKit.m in Sources */,
 				BB1F850819A4A950004BE9AA /* XCDecoder.mm in Sources */,
+				BBE93A7E1B15970F00200E79 /* P2PSDK_New.mm in Sources */,
+				BBFE296E1B1BEF6A00E08D17 /* pteClient.m in Sources */,
 				BB1F849E19A4A950004BE9AA /* MoreViewController.m in Sources */,
 				BBCB2DAC1A8470B000AD8C23 /* XCPhoto.m in Sources */,
 				BB1F84A419A4A950004BE9AA /* PlayP2PViewController.m in Sources */,
 				BB257B0119B711CB00076B0F /* RegisterAuthCode.m in Sources */,
 				BB230E5919E8C1F100EF79AB /* UpdNickService.m in Sources */,
 				BB1F84F819A4A950004BE9AA /* RecordDb.m in Sources */,
-				BB42019A1B0C3F88004059AC /* TimeProView.m in Sources */,
 				BB9F47791AB97E8E002AF594 /* LoginUserDB.m in Sources */,
 				BBAC41681AAE74FB00EB1F8B /* PlayViewController.m in Sources */,
 				BB2647FF19C1A8620019CFAB /* RecordView.m in Sources */,
 				BB33BD7E19B0837700A76D37 /* UIView+convenience.m in Sources */,
-				BBA940971A47C6FA009837EA /* private_protocol.m in Sources */,
+				BB1C1C281B14778000F93F5A /* PlayCloudViewController.m in Sources */,
 				BBDFCADA1AB2C908004B0E0F /* VideoTopHud.m in Sources */,
 				BB1F850019A4A950004BE9AA /* DecodeJson.m in Sources */,
 				BB1F84FD19A4A950004BE9AA /* LoginService.m in Sources */,
@@ -1749,6 +1792,7 @@
 				BB1F84B819A4A950004BE9AA /* NSArray+Sort.m in Sources */,
 				BB1801DC1B0B0BA6001BDAEE /* CloudViewController.m in Sources */,
 				BB1F850A19A4A950004BE9AA /* CellForLabel.m in Sources */,
+				BBFE296F1B1BEF6A00E08D17 /* systool.c in Sources */,
 				BB1F850519A4A950004BE9AA /* P2PInitService.mm in Sources */,
 				BBDFCADD1AB2D470004B0E0F /* VideoDownHud.m in Sources */,
 				BB1F84C119A4A950004BE9AA /* UIScrollView+Extension.m in Sources */,
@@ -1763,10 +1807,10 @@
 				BB1F84A619A4A950004BE9AA /* RTSPListViewController.m in Sources */,
 				BB1F84C419A4A950004BE9AA /* MBProgressHUD+Add.m in Sources */,
 				BB1F851019A4A950004BE9AA /* UserImageCell.m in Sources */,
-				BBA940961A47C6FA009837EA /* LongseDes.c in Sources */,
 				BB1F84A019A4A950004BE9AA /* VersionInfoViewController.m in Sources */,
 				BB1F84E819A4A950004BE9AA /* RtspInfo.m in Sources */,
 				BB1F84FC19A4A950004BE9AA /* DeviceService.m in Sources */,
+				BBFE296B1B1BEF6A00E08D17 /* linklist.c in Sources */,
 				BB267CEB19E7928C00FBAB1D /* UpdEmailService.m in Sources */,
 				BB1F849A19A4A950004BE9AA /* UpdDevNameViewController.m in Sources */,
 				BB1F84C619A4A950004BE9AA /* MBProgressHUD.m in Sources */,
@@ -1805,6 +1849,7 @@
 				BB1F849919A4A950004BE9AA /* DevInfoViewController.m in Sources */,
 				BB1F84EA19A4A950004BE9AA /* UserInfo.m in Sources */,
 				BB1F84F719A4A950004BE9AA /* DeviceInfoDb.m in Sources */,
+				BBFE29691B1BEF6A00E08D17 /* devdiscovery.m in Sources */,
 				BB1F84E719A4A950004BE9AA /* RecordModel.m in Sources */,
 				BBDC51421AB8273400C81D00 /* XLDecoder.mm in Sources */,
 				BB1F849F19A4A950004BE9AA /* RecordViewController.m in Sources */,
@@ -1835,7 +1880,6 @@
 				BB1F84A719A4A950004BE9AA /* RTSPPlayViewController.m in Sources */,
 				BB230E5019E8C06400EF79AB /* UpdMobileViewController.m in Sources */,
 				BB1F84B119A4A950004BE9AA /* FMDatabaseQueue.m in Sources */,
-				BBD550DF1AD60B7C0098B75B /* devdiscovery.m in Sources */,
 				BB230E5319E8C1D200EF79AB /* UpdRealService.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1873,6 +1917,7 @@
 				BB1F845119A4A950004BE9AA /* zh-Hans */,
 				BB8BD6751A5A8D5B00E81412 /* pt-PT */,
 				BB8BD6771A5A94C300E81412 /* pt */,
+				BBFE29701B1C661D00E08D17 /* ru */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";
@@ -1994,7 +2039,7 @@
 				PROVISIONING_PROFILE = "b4db5bec-07a5-4209-81eb-c0423703eef2";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = 1;
-				VALID_ARCHS = "armv7 arm64";
+				VALID_ARCHS = armv7;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -2032,10 +2077,10 @@
 					_FOR_DEBUG_,
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "43f78d24-de0e-422b-aba3-e9f1b1b39ed7";
+				PROVISIONING_PROFILE = "b4db5bec-07a5-4209-81eb-c0423703eef2";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = 1;
-				VALID_ARCHS = "armv7 arm64";
+				VALID_ARCHS = armv7;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;

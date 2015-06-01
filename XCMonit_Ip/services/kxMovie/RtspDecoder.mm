@@ -8,6 +8,7 @@
 
 #import "RtspDecoder.h"
 #import "XCNotification.h"
+#include <stdio.h>
 #import "ProgressHUD.h"
 #import "Toast+UIView.h"
 #include <sys/time.h>
@@ -15,7 +16,7 @@
 #import "RecordModel.h"
 #import "RecordDb.h"
 #include <stdio.h>
-#include "private_protocol.h"
+//#include "private_protocol.h"
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -31,13 +32,14 @@
 
 extern "C"
 {
-#include "libavformat/avformat.h"
-#include "libswscale/swscale.h"
+    #import "DIrectDVR.h"
+    #include "libavformat/avformat.h"
+    #include "libswscale/swscale.h"
 }
 
 
 #define RTSP_CONNECT_TIME_OUT 10
-int rtspConnect_time_out;// = 10;
+int rtspConnect_time_out;
 void avStreamFPSTimeBaseInfo(AVStream *st, CGFloat defaultTimeBase, CGFloat *pFPS, CGFloat *pTimeBase)
 {
     CGFloat fps, timebase;
@@ -74,7 +76,6 @@ int getNextFrame(void *userData,unsigned char *cFrame,int nLength)
     struct timeval tv;
     gettimeofday(&tv,NULL);
     NSMutableArray *aryVideo = (__bridge NSMutableArray *)userData;
-    
     do{
         struct timeval result;
         gettimeofday(&result,NULL);
@@ -156,12 +157,12 @@ int getNextFrame(void *userData,unsigned char *cFrame,int nLength)
     NSString *strRtspPath;
     BOOL bOpening;
     BOOL bConnect;
-    private_protocol_info_t * info;
     long lFrameNum;
+    pteClient_t *pClient;
+    NSMutableArray *_aryVideo;
 }
 @property (nonatomic,copy) NSString *strRecordPath;
 @property (nonatomic,copy) NSString *strDevName;
-@property (nonatomic,strong) NSMutableArray *aryVideo;
 
 
 @end
@@ -218,7 +219,7 @@ int getNextFrame(void *userData,unsigned char *cFrame,int nLength)
     AVCodec *pCodec = NULL;
     @synchronized(self)
     {
-        if(avformat_open_input(&pFormatCtx, [strPath UTF8String], NULL, &options) != 0 )
+       if(avformat_open_input(&pFormatCtx, [strPath UTF8String], NULL, &options) != 0 )
         {
             bOpening = NO;
             goto Release_format_input;
@@ -282,54 +283,51 @@ Release_format_input:
 #pragma mark 私有协议
 -(int)protocolInit:(RtspInfo*)rtspInfo path:(NSString *)strPath channel:(int)nChannel code:(int)nCode
 {
-    info = private_protocol_init();
-    int ret = 0;
-    if (info==NULL)
-    {
-        DLog(@"malloc info failed,out of memmory!");
-        return 999;
-    }
+    int nLogin=0;
     _aryVideo = [NSMutableArray array];
-    DLog(@"start login");
+    strRtspPath = strPath;
     @synchronized(self)
     {
         //新加入解析
         NSString *strAddress = [self getIPWithHostName:rtspInfo.strAddress];
+        Direct_UserInfo *direct= (Direct_UserInfo*)malloc(sizeof(Direct_UserInfo));
+        
+        sprintf((char*)direct->userinfo.ucUsername,"%s",[rtspInfo.strUser UTF8String]);
+        sprintf((char*)direct->userinfo.ucPassWord, "%s",[rtspInfo.strPwd UTF8String]);
+        int rsl = PC_InitCtx();
+        if(0!=rsl)
+        {
+            return DIRECT_CONNECT_INIT_FAIL;
+        }
+        pClient = PC_CreateNew();
+        if(0==pClient)
+        {
+            return DIRECT_CONNNECT_NEW_FAIL;
+        }
+        direct->nPort = rtspInfo.nPort;
         if (strAddress)
         {
-           ret = private_protocol_login(info, inet_addr([strAddress UTF8String]), (int)rtspInfo.nPort, (char*)[rtspInfo.strUser UTF8String], (char*)[rtspInfo.strPwd UTF8String]);
+            sprintf((char*)direct->cAddress,"%s",[strAddress UTF8String]);
         }
         else
         {
-            ret = private_protocol_login(info, inet_addr([rtspInfo.strAddress UTF8String]), (int)rtspInfo.nPort, (char*)[rtspInfo.strUser UTF8String], (char*)[rtspInfo.strPwd UTF8String]);
+            sprintf((char*)direct->cAddress,"%s",[rtspInfo.strAddress UTF8String]);
         }
+        nLogin = Direct_Connect(pClient,direct,nCode,nChannel);
     }
-    if(ret < 0)
+    if(nLogin > 0)
     {
-        DLog(@"login failed!");
-        return 998;
+        DLog(@"connect Fail:%d",nLogin);
+        return 0;
     }
-    DLog(@"login suc");
-    if (_bExit)
-    {
-        return 996;
-    }
-    setUserData((__bridge void*)_aryVideo);
-    __weak RtspDecoder *weakSelf = self;
     rtspConnect_time_out = 30;
-    bConnect = YES;
+    
+    pClient->aryVideo = (__bridge void*)_aryVideo;
+    
+    __weak RtspDecoder *__self = self;
     dispatch_async(dispatch_get_global_queue(0, 0), ^{
-        [weakSelf ffmpegInit];
+        [__self ffmpegInit];
     });
-    ret = private_protocol_getStream(info,nChannel,nCode);
-    if(ret==0)
-    {
-        strRtspPath = strPath;
-    }
-    else
-    {
-        return 997;
-    }
     return 1;
 }
 
@@ -339,6 +337,7 @@ Release_format_input:
     bNotify = YES;
     pFormatCtx = NULL;
     _bIsDecoding = NO;
+ 
     AVInputFormat* pAvinputFmt = NULL;
     AVCodec         *pCodec = NULL;
     AVIOContext		*pb = NULL;
@@ -376,7 +375,6 @@ Release_format_input:
     }
     _fps = 25;
     _bIsDecoding = YES;
-    
     return YES;
 }
 
@@ -386,7 +384,7 @@ Release_format_input:
     {
         [self stopRecord];
     }
-    
+    rtspConnect_time_out = 1;
     DLog(@"rtsp释放");
     [self closeScaler];
     [self closeFile];
@@ -395,9 +393,9 @@ Release_format_input:
 -(void)closeFile
 {
     _videoStream = -1;
-    if (info)
+    if (pClient)
     {
-        private_protocol_stop(&info);
+        destoryClient(pClient);
         DLog(@"stopInfo");
     }
     [_aryVideo removeAllObjects];

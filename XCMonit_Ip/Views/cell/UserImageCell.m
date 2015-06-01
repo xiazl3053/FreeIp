@@ -39,7 +39,7 @@
     [_lblDevInfo setFont:[UIFont fontWithName:@"Helvetica" size:16.0f]];
     
     [_lblDevInfo setTextColor:RGB(180, 180, 180)];
-    _imgView.layer.MasksToBounds = YES;
+    [_imgView.layer setMasksToBounds:YES];
     _imgView.layer.cornerRadius = 22.5f;
     [self.contentView addSubview:_lblDevInfo];
     [self.contentView addSubview:_imgView];
@@ -66,26 +66,28 @@
 {
     __block NSString *__strPath = strImage;
     __block UserImageCell *imageCell = self;
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^
+    {
         DLog(@"Starting: %@", __strPath);
         UIImage *avatarImage = nil;
         NSURL *url = [NSURL URLWithString:__strPath];
         NSData *responseData = [NSData dataWithContentsOfURL:url];
         avatarImage = [UIImage imageWithData:responseData];
         DLog(@"Finishing: %@", __strPath);
-        
         if (avatarImage)
         {
             dispatch_async(dispatch_get_main_queue(), ^{
-                if (imageCell.imageLoad) {
+                if (imageCell.imageLoad)
+                {
                     imageCell.imageLoad(avatarImage);
                 }
             });
         }
-        else {
+        else
+        {
             DLog(@"-- impossible download: %@", __strPath);
         }
     });
 }
+
 @end

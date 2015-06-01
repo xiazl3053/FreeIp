@@ -9,6 +9,7 @@
 #import "HomeViewController.h"
 #import "CustomNaviBarView.h"
 #import "CloudViewController.h"
+#import "PlayCloudViewController.h"
 #import "DeviceInfoDb.h"
 #import "XCNotification.h"
 #import "DevModel.h"
@@ -259,9 +260,11 @@
 #pragma mark 修改
 -(void)recordVideo:(NSString *)strNO name:(NSString *)strDevName line:(int)nLine
 {
+    PlayCloudViewController *playCloud = [[PlayCloudViewController alloc] init];
+    [self presentViewController:playCloud animated:YES completion:nil];
     
-    CloudViewController *cloundView = [[CloudViewController alloc] init];
-    [self presentViewController:cloundView animated:YES completion:nil];
+//    CloudViewController *cloundView = [[CloudViewController alloc] init];
+//    [self presentViewController:cloundView animated:YES completion:nil];
 //    NSArray *aryRecord = [RecordDb queryRecord:strNO];
 //    if (aryRecord.count<1)
 //    {

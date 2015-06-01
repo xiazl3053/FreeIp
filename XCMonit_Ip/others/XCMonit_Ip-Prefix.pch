@@ -19,8 +19,7 @@
     #define XCLocalized(x) NSLocalizedString(x, "")
 
 #define    kUSER_INFO_MAX_LENGTH   64
-
-
+#import "UtilsMacro.h"
 
 #endif
 

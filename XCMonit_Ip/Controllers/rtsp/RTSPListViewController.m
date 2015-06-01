@@ -8,6 +8,9 @@
 
 #import "RTSPListViewController.h"
 #import "CustomNaviBarView.h"
+#import "DIrectDVR.h"
+
+
 #import "RTSPAddDeviceViewController.h"
 #import "RtspInfo.h"
 #import "RtspInfoDb.h"
@@ -376,6 +379,11 @@
     }
     else if([info.strType isEqualToString:@"DVR"])
     {
+        /*
+            修改
+         */
+//        testConnect([info.strUser UTF8String], [info.strPwd UTF8String],[info.strAddress UTF8String],info.nPort);
+//        return;
         strPath = [NSString stringWithFormat:@"rtsp://%@%@:%lu",strAdmin,info.strAddress,(long)info.nPort];
     }
     else

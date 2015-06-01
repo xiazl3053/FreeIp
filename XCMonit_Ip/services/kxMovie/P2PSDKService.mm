@@ -312,8 +312,8 @@ int RecvFile::initTranServer()
     delete relayconn;
     relayconn = NULL;
     return -1;
-    
 }
+
 BOOL RecvFile::connectTranServer(int nCodeType)
 {
     int ret = 0;

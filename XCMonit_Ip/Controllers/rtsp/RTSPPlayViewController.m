@@ -71,6 +71,7 @@
     _rtspDecoder.bExit = YES;
     [_rtspDecoder releaseRtspDecoder];
     _rtspDecoder = nil;
+    
 }
 
 - (instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
