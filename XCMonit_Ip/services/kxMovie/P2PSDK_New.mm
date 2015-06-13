@@ -8,6 +8,21 @@
 
 #import "P2PSDK_New.h"
 
+bool P2PSDK_New::ProcessFrameData(char* aFrameData, int aFrameDataLength)
+{
+//    DLog(@"aframeDataLength:%d",aFrameDataLength);
+//    unsigned char *pBuf = (unsigned char *)aFrameData;
+//    DLog(@"%hhu--%hhu--%hhu--%hhu--%hhu",pBuf[0],pBuf[1],pBuf[2],pBuf[3],pBuf[4]);
+    NSData *dataInfo = [NSData dataWithBytes:aFrameData length:aFrameDataLength];
+    @synchronized(aryVideo)
+    {
+        [aryVideo addObject:dataInfo];
+        DLog(@"aryVideo:%u",aryVideo.count);
+    }
+    dataInfo = nil;
+    return YES;
+}
+
 BOOL P2PSDK_New::initP2PServer()
 {
     if(conn == NULL)
@@ -16,7 +31,7 @@ BOOL P2PSDK_New::initP2PServer()
     }
     if (mSdk)
     {
-        if(mSdk->Connect((char*)peerName.c_str(), conn)==0)
+        if(mSdk->Connect((char*)peerName.c_str(),conn)==0)
         {
             DLog(@"P2P连接设备成功");
             return YES;
@@ -40,9 +55,11 @@ BOOL P2PSDK_New::initTranServer()
         int ret = mSdk->RelayConnect((char*)peerName.c_str(),relayconn);
         if (ret==0)
         {
+            DLog(@"中转成功");
             return YES;
         }
     }
+    DLog(@"中转失败");
     delete relayconn;
     relayconn = NULL;
     return NO;
@@ -66,7 +83,7 @@ void P2PSDK_New::StopRecv()
         else if(streamType == 1)
         {
             PlayRecordCtrlMsg msg;
-            msg.ctrl = PB_STOP;
+//            msg.ctrl = PB_STOP;
             conn->PlayBackRecordCtrl(&msg);
         }
         conn->Close();
@@ -87,7 +104,7 @@ void P2PSDK_New::StopRecv()
         else if(streamType == 1)
         {
             PlayRecordCtrlMsg msg;
-            msg.ctrl = PB_STOP;
+//            msg.ctrl = PB_STOP;
             relayconn->PlayBackRecordCtrl(&msg);
         }
         relayconn->Close();
@@ -150,19 +167,19 @@ int P2PSDK_New::TRAN_RecordSerach(struct _playrecordmsg*   recordsearch_req,char
         result = RELAY_GetDeviceRecordInfo(recordsearch_req,recordsearch_resp);//中转方式获取录像相关信息
       	if(result<0)
         {
-            printf("get recordinfo failed!!!\n");    //获取设备录像信息失败
+            DLog(@"tran get recordinfo failed!!!\n");    //获取设备录像信息失败
             return -1;
         }
         else     //获取设备录像信息成功
         {
             if(recordsearch_resp->count == 0)  //录像信息为空(可能无当天录像)
             {
-                printf("empty record!!!");
+                DLog(@"empty record!!!");
                 return -2;
             }
             else
             {
-                printf("get recordinfo success!!!record count is %d\n",recordsearch_resp->count);
+                DLog(@"get recordinfo success!!!record count is %d\n",recordsearch_resp->count);
                 for(i=0;i<recordsearch_resp->count;i++)
                 {
                     
@@ -178,7 +195,8 @@ int P2PSDK_New::TRAN_RecordSerach(struct _playrecordmsg*   recordsearch_req,char
                     hour = p->tm_hour;
                     minute = p->tm_min;
                     Second = p->tm_sec;
-                    printf( "record[%d] start time is %d-%d %d:%d:%d\n",i,month,day,hour,minute,Second);
+                    printf("record:%d--%d--%d\n",recordmsg[i].frameType,recordmsg[i].channelNo,recordmsg[i].nalarmFileType);
+                    printf("record[%d] start time is %d-%d %d:%d:%d\n",i,month,day,hour,minute,Second);
                     
                     p = localtime((const long*)&(recordmsg[i].endTime));
                     month = p->tm_mon + 1;
@@ -186,7 +204,7 @@ int P2PSDK_New::TRAN_RecordSerach(struct _playrecordmsg*   recordsearch_req,char
                     hour = p->tm_hour;
                     minute = p->tm_min;
                     Second = p->tm_sec;
-                    printf( "record[%d] end time is %d-%d %d:%d:%d\n",i,month,day,hour,minute,Second);
+                    printf("record[%d] end time is %d-%d %d:%d:%d\n",i,month,day,hour,minute,Second);
                 }
                 return 0;
             }
@@ -197,7 +215,7 @@ int P2PSDK_New::TRAN_RecordSerach(struct _playrecordmsg*   recordsearch_req,char
 
 int P2PSDK_New::P2P_RecordSearch(struct _playrecordmsg*   recordsearch_req,char*  resp)
 {
-    printf("RecordSearch \n");
+    DLog(@"RecordSearch \n");
     int  result=-1;
     int i=0;
     struct  _playrecordresp*  recordsearch_resp=NULL;
@@ -209,12 +227,12 @@ int P2PSDK_New::P2P_RecordSearch(struct _playrecordmsg*   recordsearch_req,char*
         result = P2P_GetDeviceRecordInfo(recordsearch_req,recordsearch_resp);//P2P方式获取录像相关信息
         if(result<0)
         {
-            printf("get recordinfo failed!!!\n");    //获取设备录像信息失败
+            DLog(@"get recordinfo failed!!!\n");//获取设备录像信息失败
             return -1;
         }
-        else     //获取设备录像信息成功
+        else//获取设备录像信息成功
         {
-            if(recordsearch_resp->count == 0)  //录像信息为空(可能无当天录像)
+            if(recordsearch_resp->count == 0)//录像信息为空(可能无当天录像)
             {
                 printf("empty record!!!");
                 return -2;
@@ -236,7 +254,16 @@ int P2PSDK_New::P2P_RecordSearch(struct _playrecordmsg*   recordsearch_req,char*
                     day = p->tm_mday;
                     hour = p->tm_hour;
                     minute = p->tm_min;
+                    /*
+                     unsigned short        channelNo;                 // Õ®µ¿∫≈
+                     unsigned short        frameType;		// ÷°¿‡–Õ(0: ”∆µ,1:“Ù∆µ,2:“Ù ”∆µ)
+                     unsigned int            startTime;	                // ø™ º ±º‰
+                     unsigned int            endTime;		        // Ω· ¯ ±º‰
+                     unsigned int            nalarmFileType;        // 1:∆’Õ®¬ºœÒŒƒº˛   2:±®æØ¬ºœÒŒƒº˛
+                     char                       reserve[8];
+                     */
                     Second = p->tm_sec;
+                    printf("record:%d--%d\n",recordmsg[i].frameType,recordmsg[i].channelNo);
                     printf( "record[%d] start time is %d-%d %d:%d:%d\n",i,month,day,hour,minute,Second);
                     
                     p = localtime((const long*)&(recordmsg[i].endTime));
@@ -255,15 +282,86 @@ int P2PSDK_New::P2P_RecordSearch(struct _playrecordmsg*   recordsearch_req,char*
     return -1;
 }
 
-
-
-
-
-bool P2PSDK_New::ProcessFrameData(char* aFrameData, int aFrameDataLength)
-{
-    return YES;
-}
 bool P2PSDK_New::DeviceDisconnectNotify()
 {
     return YES;
 }
+
+int P2PSDK_New::P2P_PlayDeviceRecord(struct _playrecordmsg*   playrecord_req)
+{
+    int ret=-1;
+    if(conn != NULL)
+    {
+        ret = conn->PlayBackRecord(playrecord_req);
+        if(ret == 0)    //请求P2P录像流成功
+        {
+            aryVideo = [NSMutableArray array];
+            printf("success P2P_PlayDeviceRecord \n");
+        }
+        else
+        {
+            printf("P2P_PlayDeviceRecord failed \n");
+        }
+    }
+    return ret;
+}
+
+int P2PSDK_New::RELAY_PlayDeviceRecord(struct _playrecordmsg*   playrecord_req)
+{
+    int ret=-1;
+    if(relayconn != NULL)
+    {
+        ret = relayconn->PlayBackRecord(playrecord_req);
+        if(ret == 0)    //请求中转录像流成功
+        {
+            aryVideo = [NSMutableArray array];
+            printf("success RELAY_PlayDeviceRecord \n");
+        }
+        else
+        {
+            printf("RELAY_PlayDeviceRecord failed \n");
+        }
+    }
+    return ret;
+}
+
+int P2PSDK_New::closeTranServer()
+{
+    if (conn)
+    {
+        delete conn;
+        conn = NULL;
+    }
+    return 1;
+}
+
+int P2PSDK_New::closeP2PService()
+{
+    if (relayconn)
+    {
+        delete relayconn;
+        relayconn = NULL;
+    }
+    return 1;
+}
+
+int P2PSDK_New::stopDeviceRecord(struct _playrecordmsg* playrecord_req)
+{
+//    PlayRecordCtrlMsg msg;
+//    msg.ctrl = PB_STOP;
+//    msg.channelNo = 1;
+//    msg.frameType = 0;
+    if (conn)
+    {
+//        conn->PlayBackRecordCtrl(&msg);
+        conn->StopBackRecord(playrecord_req);
+    }
+    else
+    {
+        relayconn->StopBackRecord(playrecord_req);
+//        int nStop = relayconn->PlayBackRecordCtrl(&msg);
+//        DLog(@"nStop:%d",nStop);
+    }
+    return 1;
+}
+

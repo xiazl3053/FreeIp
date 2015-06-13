@@ -112,6 +112,30 @@
             _segChannel.hidden = NO ;
             [self clickDeviceType:_btnNVR];
         }
+//        _rtspInfo.nChannel
+        
+//        [_segChannel setSelectedSegmentIndex:];
+        int nIndex = 0;
+        switch (_rtspInfo.nChannel) {
+            case 1:
+                nIndex = 0;
+                break;
+            case 4:
+                nIndex = 1;
+                break;
+            case 8:
+                nIndex = 2;
+                break;
+            case 16:
+                nIndex = 3;
+                break;
+            case 24:
+                nIndex = 4;
+            default:
+                
+                break;
+        }
+        [_segChannel setSelectedSegmentIndex:nIndex];
     }
 }
 

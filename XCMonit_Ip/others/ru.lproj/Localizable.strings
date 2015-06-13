@@ -1,77 +1,47 @@
-翻译方式：
-翻译 "="右边部分内容，左边的不修改
-/*Loginbtn */
+
 "Loginbtn" = "Войти";
-/*Loginuser */
 "Loginuser" = "Введите имя пользователя";
 "regUser"="Введите адрес почты";
-/*Loginpwd */
-"Loginpwd" = "Введите пароль"
+
+"Loginpwd" = "Введите пароль";
 "LoginpwdAgain" = "Подтвердите пароль";
-/*Loginregister */
 "Loginregister" = "Регистрация";
-/*offline*/
+
+"httpserver" = "http://www.freeip.com/";
+"p2pserver" = "heart.freeip.com";
+
 "offline" = "Не в сети";
-/*online*/
 "online" = "В сети";
-/*device status*/
 "statu" = "Статус";
-/*device type*/
+
 "type" = "Тип устройства";
-/*devNO*/
 "devNO" = "Серийный номер";
-/*devDel*/
 "devDel" = "Удалить";
-/*home*/
 "home" = "Домой";
-/*device*/
 "device" = "Устройство";
-/*more*/
 "more" = "Ещё";
 "rtsp" = " RTSP поток";
-/*picture*/
 "picture" = "Изображение";
-/*userinfo*/
 "userinfo" = "Информация пользователя";
-/*aboutus*/
 "aboutus" = "О нас";
-/*version*/
 "version" = "Версия";
-/*cancel*/
 "cancel" = "Выход";
-/*confirm*/
 "confirm" = "Подтвердить";
-/*delete device request*/
-"delDeviceQuq" = "Удалить устройство? ";
-/*logout*/
+"delDeviceQuq" = "Удалить устройство?";
 "logout" = "Выйти";
-/*DeviceDetails*/
 "devDetails" = "Устройство";
-/*loading*/
 "loading" = "Загрузка... ";
-/*connectFail*/
 "connectFail" = "Устройство не подключено";
-/*Disconnect*/
 "Disconnect" = "Подключение устройства прервано";
-/*deviceinfotimeout*/
 "deviceinfotimeout" = "подключение устройство, время вышло";
-/*updDevName*/
 "updDevName" = "Модификация";
-/*save*/
 "save" = "Сохранить";
-/*cameraName*/
 "cameraName" = "Имя устройства (не более 50символов) ";
-/*userAuth*/
 "userAuth" = "Имя пользователя не может быть пустым";
-/*pwdAuth*/
 "pwdAuth" = "Пароль не может быть пустым";
-/*logining*/
 "logining" = "Вход... ";
-/*authError*/
 "authError" = "Имя пользователя или пароль не правильны";
-/*loginTime*/
 "loginTime" = "время подключения истекло";
-/*ServerException*/
 "ServerException" = "Исключение сервера";
 "Remind" = "Напомнить";
 "logoutRemind" = "Выйти? ";
@@ -179,7 +149,7 @@
 "endOStart"="Конец раньше начала, ошибка";
 "updateEmail"="Сменить почту";
 "updateReal"="Сменит реальное имя";
-"nickUpd"="Сменить псевдоним (Nickname) ";
+"nickUpd"="Сменить псевдоним (Nickname)";
 "oldPwd"="Старый пароль";
 "updpwd"="Смена пароля";
 "newpwd"="Новый пароль";
@@ -187,6 +157,9 @@
 "oldEmpty"="Старый пароль не может быть пустым";
 "newEmpty"="Новый пароль не может быть пустым";
 "nickEmpty"="Псевдоним не может быть пустым";
+"realEmpty"="Nome não pode estar vazio";
+
+
 "comEmpty"="Пароль пуст";
 "oldError"="Ошибка старого пароля";
 "newError"="Новый пароль не совпадает";
@@ -211,16 +184,16 @@
 "autoLogin"="Авто логин";
 "savePhoto"="Сохранить";
 "qrResult"="Не от сканирован серийный номер";
-"qrcode_h"=" qrcode_h";
-"qrcode"=" qrcode_en";
+"qrcode_h"="qrcode_ru_h";
+"qrcode"="qrcode_ru";
 "noRecording"="Нет фото или видео";
-"helpicon"=" help_en";
+"helpicon"="help_ru";
 "find_pwd"="Забыли пароль";
 "next_find"="Далее";
 "UserInfoNotExits"="Нет информации о пользователе";
 "NewPwd"="Введите новый пароль";
 "confirmNewPwd"="Подтвердите новый пароль";
-"resend"="Переслать
+"resend"="Переслать";
 "VerifyAccount"="Подтверждение учетной записи... ";
 "VertifySucc"="Код подтверждения выслан на почту";
 "VertifyExits"="Имя пользователя не существует";
@@ -239,17 +212,30 @@
 "uploadDone"="Загрузка успешна";
 "savePhotos"="Сохранить снимок";
 
-
-
-
-
-
-
-
-
-
-
-
+"oldPwdError"="Старый пароль Ошибка";
+"networkstatus3G"="Текущая сеть : мобильной сети";
+"networkstatusWIFI"="Текущая сеть : Wi-Fi";
+"networkstatusNO"="нет сети";
+"connectionDevice"="Текущий канал установления соединения P2P";
+"reconnect"="Подключите устройство";
+"devUpdOK"="Изменить успеха";
+"editor"="редактор";
+"recorddirect"="запись";
+"updRtsp"="Изменить непосредственно подключенных устройств";
+"nSecondSend"="второй";
+"regThan64"="Имя пользователя не может быть длиннее, чем 64";
+"emailThan64" = "Электронная почта Длина адреса не может превышать 64";
+"nickThan64" = "Ник не может быть больше , чем 64";
+"pwdThan64"="Длина пароля не может превышать 64";
+"realThan64"="Длина имени не может быть больше , чем 64";
+"versionCheck"="обнаружение Версия";
+"versionLaster"="Текущая версияпоследняя";
+"versionUpdate"="Вы уверены, чтообновленная версия ?";
+"versionUpdate"="Определить обновление версии ?";
+"Manually"="вручную добавить";
+"search"="поиск Интранет";
+"searching"="Поиск ...";
+"WIFIOK"="Пожалуйста, подтвердите подключение Wi-Fi нормально";
 
 
 

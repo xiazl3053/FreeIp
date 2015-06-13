@@ -11,7 +11,6 @@ extern "C" {
 //#include <string>
 #include <stdio.h>
 #define MAX_MSG_DATA_LEN 2048
-
 #define  MAX_VERSION_LENGTH   32
 
 #ifdef _MSC_VER_
@@ -28,7 +27,6 @@ typedef struct
     short           resultCode;  //     返回结果代码
     
 }PP_PACKED NetMsgResHeader;
-
 
 // 实时视频帧和录像回放视频帧前的帧头
 typedef struct 
@@ -61,7 +59,6 @@ typedef struct
     // 可能需要扩展其它属性
 }PP_PACKED PlayRealStreamMsgRes;
 
-
 // 关闭实时流请求应答
 typedef struct 
 {
@@ -72,7 +69,7 @@ typedef struct
 
 //***************************** 录像回放相关消息 ****************************
 #if 0
-// 录像回放搜索请求消息
+// 录像回放消息
 typedef struct _playrecordmsg
 {
 	unsigned short        channelNo;                 // 通道号
@@ -84,7 +81,6 @@ typedef struct _playrecordmsg
 
 typedef struct  _NvrRecordinfo
 {
-	//录像文件信息 
 	unsigned short diskNo;//硬盘号
 	unsigned short recordNo;// 录像文件（%04X，则为录像文件名）
 	unsigned short fileType;//文件类型  bit0：定时录像 bit1：告警录像 bit2：手动录像
@@ -101,11 +97,9 @@ typedef struct  _NvrRecordfile
 	unsigned int  count;  //录像文件总个数
 	struct  _NvrRecordinfo*  RecordInfo;
 }PP_PACKED RecordFileMsg;
-
 typedef enum {
 	DVR		      		      = 0,	//DVR设备
 	NVR			              = 1,	//NVR设备
-	
 }DeviceType;
 typedef struct  _playrecordresp
 {
@@ -113,35 +107,29 @@ typedef struct  _playrecordresp
 	char              recordmsg[MAX_MSG_DATA_LEN];//录像文件信息(DVR录像文件信息和NVR录像文件信息结构体不一样)
 }PP_PACKED PlayRecordResMsg;
 #endif
-
-// 录像回放搜索、录像播放请求消息
+// 录像回放应答消息
 typedef struct _playrecordmsg
 {
 	unsigned short        channelNo;                 // 通道号
 	unsigned short        frameType;		// 帧类型(0:视频,1:音频,2:音视频) 
-	unsigned int          startTime;	                // 开始时间
-	unsigned int          endTime;		        // 结束时间
-	unsigned int          nalarmFileType;        // 1:普通录像文件   2:报警录像文件
-	char                  reserve[8];                //保留
+	unsigned int            startTime;	                // 开始时间
+	unsigned int            endTime;		        // 结束时间
+	unsigned int            nalarmFileType;        // 1:普通录像文件   2:报警录像文件
+	char                       reserve[8];                //保留
 }PP_PACKED PlayRecordMsg;
-
-
 typedef struct  _playrecordresp
 {
 	unsigned int  count;  //录像文件总个数
 	struct  _playrecordmsg*  RecordInfo;
 }PP_PACKED PlayRecordResMsg;
 
-
-
 typedef enum {
-	PB_PLAY		        		      = 0,	//播放
-	PB_PAUSE			    	      = 1,	//暂停
-	PB_STOP					      = 2,	//停止
-	PB_STEPFORWARD		      = 3,	//单帧进
-	PB_STEPBACKWARD		      = 4,	//单帧退
-	PB_FORWARD			      = 5,	//快进
-	PB_BACKWARD			      = 6,	//快退
+	PB_PLAY		        		= 0,	//播放
+	PB_PAUSE			    	= 1,	//暂停
+	PB_STEPFORWARD		      = 2,	//单帧进
+	PB_STEPBACKWARD		      = 3,	//单帧退
+	PB_FORWARD			      = 4,	//快进
+	PB_BACKWARD			      = 5,	//快退
 }PlayBackControl;
 
 // 录像回放控制消息
@@ -149,7 +137,7 @@ typedef struct
 {
     unsigned short        channelNo;                 // 通道号
     unsigned short        frameType;		// 帧类型(0:视频,1:音频,2:音视频) 	
-    PlayBackControl      ctrl;
+    PlayBackControl ctrl;
 }PP_PACKED PlayRecordCtrlMsg;
 
 // 录像回放控制应答消息
@@ -157,10 +145,6 @@ typedef struct
 {
     NetMsgResHeader header;
 }PP_PACKED PlayRecordCtrlResMsg;
-
-
-
-// ptz control type define
 typedef enum {
 	PTZCONTROLTYPE_INVALID		= 0,
 	PTZCONTROLTYPE_UP_START 	= 1,    //开始向上转动
@@ -187,29 +171,18 @@ typedef enum {
 	PTZCONTROLTYPE_FOCUSNEAR_STOP	= 22,
 	PTZCONTROLTYPE_FOCUSFAR_START	= 23,           //聚焦拉远
 	PTZCONTROLTYPE_FOCUSFAR_STOP	= 24,
-
 } PTZCONTROLTYPE;
-
-
 typedef struct  _PtzControlMsg
 {
 	PTZCONTROLTYPE   ptzcmd;
 	int                           channel;  // 对应通道号(从0开始) 
-		
 }PP_PACKED PtzControlMsg;
-
-
-
-// 获取对应通道相关码流信息和版本信息
 typedef struct _DeviceStreamMsg
 {
     short streamType;  // 1:主码流 2:副码流
     short channelNo;  // 通道号
 }DeviceStreamMsgReq;
-
-
-
-//***************************** 设备相关消息 ********************************
+//************************************************************************
 typedef struct 
 {
     int       streamsend_statue;     //码流的发送状态    0:failed    1:成功
@@ -217,8 +190,6 @@ typedef struct
     int       streambitrate;   //码流大小
     char     deviceversion[MAX_VERSION_LENGTH];  //设备版本信息
 }PP_PACKED DeviceStreamInfoResp;
-
-
 
 // 消息类型
 typedef enum
@@ -240,6 +211,8 @@ typedef enum
     GET_DEVICE_STREAMINFO_RES = 14,
     GET_DEVICE_RECORDINFO = 15,
     GET_DEVICE_RECORDINFO_RES = 16,
+    STOP_RECORD_STREAM = 17,   // 停止回放录像流消息类型
+    STOP_RECORD_STREAM_RES = 18,
 }MsgType;
 // 请求消息
 typedef struct _NetMsg

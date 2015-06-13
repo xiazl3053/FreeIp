@@ -21,7 +21,7 @@ int recvStream(int sockfd)
         rsl = SK_SelectWaitReadable(sockfd,3000);
         if(0==rsl)
         {
-            len = recv(sockfd,&stream,sizeof(ARG_STREAM),0);
+            len = (int)recv(sockfd,&stream,sizeof(ARG_STREAM),0);
             if(0>len) continue;
             if(sizeof(ARG_STREAM)!=len){
                 printf("read head failed!\n");
@@ -41,17 +41,16 @@ int recvStream(int sockfd)
 }
 
 
-int  Recvmsg(int* run,int msocket,char *buff,int datalen)
+int Recvmsg(int* run,int msocket,char *buff,int datalen)
 {
 	int haverecvdatalen = 0;
 	int totaldatalen = datalen;
-
 	
 	while(totaldatalen>0)
 	{
 		if(*run ==1)
 		{
-			int recvlen = recv(msocket,buff+haverecvdatalen,totaldatalen,0); //Ω” ’’Ê’˝µƒ«Î«Û ˝æ›
+			int recvlen = (int)recv(msocket,buff+haverecvdatalen,totaldatalen,0); //Ω” ’’Ê’˝µƒ«Î«Û ˝æ›
 			if(recvlen> 0)
 		        {   
 				totaldatalen -= recvlen;
@@ -106,8 +105,8 @@ void RecvOneFramedata(char *data,int datalen,void *arg)
     
 }
 
-typedef void *(*sthread)(void*);
-
+//typedef void *(*sthread)(void*);
+//int CreatThread(sthread func,void* param);
 int CreatThread(sthread func,void* param)
 {
 	int iRet=0;
@@ -134,9 +133,9 @@ void recvStream2(void * arg)
     ARG_STREAM Stream;
     char recvstate=0;	
     int rsl;
-    int recvLen;
+
     int fd = 0;
-    int *fsocket=NULL;
+
    pteClient_t*  pclient = (pteClient_t*)arg;
    fd = pclient->sockFd;
 
@@ -196,7 +195,7 @@ int  StartGetStream(void *arg)
 	iRet = CreatThread(recvStream2,(void *)(arg));
 	if(iRet != 0)
 	{
-		printf("CreatThread failed!\n");
+		printf("CreatThread_pte failed!\n");
 		return -1;
 	}
 	printf("StartGetStream return!!!\n");
@@ -319,8 +318,6 @@ int Direct_Connect(pteClient_t *pClient,Direct_UserInfo *directInfo,int nStream,
     else
     {
     	printf("PC_GetStream failed!!!\n");
-//        PC_Delete(pClient);
-//        PC_UnInitCtx();
         return DIRECT_CONNECT_GET_STREAM_FAIL;
     }
     return DIRECT_CONNECT_SUCESS;

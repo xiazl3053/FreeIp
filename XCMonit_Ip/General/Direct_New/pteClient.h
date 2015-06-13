@@ -77,6 +77,10 @@ void PC_CloseStream(pteClient_t* pClient);
 int SK_SelectWaitReadable(unsigned int fd, int msec);
 int SK_SelectWaitWriteable(unsigned int fd, int msec);
 
+typedef void *(*sthread)(void*);
+int CreatThread(sthread func,void* param);
+    
+    
 #ifdef __cplusplus
 }
 #endif

@@ -24,5 +24,6 @@
 
 -(id)initWithTabInfo:(XCTabInfo*)tabInfo frame:(CGRect)frame;
 
+
 @end
 

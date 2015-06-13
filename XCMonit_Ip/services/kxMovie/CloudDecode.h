@@ -10,10 +10,21 @@
 
 @interface CloudDecode : NSObject
 
+@property (nonatomic,assign) CGFloat fps;
+@property (nonatomic,copy) NSString *strTime;
+
 -(id)initWithCloud:(NSString*)strNo channel:(int)nChannel codeType:(int)nCode;
 
 -(NSMutableArray*)getCloudInfo:(NSDate*)dateTime;
 
 -(BOOL)playDeviceCloud:(NSDate*)dateTime;
+
+-(BOOL)startVideo:(NSString *)strTime;
+
+-(void)checkView:(NSString *)strTime;
+
+-(NSArray*)decodeFrame;
+
+-(void)stopDecode;
 
 @end

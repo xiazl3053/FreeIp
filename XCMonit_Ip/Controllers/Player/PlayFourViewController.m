@@ -549,9 +549,9 @@
 -(void)initScrollView
 {
     VideoView *mainView = ((PlayControllerView *)[_array objectAtIndex:3]).mainView;
-    CGFloat fHeight = mainView.frame.origin.y+mainView.frame.size.height;
+    CGFloat fTempHeight = mainView.frame.origin.y+mainView.frame.size.height;
     //滚动条
-    _scroll = [[UIScrollView alloc] initWithFrame:Rect(0, fHeight+2, kScreenWidth, kScreenHeight-fHeight-70+HEIGHT_MENU_VIEW(20, 0))];
+    _scroll = [[UIScrollView alloc] initWithFrame:Rect(0, fTempHeight+2, kScreenWidth, kScreenHeight-fTempHeight-70+HEIGHT_MENU_VIEW(20, 0))];
     [self.view addSubview:_scroll];
     nOldIndex = -1;
     CGFloat btnWidth = kScreenWidth / 4 ;

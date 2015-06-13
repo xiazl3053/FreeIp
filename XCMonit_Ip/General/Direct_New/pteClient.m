@@ -138,8 +138,8 @@ void PC_SingleStep()
     int                rsl;
 
     /*time*/
-    incTime = time(0) - PC_G_Time;
-    PC_G_Time = time(0);
+    incTime = (int)(time(0) - PC_G_Time);
+    PC_G_Time = (int)time(0);
     if(incTime > 5) incTime = 5;
 
     /*select 1 秒间隔*/
@@ -353,7 +353,7 @@ pteClient_t* PC_CreateNew()
     PC_FREE(pClient);
 }*/
 
-void Dvrprivate_protocol_free(void *arg)
+void* Dvrprivate_protocol_free(void *arg)
 {
 	printf("Dvrprivate_protocol_free come\n");
 	pteClient_t *clinetInfo ;
@@ -384,6 +384,7 @@ void Dvrprivate_protocol_free(void *arg)
 		}
 	}
 	printf("Dvrprivate_protocol_free exit\n");
+    return nil;
 }
 #if 0
 void PC_Delete(pteClient_t** pClient)

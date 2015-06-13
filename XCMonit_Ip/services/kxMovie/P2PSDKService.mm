@@ -24,10 +24,8 @@ bool RecvFile::ProcessFrameData(char* aFrameData, int aFrameDataLength)
     {
         return YES;
     }
-//    unsigned char *unFrame = (unsigned char *)aFrameData;
-    
-//    DLog(@"%hhu--%hhu--%hhu--%hhu--%hhu--%d",unFrame[0],unFrame[1],unFrame[2],unFrame[3],unFrame[4],aFrameDataLength);
-    
+    unsigned char *unFrame = (unsigned char *)aFrameData;
+    DLog(@"%hhu--%hhu--%hhu--%hhu--%hhu--%d",unFrame[0],unFrame[1],unFrame[2],unFrame[3],unFrame[4],aFrameDataLength);
 //    if (!aryData)
 //    {
 //        aryData = [NSMutableData data];
@@ -155,7 +153,7 @@ void RecvFile::StopRecv()
         else if(streamType == 1)
         {
             PlayRecordCtrlMsg msg;
-            msg.ctrl = PB_STOP;
+//            msg.ctrl = PB_STOP;
             conn->PlayBackRecordCtrl(&msg);
         }
         conn->Close();
@@ -176,7 +174,7 @@ void RecvFile::StopRecv()
         else if(streamType == 1)
         {
             PlayRecordCtrlMsg msg;
-            msg.ctrl = PB_STOP;
+//            msg.ctrl = PB_STOP;
             relayconn->PlayBackRecordCtrl(&msg);
         }
         relayconn->Close();
@@ -205,7 +203,7 @@ void RecvFile::closeP2P()
         else if(streamType == 1)
         {
             PlayRecordCtrlMsg msg;
-            msg.ctrl = PB_STOP;
+//            msg.ctrl = PB_STOP;
             conn->PlayBackRecordCtrl(&msg);
         }
         conn->Close();
@@ -229,7 +227,7 @@ void RecvFile::closeTran()
         else if(streamType == 1)
         {
             PlayRecordCtrlMsg msg;
-            msg.ctrl = PB_STOP;
+//            msg.ctrl = PB_STOP;
             relayconn->PlayBackRecordCtrl(&msg);
         }
         if(relayconn!=NULL)

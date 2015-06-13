@@ -48,12 +48,17 @@ public:
     
     int  P2P_GetDeviceRecordInfo(struct _playrecordmsg*   recordsearch_req,struct  _playrecordresp*  recordsearch_resp);
     int  RELAY_GetDeviceRecordInfo(struct _playrecordmsg*   recordsearch_req,struct  _playrecordresp*  recordsearch_resp);
-   
+    
+    int  P2P_PlayDeviceRecord(struct _playrecordmsg*   playrecord_req);
+    int  RELAY_PlayDeviceRecord(struct _playrecordmsg*   playrecord_req);
+    
     int  P2P_RecordSearch(struct _playrecordmsg*   recordsearch_req,char*  resp);
     int  TRAN_RecordSerach(struct _playrecordmsg*   recordsearch_req,char*  resp);
-//    BOOL startGcd(int _nType,int nCodeType);
-    //转发服务器
-//    BOOL connectP2PStream(int nCodeType);
+    
+    int closeTranServer();
+    int closeP2PService();
+    
+    int stopDeviceRecord(struct _playrecordmsg*   playrecord_req);
     
     BOOL initP2PServer();
     BOOL initTranServer();

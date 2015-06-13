@@ -584,8 +584,8 @@
     if (UIInterfaceOrientationPortrait == [UIApplication sharedApplication].statusBarOrientation)
     {
         //16:9   320 ：240
-        CGFloat fHeight = kScreenWidth/4*3;
-        frameCenter = Rect(0,kScreenHeight/2-fHeight/2, kScreenWidth, fHeight);
+        CGFloat fTempHeight = kScreenWidth/4*3;
+        frameCenter = Rect(0,kScreenHeight/2-fTempHeight/2, kScreenWidth, fTempHeight);
     }
     else
     {

@@ -1,4 +1,5 @@
-
+/*翻译方式：
+ 翻译 "="右边部分内容，左边的不修改*/
 "Loginbtn" = "Login";
 
 "Loginuser" = "Please enter the user name";

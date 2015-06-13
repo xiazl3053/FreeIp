@@ -151,7 +151,6 @@
 		BB1F851119A4A950004BE9AA /* XCLoginView.m in Sources */ = {isa = PBXBuildFile; fileRef = BB1F849019A4A950004BE9AA /* XCLoginView.m */; };
 		BB1F851219A4A950004BE9AA /* RtspCell.m in Sources */ = {isa = PBXBuildFile; fileRef = BB1F849319A4A950004BE9AA /* RtspCell.m */; };
 		BB1F851319A4A950004BE9AA /* VideoView.m in Sources */ = {isa = PBXBuildFile; fileRef = BB1F849619A4A950004BE9AA /* VideoView.m */; };
-		BB1F851519A4A96C004BE9AA /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BB1F851419A4A96C004BE9AA /* Images.xcassets */; };
 		BB1F85EF19A6E63A00FB7B30 /* libavcodec.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BB1F85EA19A6E63A00FB7B30 /* libavcodec.a */; };
 		BB1F85F019A6E63A00FB7B30 /* libavformat.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BB1F85EB19A6E63A00FB7B30 /* libavformat.a */; };
 		BB1F85F119A6E63A00FB7B30 /* libavutil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BB1F85EC19A6E63A00FB7B30 /* libavutil.a */; };
@@ -179,6 +178,8 @@
 		BB33BD7D19B0837700A76D37 /* UIColor+expanded.m in Sources */ = {isa = PBXBuildFile; fileRef = BB33BD7619B0837700A76D37 /* UIColor+expanded.m */; };
 		BB33BD7E19B0837700A76D37 /* UIView+convenience.m in Sources */ = {isa = PBXBuildFile; fileRef = BB33BD7819B0837700A76D37 /* UIView+convenience.m */; };
 		BB33BD7F19B0837700A76D37 /* VRGCalendarView.m in Sources */ = {isa = PBXBuildFile; fileRef = BB33BD7A19B0837700A76D37 /* VRGCalendarView.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		BB3CBD331B25455000EF49C4 /* CloudButton.m in Sources */ = {isa = PBXBuildFile; fileRef = BB3CBD321B25455000EF49C4 /* CloudButton.m */; };
+		BB3CBD351B25809200EF49C4 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BB3CBD341B25809200EF49C4 /* Images.xcassets */; };
 		BB3CE33519B86255006435AA /* FolderCoverView.m in Sources */ = {isa = PBXBuildFile; fileRef = BB3CE33019B86255006435AA /* FolderCoverView.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		BB3CE33619B86255006435AA /* UIFolderTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = BB3CE33219B86255006435AA /* UIFolderTableView.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		BB3CE33719B86255006435AA /* UIView+screenshot.m in Sources */ = {isa = PBXBuildFile; fileRef = BB3CE33419B86255006435AA /* UIView+screenshot.m */; };
@@ -505,7 +506,6 @@
 		BB1F849319A4A950004BE9AA /* RtspCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RtspCell.m; sourceTree = "<group>"; };
 		BB1F849519A4A950004BE9AA /* VideoView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VideoView.h; sourceTree = "<group>"; };
 		BB1F849619A4A950004BE9AA /* VideoView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VideoView.m; sourceTree = "<group>"; };
-		BB1F851419A4A96C004BE9AA /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		BB1F85EA19A6E63A00FB7B30 /* libavcodec.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavcodec.a; path = libs/libavcodec.a; sourceTree = "<group>"; };
 		BB1F85EB19A6E63A00FB7B30 /* libavformat.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavformat.a; path = libs/libavformat.a; sourceTree = "<group>"; };
 		BB1F85EC19A6E63A00FB7B30 /* libavutil.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavutil.a; path = libs/libavutil.a; sourceTree = "<group>"; };
@@ -556,6 +556,9 @@
 		BB33BD7819B0837700A76D37 /* UIView+convenience.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIView+convenience.m"; sourceTree = "<group>"; };
 		BB33BD7919B0837700A76D37 /* VRGCalendarView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VRGCalendarView.h; sourceTree = "<group>"; };
 		BB33BD7A19B0837700A76D37 /* VRGCalendarView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VRGCalendarView.m; sourceTree = "<group>"; };
+		BB3CBD311B25455000EF49C4 /* CloudButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CloudButton.h; path = cloud/CloudButton.h; sourceTree = "<group>"; };
+		BB3CBD321B25455000EF49C4 /* CloudButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CloudButton.m; path = cloud/CloudButton.m; sourceTree = "<group>"; };
+		BB3CBD341B25809200EF49C4 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		BB3CE32F19B86255006435AA /* FolderCoverView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FolderCoverView.h; sourceTree = "<group>"; };
 		BB3CE33019B86255006435AA /* FolderCoverView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FolderCoverView.m; sourceTree = "<group>"; };
 		BB3CE33119B86255006435AA /* UIFolderTableView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UIFolderTableView.h; sourceTree = "<group>"; };
@@ -669,7 +672,7 @@
 		BBFE29661B1BEF6A00E08D17 /* pteClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pteClient.h; sourceTree = "<group>"; };
 		BBFE29671B1BEF6A00E08D17 /* systool.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = systool.c; sourceTree = "<group>"; };
 		BBFE29681B1BEF6A00E08D17 /* systool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = systool.h; sourceTree = "<group>"; };
-		BBFE29701B1C661D00E08D17 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/Localizable.strings; sourceTree = "<group>"; };
+		BBFE29701B1C661D00E08D17 /* ru */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; lineEnding = 0; name = ru; path = ru.lproj/Localizable.strings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -782,7 +785,7 @@
 		160133F919221150003DB845 /* XCMonit_Ip */ = {
 			isa = PBXGroup;
 			children = (
-				BB1F851419A4A96C004BE9AA /* Images.xcassets */,
+				BB3CBD341B25809200EF49C4 /* Images.xcassets */,
 				BB1F837719A4A950004BE9AA /* Controllers */,
 				BB1F83A319A4A950004BE9AA /* General */,
 				BB1F842A19A4A950004BE9AA /* Macro */,
@@ -1431,6 +1434,8 @@
 		BB4201941B0C3F2C004059AC /* cloud */ = {
 			isa = PBXGroup;
 			children = (
+				BB3CBD311B25455000EF49C4 /* CloudButton.h */,
+				BB3CBD321B25455000EF49C4 /* CloudButton.m */,
 				BB1C1C231B14774A00F93F5A /* TimeView.h */,
 				BB1C1C241B14774A00F93F5A /* TimeView.m */,
 			);
@@ -1690,10 +1695,10 @@
 				BB1F84EF19A4A950004BE9AA /* Localizable.strings in Resources */,
 				BB1F84F419A4A950004BE9AA /* kxmovie.bundle in Resources */,
 				BB1F84F319A4A950004BE9AA /* icon3@2x.png in Resources */,
-				BB1F851519A4A96C004BE9AA /* Images.xcassets in Resources */,
 				BB3CE33F19B86DB7006435AA /* tmall_bg_main.png in Resources */,
 				BB1F84F219A4A950004BE9AA /* icon3.png in Resources */,
 				BB1F84E019A4A950004BE9AA /* ProgressHUD.bundle in Resources */,
+				BB3CBD351B25809200EF49C4 /* Images.xcassets in Resources */,
 				BB3CE33C19B86AB1006435AA /* tmall_bg_furley.png in Resources */,
 				BB1F84C519A4A950004BE9AA /* MBProgressHUD.bundle in Resources */,
 				BB1EDADC19B9A3FA0005098B /* checkbox1_unchecked.png in Resources */,
@@ -1718,6 +1723,7 @@
 				BBFE296A1B1BEF6A00E08D17 /* DIrectDVR.m in Sources */,
 				BBDC513F1AB8273400C81D00 /* RecordSource.m in Sources */,
 				BB1F84B419A4A950004BE9AA /* IQKeyboardManager.m in Sources */,
+				BB3CBD331B25455000EF49C4 /* CloudButton.m in Sources */,
 				BB4B5EC019AAD07800BA1E8B /* Picture.m in Sources */,
 				BB1F850719A4A950004BE9AA /* RtspDecoder.mm in Sources */,
 				BB1F84EC19A4A950004BE9AA /* AppDelegate.m in Sources */,
@@ -2036,7 +2042,7 @@
 					_FOR_DEBUG_,
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "b4db5bec-07a5-4209-81eb-c0423703eef2";
+				PROVISIONING_PROFILE = "bfdac09b-79e7-475e-b942-c16e18a2b39a";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = 1;
 				VALID_ARCHS = armv7;
@@ -2077,7 +2083,7 @@
 					_FOR_DEBUG_,
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "b4db5bec-07a5-4209-81eb-c0423703eef2";
+				PROVISIONING_PROFILE = "43f78d24-de0e-422b-aba3-e9f1b1b39ed7";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = 1;
 				VALID_ARCHS = armv7;

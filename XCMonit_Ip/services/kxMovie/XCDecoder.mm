@@ -430,6 +430,7 @@ NSData * copyFrameData(UInt8 *src, int linesize, int width, int height)
     }
     [self closeScaler];
     [self closeFile];
+//    avformat_alloc_output_context2
     [[NSNotificationCenter defaultCenter] postNotificationName:NS_SWITCH_TRAN_OPEN_VC object:nil];
 }
 
@@ -438,7 +439,6 @@ NSData * copyFrameData(UInt8 *src, int linesize, int width, int height)
 {
     bDestorySDK = YES;
 }
-
 
 -(void)startTranServer:(NSString*)nsDevId
 {

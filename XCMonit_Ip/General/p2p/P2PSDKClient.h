@@ -32,56 +32,33 @@ public:
     Connection(EventHandler* handler) ;
    // virtual ~Connection() {};
     ~Connection();
-
     int  Connect(char* channelId);
     // 关闭连接
     void Close();
     bool IsConnected();
-    //int  GetTotalChannel(char *channel);	
     /**
 	 * 打开指定通道的实时流
-	 * channelId: 设备的通道账号(DVR、NVR通道从0开始)
-	 * streamType: 1:主码流  2:辅码流
+	 * channelId: 设备的通道账号
+	 * streamType: 1:主码流  2:副码流
 	 * 返回: 0:success, -1: fail;
 	 */
 	int StartRealStream(short channelNo, short streamType);
     // 停止实时流
 	int StopRealStream(short channelNo, short streamType);
 
-	 /**
-	 * 控制设备云台
-	 * ptzcmd: 云台控制命令
-	 * 返回: 0:success, -1: fail;
-	 */
 	int PtzContol(PtzControlMsg* ptzmsg);
-
-	 /*远程重启设备*/
-	int  Reboot(); 
-
-	/********************************
-	 * 获取设备码流和版本相关信息
-	 * channelId: 设备的通道账号(DVR、NVR通道从0开始)
-	 * streamType: 1:主码流  2:辅码流
-	 * 返回: 0:success, -1: fail;
-	**************************** */
-	int GetDeviceStreamInfo(short channelNo, short streamType); 
-
-        /***********************************
-        * 获取设备录像文件相关信息
-        recordsearch_req:录像搜索请求信息
-        recordsearch_resp:设备录像回复信息
-        * 返回: 0:success, -1: fail;
-        ***********************************/
-	int GetDeviceRecordInfo(struct _playrecordmsg*   recordsearch_req,struct  _playrecordresp*  recordsearch_resp); 
-		
     // 打开回放录像
+	int  Reboot(); 
+	int GetDeviceStreamInfo(short channelNo, short streamType,DeviceStreamInfoResp*  deviceinfo); 
+	int GetDeviceRecordInfo(struct _playrecordmsg*   recordsearch_req,struct  _playrecordresp*  recordsearch_resp); 
     int PlayBackRecord(PlayRecordMsg* msg);
     // 录像回放控制,包括暂停、快进、快退、停止等。详见PlayBackControl声明.
+    int StopBackRecord(PlayRecordMsg* msg);	
     int PlayBackRecordCtrl(PlayRecordCtrlMsg* msg);
     
     
 private:
-    bool connectstatue;
+    bool     connectstatue;	
     ConnectionImpl* impl;
     friend class P2PSDKClient;
 };
@@ -93,64 +70,28 @@ public:
     RelayConnection(EventHandler* handler) ;
      ~RelayConnection();	
     //virtual ~RelayConnection() {};
- 
     int  RelayConnect(char* channelId);
-    // 关闭连接
     void Close();
     bool IsConnected();	
-   // int  GetTotalChannel(char *channel);
-    /**
-	 * 打开指定通道的实时流
-	 * channelId: 设备的通道账号(DVR、NVR通道从0开始)
-	 * streamType: 1:主码流  2:辅码流
-	 * 返回: 0:success, -1: fail;
-	 */
 	int StartRealStream(short channelNo, short streamType);
-    // 停止实时流
 	int StopRealStream(short channelNo, short streamType);
-
-	 /**
-	 * 控制设备云台
-	 * ptzcmd: 云台控制命令
-	 * 返回: 0:success, -1: fail;
-	 */
 	int PtzContol(PtzControlMsg* ptzmsg);
-	 /*远程重启设备*/
 	int Reboot();
-
-	/***********************************
-        * 获取设备录像文件相关信息
-        recordsearch_req:录像搜索请求信息
-        recordsearch_resp:设备录像回复信息
-        * 返回: 0:success, -1: fail;
-        ***********************************/
 	int GetDeviceRecordInfo(struct _playrecordmsg*   recordsearch_req,struct  _playrecordresp*  recordsearch_resp); 
-
-       // 打开回放录像
-       int PlayBackRecord(PlayRecordMsg* msg);
-       // 录像回放控制,包括暂停、快进、快退、停止等。详见PlayBackControl声明.
-       int PlayBackRecordCtrl(PlayRecordCtrlMsg* msg);
-
-    /********************************
-	 * 获取设备码流和版本相关信息
-	 * channelId: 设备的通道账号(DVR、NVR通道从0开始)
-	 * streamType: 1:主码流  2:辅码流
-	 * 返回: 0:success, -1: fail;
-	**************************** */
-    int GetDeviceStreamInfo(short channelNo, short streamType); 	
-    
-    
+    int PlayBackRecord(PlayRecordMsg* msg);
+       int StopBackRecord(PlayRecordMsg* msg);
+    int PlayBackRecordCtrl(PlayRecordCtrlMsg* msg);
+    int GetDeviceStreamInfo(short channelNo, short streamType,DeviceStreamInfoResp*  deviceinfo); 	
 private:
     bool     connectstatue;	
     RelayConnectionImpl* impl;
     friend class P2PSDKClient;
 };
-
 class DLLCLASS_API P2PSDKClient 
 {
 public:
-      static P2PSDKClient* CreateInstance();
-      static void DestroyInstance(P2PSDKClient* instance);    
+    static P2PSDKClient* CreateInstance();
+    static void DestroyInstance(P2PSDKClient* instance);    
       int SendHeartBeat();	
     // 初始化sdk
 	bool Initialize(const char* serverName, const char* myId);    

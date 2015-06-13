@@ -28,12 +28,14 @@
 @end
 
 @implementation XCPhotoViewController
+
 -(void)show
 {
     UIWindow *window = [UIApplication sharedApplication].keyWindow;
     [window addSubview:self.view];
     [window.rootViewController addChildViewController:self];
 }
+
 -(id)initWithArray:(NSMutableArray*)ary current:(int)nSelect
 {
     self = [super init];

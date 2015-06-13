@@ -1488,10 +1488,9 @@ typedef struct AGREEMENT_PROPERTY{
 }AGREEMENT_PROPERTY;
 
 /*协议配置属性范围*/
-typedef struct  AGREEMENT_SCOPE{
-
-
-}AGREEMENT_SCOPE;
+//typedef struct  AGREEMENT_SCOPE{
+//
+//}AGREEMENT_SCOPE;
 
 
 /********************************************************************************************/

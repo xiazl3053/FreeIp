@@ -268,10 +268,9 @@
 //    NSArray *aryRecord = [RecordDb queryRecord:strNO];
 //    if (aryRecord.count<1)
 //    {
-//        [self.view makeToast:XCLocalized(@"noRecords")];
+//        [self.view makeToast:XCLocalized(@"noRecords") duration:1.0f position:@"center"];
 //        return;
 //    }
-//
 //    RecordViewController *record = [[RecordViewController alloc] initWithNo:strNO status:nLine];
 //    [self presentViewController:record animated:YES completion:nil];
 }
