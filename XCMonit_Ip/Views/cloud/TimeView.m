@@ -76,6 +76,26 @@
     return strTime;
 }
 
+-(NSString*)strDate
+{
+    struct tm *p=NULL;
+    char month;
+    char day;
+    char hour;
+    char minute;
+    char Second;
+    
+    p = localtime(&(lStartWidth));
+    
+    month = p->tm_mon + 1;
+    day = p->tm_mday;
+    hour = p->tm_hour;
+    minute = p->tm_min;
+    Second = p->tm_sec;
+    NSString *strTime = [NSString stringWithFormat:@"%d-%02d-%02d 00:00:00",1900+p->tm_year,month,day];
+    return strTime;
+}
+
 -(void)panEvent:(UIPanGestureRecognizer*)pan
 {
     CGPoint pt = [pan translationInView:self];
@@ -83,9 +103,11 @@
     CGFloat fWid = pt.x;
     //  1 * 36 秒
     lStartWidth -= ((int)fWid*36);
-    
     [pan setTranslation:CGPointZero inView:self];
     [self setNeedsDisplay];
+    if ([pan state]==UIGestureRecognizerStateEnded) {
+        DLog(@"发送当前时间");
+    }
 }
 
 -(void)initBodyView

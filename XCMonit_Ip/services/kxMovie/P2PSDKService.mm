@@ -25,7 +25,7 @@ bool RecvFile::ProcessFrameData(char* aFrameData, int aFrameDataLength)
         return YES;
     }
     unsigned char *unFrame = (unsigned char *)aFrameData;
-    DLog(@"%hhu--%hhu--%hhu--%hhu--%hhu--%d",unFrame[0],unFrame[1],unFrame[2],unFrame[3],unFrame[4],aFrameDataLength);
+//    DLog(@"%hhu--%hhu--%hhu--%hhu--%hhu--%d",unFrame[0],unFrame[1],unFrame[2],unFrame[3],unFrame[4],aFrameDataLength);
 //    if (!aryData)
 //    {
 //        aryData = [NSMutableData data];

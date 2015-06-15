@@ -10,14 +10,10 @@
 
 bool P2PSDK_New::ProcessFrameData(char* aFrameData, int aFrameDataLength)
 {
-//    DLog(@"aframeDataLength:%d",aFrameDataLength);
-//    unsigned char *pBuf = (unsigned char *)aFrameData;
-//    DLog(@"%hhu--%hhu--%hhu--%hhu--%hhu",pBuf[0],pBuf[1],pBuf[2],pBuf[3],pBuf[4]);
     NSData *dataInfo = [NSData dataWithBytes:aFrameData length:aFrameDataLength];
     @synchronized(aryVideo)
     {
         [aryVideo addObject:dataInfo];
-        DLog(@"aryVideo:%u",aryVideo.count);
     }
     dataInfo = nil;
     return YES;
@@ -83,7 +79,6 @@ void P2PSDK_New::StopRecv()
         else if(streamType == 1)
         {
             PlayRecordCtrlMsg msg;
-//            msg.ctrl = PB_STOP;
             conn->PlayBackRecordCtrl(&msg);
         }
         conn->Close();

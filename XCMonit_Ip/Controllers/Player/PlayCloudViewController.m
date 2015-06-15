@@ -29,6 +29,14 @@
     CloudButton *btnDate;
     CloudButton *btnRight;
     
+    CGFloat fWidth,fHeight;
+    CGFloat lastX,lastY;
+    CGFloat lastScale;
+    
+    UITapGestureRecognizer *_tapGestureRecognizer;
+    UIPinchGestureRecognizer *pinchGesture;
+    UIPanGestureRecognizer *_panGesture;
+    
     UIImageView *imgView;
 }
 @property (nonatomic,assign) BOOL bDecoding;
@@ -42,7 +50,88 @@
 {
     [super viewDidLoad];
     [self.view setBackgroundColor:RGB(255, 255, 255)];
+    _tapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTapNew:)];
+    pinchGesture = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(pinchEvent:)];
+    _panGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(panEvent:)];
     [self initBodyView];
+}
+
+-(void)panEvent:(UIPanGestureRecognizer*)sender
+{
+    if ([sender state]== UIGestureRecognizerStateBegan)
+    {
+        CGPoint curPoint = [sender locationInView:self.view];
+        lastX = curPoint.x;
+        lastY = curPoint.y;
+        return ;
+    }
+    CGPoint curPoint = [sender locationInView:self.view];
+    CGFloat frameX = (imgView.x + (curPoint.x-lastX)) > 0 ? 0 : (abs(imgView.x+(curPoint.x-lastX))+fWidth >= imgView.width ? -(imgView.width-fWidth) : (imgView.x+(curPoint.x-lastX)));
+    CGFloat frameY =(imgView.y + (curPoint.y-lastY))>0?0: (abs(imgView.y+(curPoint.y-lastY))+fHeight >= imgView.height ? -(imgView.height-fHeight) : (imgView.y+(curPoint.y-lastY)));
+    imgView.frame = Rect(frameX,frameY , imgView.width, imgView.height);
+    lastX = curPoint.x;
+    lastY = curPoint.y;
+}
+
+-(void)pinchEvent:(UIPinchGestureRecognizer*)sender
+{
+    DLog(@"点击事件");
+    if([sender state] == UIGestureRecognizerStateBegan) {
+        //   lastScale = 1.0;
+        return;
+    }
+    CGFloat glWidth = imgView.frame.size.width;
+    CGFloat glHeight = imgView.frame.size.height;
+    CGFloat fScale = 0;
+    
+    if ([sender scale]>1)
+    {
+        fScale = 1.011;
+    }
+    else
+    {
+        fScale = 0.99;
+    }
+    
+    if (imgView.frame.size.width * [sender scale] <= fWidth)
+    {
+        lastScale = 1.0f;
+        imgView.frame = Rect(0, 0, fWidth, fHeight);
+        [imgView removeGestureRecognizer:_panGesture];
+    }
+    else
+    {
+        lastScale = 1.5f;
+        [imgView addGestureRecognizer:_panGesture];
+        CGPoint point = [sender locationInView:self.view];
+        DLog(@"point:%f--%f",point.x,point.y);
+        CGFloat nowWidth = glWidth*fScale>fWidth*4?fWidth*4:glWidth*fScale;
+        CGFloat nowHeight =glHeight*fScale >fHeight* 4?fHeight*4:glHeight*fScale;
+        
+        imgView.frame = Rect(fWidth/2 - nowWidth/2,fHeight/2- nowHeight/2,nowWidth,nowHeight);
+    }
+}
+
+/**
+ *  点击事件
+ *
+ *  @param tapGesture 手势事件
+ */
+-(void)handleTapNew:(UITapGestureRecognizer*)tapGesture
+{
+    if (tapGesture.state == UIGestureRecognizerStateEnded)
+    {
+        CGPoint point = [tapGesture locationInView:self.view];
+        if (point.y < 40 || point.y > downView.frame.origin.y)
+        {
+            return ;
+        }
+        if (tapGesture == _tapGestureRecognizer)
+        {
+            topView.hidden = !topView.hidden;
+            downView.hidden = !downView.hidden;
+        }
+    }
 }
 
 - (void)didReceiveMemoryWarning
@@ -142,7 +231,7 @@
 -(void)cloudInit
 {
     cloudDec = [[CloudDecode alloc] initWithCloud:@"9743200000001" channel:1 codeType:0];
-    [cloudDec checkView:@"2015-6-9 00:00:00"];
+    [cloudDec checkView:timeView.strDate];
 }
 
 -(void)viewDidAppear:(BOOL)animated
@@ -153,6 +242,26 @@
     {
         heightInfo = kScreenSourchWidth;
     }
+    
+    if(IOS_SYSTEM_8)
+    {
+        fWidth = self.view.width;
+        fHeight = self.view.height;
+    }
+    else
+    {
+        fWidth = self.view.height;
+        fHeight = self.view.width;
+    }
+    
+    topView.frame = Rect(0, 0, fWidth, 49);
+    _lblName.frame = Rect(30, 15, fWidth-60, 20);
+    [topView viewWithTag:10088].frame = topView.bounds;
+    downView.frame = Rect(0, fHeight-120, fWidth, 120);
+    [downView viewWithTag:10089].frame = downView.bounds;
+    
+    
+    
     NSDate *date = [NSDate date];
     NSDateFormatter *nsFormat = [[NSDateFormatter alloc] init];
     nsFormat.locale = [[NSLocale alloc] initWithLocaleIdentifier:@"zh_CN"];
@@ -184,23 +293,7 @@
 -(void)viewWillLayoutSubviews
 {
     [super viewWillLayoutSubviews];
-    CGFloat fWidth,fHeight;
-    if(IOS_SYSTEM_8)
-    {
-        fWidth = self.view.width;
-        fHeight = self.view.height;
-    }
-    else
-    {
-        fWidth = self.view.height;
-        fHeight = self.view.width;
-    }
     
-    topView.frame = Rect(0, 0, fWidth, 49);
-    _lblName.frame = Rect(30, 15, fWidth-60, 20);
-    [topView viewWithTag:10088].frame = topView.bounds;
-    downView.frame = Rect(0, fHeight-120, fWidth, 120);
-    [downView viewWithTag:10089].frame = downView.bounds;
 }
 
 -(BOOL)prefersStatusBarHidden
@@ -245,21 +338,17 @@
 
 -(void)initGlView
 {
-    CGFloat fWidth,fHeight;
-    if (IOS_SYSTEM_8) {
-        fWidth = kScreenSourchWidth;
-        fHeight = kScreenSourchHeight;
-    }
-    else
-    {
-        fWidth = kScreenSourchHeight;
-        fHeight = kScreenSourchWidth;
-    }
+    
     if (imgView == nil)
     {
         imgView = [[UIImageView alloc] initWithFrame:Rect(0, 0, fWidth, fHeight)];
     }
     [self.view insertSubview:imgView atIndex:0];
+    [imgView setUserInteractionEnabled:YES];
+    [imgView addGestureRecognizer:_tapGestureRecognizer];
+    [imgView addGestureRecognizer:pinchGesture];
+    [imgView addGestureRecognizer:_panGesture];
+    
 }
 
 -(void)startPlay

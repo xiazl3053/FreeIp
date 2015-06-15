@@ -33,17 +33,19 @@
     UIView              *_downHUD;
     UIButton            *_doneButton;
     UITapGestureRecognizer *_doubleRecognizer;
+    
     UITapGestureRecognizer *_tapGestureRecognizer;
+    UIPinchGestureRecognizer *pinchGesture;
+    UIPanGestureRecognizer *_panGesture;
+    
     BOOL    _hiddenHUD;
     CGFloat fWidth,fHeight;
     CGFloat _bufferedDuration;
     CGFloat _minBufferedDuration;
     CGFloat _maxBufferedDuration;
-    UIPanGestureRecognizer *_panGesture;
     NSTimeInterval      _tickCorrectionTime;
     NSTimeInterval      _tickCorrectionPosition;
     NSUInteger    _tickCounter;
-    UIPinchGestureRecognizer *pinchGesture;
     UILabel *_progressLabel;
     CGFloat lastScale;
     
@@ -167,14 +169,14 @@
     [super viewDidLoad];
     [[UIApplication sharedApplication] setStatusBarHidden:YES];//隐藏status bar
     [self initToolBar];
-    _tapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTapNew:)];
     lastScale = 1.0f;
     _tapGestureRecognizer.numberOfTapsRequired = 1; // 单击
     _doubleRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTapNew:)];
     _doubleRecognizer.numberOfTapsRequired = 2; // 双击
-    [_tapGestureRecognizer requireGestureRecognizerToFail:_doubleRecognizer];
     bExit = NO;
     nCount = 0;
+    _tapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTapNew:)];
+//    [_tapGestureRecognizer requireGestureRecognizerToFail:_doubleRecognizer];
     pinchGesture = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(pinchEvent:)];
     _panGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(panEvent:)];
 }
@@ -205,15 +207,24 @@
     }
     CGFloat glWidth = _glView.frame.size.width;
     CGFloat glHeight = _glView.frame.size.height;
-    CGFloat fScale = [sender scale];
-    
+    CGFloat fScale = 0;
+    if ([sender scale]>1)
+    {
+        fScale = 1.011;
+    }
+    else
+    {
+        fScale = 0.99;
+    }
     if (_glView.frame.size.width * [sender scale] <= fWidth)
     {
         lastScale = 1.0f;
         _glView.frame = Rect(0, 0, fWidth, fHeight);
+        [_glView removeGestureRecognizer:_panGesture];
     }
     else
     {
+        [_glView addGestureRecognizer:_panGesture];
         lastScale = 1.5f;
         CGPoint point = [sender locationInView:self.view];
         DLog(@"point:%f--%f",point.x,point.y);

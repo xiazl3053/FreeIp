@@ -1625,8 +1625,15 @@
     }
     CGFloat glWidth = _currentView.frame.size.width;
     CGFloat glHeight = _currentView.frame.size.height;
-    CGFloat fScale = [sender scale];
-    
+    CGFloat fScale = 0;
+    if ([sender scale]>1)
+    {
+        fScale = 1.011;
+    }
+    else
+    {
+        fScale = 0.99;
+    }
     if (_currentView.frame.size.width * [sender scale] <= fWidth)
     {
         _currentView.frame = Rect(0, 0, fWidth, fHeight);

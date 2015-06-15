@@ -2042,8 +2042,8 @@
 					_FOR_DEBUG_,
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "bfdac09b-79e7-475e-b942-c16e18a2b39a";
-				SDKROOT = iphoneos;
+				PROVISIONING_PROFILE = "78b9c4ac-5c79-4717-8759-c5c03a5057e8";
+				SDKROOT = iphoneos8.1;
 				TARGETED_DEVICE_FAMILY = 1;
 				VALID_ARCHS = armv7;
 				WRAPPER_EXTENSION = app;
@@ -2083,8 +2083,8 @@
 					_FOR_DEBUG_,
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "43f78d24-de0e-422b-aba3-e9f1b1b39ed7";
-				SDKROOT = iphoneos;
+				PROVISIONING_PROFILE = "78b9c4ac-5c79-4717-8759-c5c03a5057e8";
+				SDKROOT = iphoneos8.1;
 				TARGETED_DEVICE_FAMILY = 1;
 				VALID_ARCHS = armv7;
 				WRAPPER_EXTENSION = app;

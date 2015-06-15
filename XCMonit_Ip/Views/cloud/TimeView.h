@@ -16,7 +16,8 @@
 
 @property (nonatomic,strong) NSDate *dateInfo;
 
-@property (nonatomic,assign) NSString *strTime;
+@property (nonatomic,strong) NSString *strTime;
+@property (nonatomic,strong) NSString *strDate;
 
 -(id)initWithFrame:(CGRect)frame time:(NSString *)strTime;
 
