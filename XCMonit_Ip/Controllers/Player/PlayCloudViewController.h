@@ -11,7 +11,7 @@
 @interface PlayCloudViewController : UIViewController
 
 
-
+-(id)initWithNO:(NSString *)strNO devName:(NSString *)strDevName;
 
 
 @end

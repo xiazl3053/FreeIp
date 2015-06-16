@@ -8,6 +8,7 @@
 #import "VideoView.h"
 #import "PlayFourViewController.h"
 #import "XCDecoderNew.h"
+#import "DecodeJson.h"
 #import "XCNotification.h"
 #import "DevInfoMacro.h"
 #import "ProgressHUD.h"
@@ -121,32 +122,37 @@
     _devModel = devModel;
     _strNO = _devModel.strDevNO;
     int nType = [_devModel.strDevType intValue];
-    if ((nType>2000 && nType <2100) || (nType>4000 && nType < 4100))
-    {
-        DLog(@"4通道dvr或者nvr");
-        _nDevChannel = 4;
-    }
-    else if((nType>2100 && nType <2200) || (nType>4100 && nType < 4200))
-    {
-        DLog(@"8通道dvr或者nvr");
-        _nDevChannel = 8;
-    }
-    else if((nType>2200 && nType <2300) || (nType>4200 && nType < 4300))
-    {
-        DLog(@"16通道dvr或者nvr");
-        _nDevChannel = 16;
-    }
-    else if((nType>2300 && nType <2400) || (nType>4300 && nType < 4400))
-    {
-        DLog(@"24通道dvr或者nvr");
-        _nDevChannel = 24;
-    }
-    else if((nType>2400 && nType <2500) || (nType>4400 && nType < 4500))
-    {
-        DLog(@"32通道dvr或者nvr");
-        _nDevChannel = 32;
-    }
     
+    NSString *strChannel = [DecodeJson getDeviceTypeByType:nType];
+    int nChannel = [[strChannel componentsSeparatedByString:@"-"][1] intValue];
+    DLog(@"nChannel:%d",nChannel);
+    _nDevChannel = nChannel;
+//    if ((nType>2000 && nType <2100) || (nType>4000 && nType < 4100))
+//    {
+//        DLog(@"4通道dvr或者nvr");
+//        _nDevChannel = 4;
+//    }
+//    else if((nType>2100 && nType <2200) || (nType>4100 && nType < 4200))
+//    {
+//        DLog(@"8通道dvr或者nvr");
+//        _nDevChannel = 8;
+//    }
+//    else if((nType>2200 && nType <2300) || (nType>4200 && nType < 4300))
+//    {
+//        DLog(@"16通道dvr或者nvr");
+//        _nDevChannel = 16;
+//    }
+//    else if((nType>2300 && nType <2400) || (nType>4300 && nType < 4400))
+//    {
+//        DLog(@"24通道dvr或者nvr");
+//        _nDevChannel = 24;
+//    }
+//    else if((nType>2400 && nType <2500) || (nType>4400 && nType < 4500))
+//    {
+//        DLog(@"32通道dvr或者nvr");
+//        _nDevChannel = 32;
+//    }
+//    
     return  self;
 }
 
@@ -292,6 +298,7 @@
     btnHD.tag = 10089;
 }
 
+#pragma mark 码流切换
 -(void)switchVideoInfo:(UIButton *)sender
 {
     [btnBD setEnabled:NO];
@@ -563,11 +570,11 @@
     if(isPhone4)
     {
         //4个通道   4s以下s
-        nNumber = _nDevChannel <= 4 ? 1 : _nDevChannel/4;
-        nRow = _nDevChannel <= 4 ? _nDevChannel : 4;
+        nNumber = _nDevChannel%4 == 0 ? _nDevChannel/4 : _nDevChannel/4+1;
         for (int i=0; i<nNumber;i++)
         {
             UIView *view = [[UIView alloc] initWithFrame:Rect(i*kScreenWidth, 36, kScreenWidth, _scroll.frame.size.height)];
+            nRow = (_nDevChannel - i*4) >= 4 ? 4 : (_nDevChannel - i*4);
             for (int j=0; j<nRow; j++)
             {
                 UIView *sonView = [[UIView alloc] initWithFrame:Rect(j*btnWidth, 0, btnWidth, btnHeight)];
@@ -592,14 +599,14 @@
     else
     {
         //8个通道 iphone5以上型号
-        nNumber = _nDevChannel <= 8 ? 1 : _nDevChannel/8;
-        nRow = _nDevChannel <= 8 ? _nDevChannel : 8;
+        nNumber = _nDevChannel%8 == 0 ? _nDevChannel/8 : _nDevChannel/8+1;//_nDevChannel <= 8 ? 1 : _nDevChannel/8;
+//        nRow = _nDevChannel <= 8 ? _nDevChannel : 8;
         for (int i=0; i<nNumber;i++)
         {
             UIView *view = [[UIView alloc] initWithFrame:Rect(i*kScreenWidth, 6, kScreenWidth, _scroll.frame.size.height)];
+            nRow = (_nDevChannel - i*8) >= 8 ? 8 : (_nDevChannel - i*8);
             for (int j=0; j<nRow; j++)
             {
-                
                 UIButton *btn = [UIButton buttonWithType:UIButtonTypeCustom];
                 btn.frame = Rect(j%4*btnWidth+btnOrgWidth, (j%8)-4>=0 ? (btnHeight+btnOrgHeight) : btnOrgHeight, nWidth, nWidth);
                 
@@ -620,9 +627,9 @@
             [_scroll addSubview:view];
         }
     }
-    
+    _scroll.showsHorizontalScrollIndicator = NO;
     _scroll.delegate = self;
-    _scroll.contentSize = CGSizeMake(kScreenWidth*nNumber,kScreenHeight-fHeight-70+HEIGHT_MENU_VIEW(20, 0));
+    _scroll.contentSize = CGSizeMake(kScreenWidth*nNumber,_scroll.frame.size.height);
     _scroll.pagingEnabled=YES;
     _scroll.scrollEnabled = NO;
     _scroll.showsHorizontalScrollIndicator = NO;

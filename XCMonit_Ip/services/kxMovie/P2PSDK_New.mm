@@ -348,15 +348,25 @@ int P2PSDK_New::stopDeviceRecord(struct _playrecordmsg* playrecord_req)
 //    msg.frameType = 0;
     if (conn)
     {
-//        conn->PlayBackRecordCtrl(&msg);
         conn->StopBackRecord(playrecord_req);
     }
     else
     {
         relayconn->StopBackRecord(playrecord_req);
-//        int nStop = relayconn->PlayBackRecordCtrl(&msg);
-//        DLog(@"nStop:%d",nStop);
     }
     return 1;
 }
 
+
+int P2PSDK_New::controlDeviceRecord(PlayRecordCtrlMsg *control)
+{
+    if (conn)
+    {
+        conn->PlayBackRecordCtrl(control);
+    }
+    else if(relayconn)
+    {
+        relayconn->PlayBackRecordCtrl(control);
+    }
+    return 1;
+}

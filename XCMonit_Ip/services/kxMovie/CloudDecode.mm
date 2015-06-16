@@ -105,12 +105,13 @@ extern "C"
     recordreq.nalarmFileType = 1;
     if(bPTP)
     {
-       sdkNew->P2P_RecordSearch(&recordreq,responsedata);
+        sdkNew->P2P_RecordSearch(&recordreq,responsedata);
     }
     else if(bTran)
     {
-       sdkNew->TRAN_RecordSerach(&recordreq,responsedata);
-       memcpy(&_recordreq,responsedata+4,sizeof(struct _playrecordmsg));
+        sdkNew->TRAN_RecordSerach(&recordreq,responsedata);
+        memcpy(&_recordreq,responsedata+4,sizeof(struct _playrecordmsg));
+        DLog(@"%d--%d--%u--%u",_recordreq.frameType,_recordreq.channelNo,_recordreq.startTime,_recordreq.endTime);
     }
 }
 
@@ -163,6 +164,7 @@ extern "C"
     bStop = YES;
     if (bTran)
     {
+        DLog(@"%d--%d--%u--%u",_recordreq.frameType,_recordreq.channelNo,_recordreq.startTime,_recordreq.endTime);
         if(sdkNew->RELAY_PlayDeviceRecord(&_recordreq)==0)
         {
             __weak CloudDecode *__self = self;
@@ -385,6 +387,14 @@ extern "C"
     }
 }
 
+-(void)pauseVideo
+{
+    PlayRecordCtrlMsg backControl;
+    backControl.channelNo = _nChannel;
+    backControl.frameType = 1;
+    backControl.ctrl = PB_PAUSE;
+    sdkNew->controlDeviceRecord(&backControl);
+}
 
 
 @end

@@ -112,11 +112,15 @@
         }
         else if(nType <= 4400)
         {
-            return XCLocalized(@"NVR24");
+            return @"NVR-25";
         }
         else if(nType <= 4500)
         {
             return XCLocalized(@"NVR32");
+        }
+        else if(nType <=4600)
+        {
+            return @"NVR-25";
         }
         else
         {

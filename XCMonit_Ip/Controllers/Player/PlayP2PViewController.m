@@ -176,7 +176,6 @@
     bExit = NO;
     nCount = 0;
     _tapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTapNew:)];
-//    [_tapGestureRecognizer requireGestureRecognizerToFail:_doubleRecognizer];
     pinchGesture = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(pinchEvent:)];
     _panGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(panEvent:)];
 }

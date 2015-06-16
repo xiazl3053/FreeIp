@@ -63,6 +63,8 @@ public:
     BOOL initP2PServer();
     BOOL initTranServer();
     
+    int controlDeviceRecord(PlayRecordCtrlMsg *control);
+    
 public:
     int nChannel;
 //    NSFileHandle * fileHandle;

@@ -26,6 +26,7 @@
     self = [super init];
     return self;
 }
+
 -(void)layoutSubviews
 {
     [super layoutSubviews];
@@ -69,7 +70,6 @@
     self = [super initWithFrame:frame];
     return self;
 }
-
 
 -(void)testInfo:(UIButton*)sender
 {

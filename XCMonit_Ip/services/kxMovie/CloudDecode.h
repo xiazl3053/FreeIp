@@ -27,4 +27,6 @@
 
 -(void)stopDecode;
 
+-(void)pauseVideo;
+
 @end

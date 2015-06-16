@@ -8,11 +8,13 @@
 
 #import "UIView+Extension.h"
 #import "CloudDecode.h"
+#import "CaptureService.h"
 #import "PlayCloudViewController.h"
 #import "TimeView.h"
 #import "TimeView.h"
 #import "CloudButton.h"
 #import "NSDate+convenience.h"
+#import "Toast+UIView.h"
 #import "DecoderPublic.h"
 
 @interface PlayCloudViewController ()
@@ -36,7 +38,7 @@
     UITapGestureRecognizer *_tapGestureRecognizer;
     UIPinchGestureRecognizer *pinchGesture;
     UIPanGestureRecognizer *_panGesture;
-    
+    NSString *strDevName;
     UIImageView *imgView;
 }
 @property (nonatomic,assign) BOOL bDecoding;
@@ -217,14 +219,16 @@
             return ;
         }
         __weak PlayCloudViewController *__self = self;
-        dispatch_async(dispatch_get_global_queue(0, 0), ^{
+        dispatch_async(dispatch_get_global_queue(0, 0),
+        ^{
             [__self startPlayCloud_gcd];
         });
     }
     else
     {
         //暂停视频
-        [self stopVideo];
+//        [self stopVideo];
+        [self pauseVideo];
     }
 }
 
@@ -433,6 +437,13 @@
     return interval;
 }
 
+-(void)pauseVideo
+{
+    [cloudDec pauseVideo];
+    _bPlaying = NO;
+    _bDecoding = YES;
+}
+
 -(void)stopVideo
 {
     [cloudDec stopDecode];
@@ -467,6 +478,19 @@
         [_videoFrames removeAllObjects];
     }
     _videoFrames = nil;
+}
+
+-(void)captureView
+{
+    BOOL bFLag = [CaptureService captureToPhotoRGB:imgView devName:strDevName];
+    if (bFLag)
+    {
+        [self.view makeToast:XCLocalized(@"captureS") duration:1.0f position:@"center"];
+    }
+    else
+    {
+        [self.view makeToast:XCLocalized(@"captureF") duration:1.0f position:@"center"];
+    }
 }
 
 @end
