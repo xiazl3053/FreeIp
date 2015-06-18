@@ -153,7 +153,6 @@
         NSString *strStartTime = [NSString stringWithFormat:@"%02d:00",nHour];
         UIFont *font = [UIFont fontWithName:@"Helvetica" size:10];
         [strStartTime drawInRect:CGRectMake(rect.size.width/2-fWidth-_nWidth*i-10, 20 ,labelsize.width, 12) withFont:font];
-        
         [self drawHour:context pointX:rect.size.width/2+(_nWidth-fWidth)+_nWidth*i];
         //写右边的时间
         nHour = (p->tm_hour+i+1) > 23 ? (abs(p->tm_hour+i+1)%24) : (p->tm_hour+i+1);//设置时间范围不会超过24小时

@@ -109,7 +109,6 @@
         DLog(@"point:%f--%f",point.x,point.y);
         CGFloat nowWidth = glWidth*fScale>fWidth*4?fWidth*4:glWidth*fScale;
         CGFloat nowHeight =glHeight*fScale >fHeight* 4?fHeight*4:glHeight*fScale;
-        
         imgView.frame = Rect(fWidth/2 - nowWidth/2,fHeight/2- nowHeight/2,nowWidth,nowHeight);
     }
 }
@@ -227,8 +226,8 @@
     else
     {
         //暂停视频
-//        [self stopVideo];
-        [self pauseVideo];
+        [self stopVideo];
+//        [self pauseVideo];
     }
 }
 

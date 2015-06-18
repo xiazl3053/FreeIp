@@ -154,12 +154,6 @@ extern "C"
 
 -(BOOL)startVideo:(NSString *)strTime
 {
-//    struct _playrecordmsg   recordreq;
-//    recordreq.channelNo = 1;
-//    recordreq.frameType = 0;
-//    recordreq.startTime = 5000;
-//    recordreq.endTime = 7000;
-//    recordreq.nalarmFileType = 1;
     theLock = [[NSRecursiveLock alloc] init];
     bStop = YES;
     if (bTran)
@@ -173,6 +167,19 @@ extern "C"
             });
             return YES;
         }
+        DLog(@"TRAN网络超时");
+    }
+    else if(bPTP)
+    {
+        if(sdkNew->P2P_PlayDeviceRecord(&_recordreq)==0)
+        {
+            __weak CloudDecode *__self = self;
+            dispatch_async(dispatch_get_global_queue(0, 0), ^{
+                [__self ffmpegInit];
+            });
+            return YES;
+        }
+        DLog(@"P2P网络超时");
     }
     return NO;
 }
@@ -396,5 +403,13 @@ extern "C"
     sdkNew->controlDeviceRecord(&backControl);
 }
 
+-(void)dealloc
+{
+    if (sdkNew) {
+        sdkNew->StopRecv();
+        delete sdkNew;
+        sdkNew = NULL;
+    }
+}
 
 @end

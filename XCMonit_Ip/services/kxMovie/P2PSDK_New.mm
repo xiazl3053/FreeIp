@@ -66,42 +66,12 @@ void P2PSDK_New::StopRecv()
     DLog(@"结束");
     if (conn)
     {
-        if(streamType == 0)
-        {
-            int ret = conn->StopRealStream(nChannel, streamType);
-            if(ret == 0)
-            {
-                printf("success stop real stream \n");
-            }
-            else
-                printf("error stop real stream \n");
-        }
-        else if(streamType == 1)
-        {
-            PlayRecordCtrlMsg msg;
-            conn->PlayBackRecordCtrl(&msg);
-        }
         conn->Close();
         delete conn;
         conn = NULL;
     }
     if(relayconn)
     {
-        if(streamType == 0)
-        {
-            int ret = relayconn->StopRealStream(nChannel, streamType);
-            
-            if(ret == 0)
-            {
-                printf("success stop relay stream \n");
-            }
-        }
-        else if(streamType == 1)
-        {
-            PlayRecordCtrlMsg msg;
-//            msg.ctrl = PB_STOP;
-            relayconn->PlayBackRecordCtrl(&msg);
-        }
         relayconn->Close();
         delete relayconn;
         relayconn = NULL;
