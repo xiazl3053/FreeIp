@@ -5,10 +5,8 @@
 //  Created by xia zhonglin  on 14-5-13.
 //  Copyright (c) 2014年 ___FULLUSERNAME___. All rights reserved.
 //
-
 #import "AppDelegate.h"
 #import "LoginViewController.h"
-
 #import "IndexViewController.h"
 #import "HomeViewController.h"
 #import "IQKeyboardManager.h"
@@ -18,6 +16,18 @@
 #import "Reachability.h"
 #import "ProgressHUD.h"
 #import "Toast+UIView.h"
+
+@interface AppDelegate()
+{
+    BOOL bStatus;
+    BOOL bGGLogin;
+}
+
+@property (nonatomic,unsafe_unretained) UIBackgroundTaskIdentifier backgroundTaskIdentifier;
+@property (nonatomic,strong) NSTimer *myTimer;
+
+@end
+
 
 @implementation AppDelegate
 
@@ -102,45 +112,83 @@ typedef struct testSturct
 {
     return UIInterfaceOrientationMaskAll;
 }
--(void)applicationWillResignActive:(UIApplication *)application
+
+-(void)setEndBackground
 {
+    if (bStatus)
+    {
+        DLog(@"等待时间不够");
+        return ;
+    }
     [[NSNotificationCenter defaultCenter] postNotificationName:NS_APPLITION_ENTER_BACK object:nil];
+    bGGLogin = YES;
 }
 
--(void)willResignActive
-{
-    //先判断应用状态
-    //发送立即结束通知
-//    [[NSNotificationCenter defaultCenter] postNotificationName:NS_APPLITION_ENTER_BACK object:nil];
-//    DLog(@"程序挂起");
-}
-
-
-
-//
 - (void)applicationDidEnterBackground:(UIApplication *)application
 {
-    DLog(@"进入后台");
- //   [[NSNotificationCenter defaultCenter] postNotificationName:NS_APPLITION_ENTER_BACK object:nil];
-    //延长后台结束的时间
-//    UIApplication *app = [UIApplication sharedApplication];
-//    
-//    //一个后台任务标识符
-//    UIBackgroundTaskIdentifier taskID;
-//    taskID = [app beginBackgroundTaskWithExpirationHandler:^{
-//        //如果系统觉得我们还是运行了太久，将执行这个程序块，并停止运行应用程序
-//        [app endBackgroundTask:taskID];
-//    }];
-//    //UIBackgroundTaskInvalid表示系统没有为我们提供额外的时候
-//    if (taskID == UIBackgroundTaskInvalid) {
-//        NSLog(@"Failed to start background task!");
-//        return;
-//    }
-//    NSLog(@"Starting background task with %f seconds remaining", app.backgroundTimeRemaining);
-//    [NSThread sleepForTimeInterval:10];
-//    NSLog(@"Finishing background task with %f seconds remaining",app.backgroundTimeRemaining);
-//    //告诉系统我们完成了
-//    [app endBackgroundTask:taskID];
+    bStatus = NO;
+    self.backgroundTaskIdentifier = [application beginBackgroundTaskWithExpirationHandler:^(void)
+    {
+         [self endBackgroundTask];
+    }];
+    _myTimer = [NSTimer scheduledTimerWithTimeInterval:3.0f
+                                                target:self
+                                              selector:@selector(timerMethod:)
+                                              userInfo:nil
+                                               repeats:YES];
+    [self performSelector:@selector(setEndBackground) withObject:nil afterDelay:30.0f];
+}
+
+-(void)timerMethod:(NSTimer *)paramSender
+{
+    NSTimeInterval backgroundTimeRemaining =[[UIApplication sharedApplication] backgroundTimeRemaining];
+    if (backgroundTimeRemaining == DBL_MAX)
+    {
+        DLog(@"Background Time Remaining = Undetermined");
+    }
+    else
+    {
+        DLog(@"Background Time Remaining = %.02f Seconds", backgroundTimeRemaining);
+        if (backgroundTimeRemaining<110) {
+            [[UIApplication sharedApplication] endBackgroundTask:self.backgroundTaskIdentifier];
+            self.backgroundTaskIdentifier = UIBackgroundTaskInvalid;
+        }
+    }
+}
+
+-(void)endBackgroundTask
+{
+    dispatch_queue_t mainQueue = dispatch_get_main_queue();
+    AppDelegate *weakSelf = self;
+    dispatch_async(mainQueue, ^(void) {
+        AppDelegate *strongSelf = weakSelf;
+        if (strongSelf != nil){
+            [strongSelf.myTimer invalidate];// 停止定时器
+            // 每个对 beginBackgroundTaskWithExpirationHandler:方法的调用,必须要相应的调用 endBackgroundTask:方法。这样，来告诉应用程序你已经执行完成了。
+            // 也就是说,我们向 iOS 要更多时间来完成一个任务,那么我们必须告诉 iOS 你什么时候能完成那个任务。
+            // 也就是要告诉应用程序：“好借好还”嘛。
+            // 标记指定的后台任务完成
+            [[UIApplication sharedApplication] endBackgroundTask:self.backgroundTaskIdentifier];
+            // 销毁后台任务标识符
+            strongSelf.backgroundTaskIdentifier = UIBackgroundTaskInvalid;
+        }
+    });
+}
+-(void)applicationWillEnterForeground:(UIApplication *)application
+{
+    
+}
+- (void)applicationDidBecomeActive:(UIApplication *)application {
+    DLog(@"返回");
+    bStatus = YES;
+    [self.myTimer invalidate];
+    if (bGGLogin)
+    {
+        [[NSNotificationCenter defaultCenter] postNotificationName:NS_APPLITION_BECOME_ACTIVE object:nil];
+    }
+}
+- (void)applicationWillTerminate:(UIApplication *)application
+{
     
 }
 
@@ -158,22 +206,4 @@ typedef struct testSturct
 {
     return UIInterfaceOrientationPortrait;
 }
-
-- (void)applicationWillEnterForeground:(UIApplication *)application
-{
-    [[NSNotificationCenter defaultCenter] postNotificationName:NS_APPLITION_ENTER_FOREG object:nil];
-}
-
-- (void)applicationDidBecomeActive:(UIApplication *)application
-{
-    DLog(@"程序返回");
-    [[NSNotificationCenter defaultCenter] postNotificationName:NS_APPLITION_BECOME_ACTIVE object:nil];
-    
-}
-
-- (void)applicationWillTerminate:(UIApplication *)application
-{
-    DLog(@"程序结束");
-}
-
 @end

@@ -92,7 +92,7 @@
 @property (nonatomic,strong) NSString *strNO;
 @property (readwrite) BOOL playing;
 @property (nonatomic,strong) NSString *strName;
-@property (nonatomic,strong) KxMovieGLView *glView;
+@property (nonatomic,strong) UIImageView *glView;
 @property (nonatomic,strong) NSMutableArray *videoFrames;
 @property (nonatomic,strong) UIButton *btnPlay;
 @property (nonatomic,strong) UIButton *btnHD;
@@ -535,12 +535,12 @@
     _playing = YES;
     if([UserInfo sharedUserInfo].bGuess)
     {
-        _decoder = [[XCDecoder alloc] initWithNO:_strNO format:_nFormat videoFormat:KxVideoFrameFormatYUV codeType:1];
+        _decoder = [[XCDecoder alloc] initWithNO:_strNO format:_nFormat videoFormat:KxVideoFrameFormatRGB codeType:1];
         _nCodeType = 1;
     }
     else
     {
-        _decoder = [[XCDecoder alloc] initWithNO:_strNO format:_nFormat videoFormat:KxVideoFrameFormatYUV];
+        _decoder = [[XCDecoder alloc] initWithNO:_strNO format:_nFormat videoFormat:KxVideoFrameFormatRGB];
         _nCodeType = 2;
     }
     while(_decoder.fps==0)
@@ -567,7 +567,7 @@
 -(void)decoderTran
 {
     _playing = YES;
-    XCDecoder *decoder = [[XCDecoder alloc] initWithNO:_strNO format:2 videoFormat:KxVideoFrameFormatYUV codeType:_nCodeType];
+    XCDecoder *decoder = [[XCDecoder alloc] initWithNO:_strNO format:2 videoFormat:KxVideoFrameFormatRGB codeType:_nCodeType];
     while(decoder.fps==0)
     {
         if (!_playing)
@@ -609,7 +609,8 @@
         }
     }
     //4:3  16:10
-    _glView = [[KxMovieGLView alloc] initWithFrame:frameCenter decoder:_decoder];
+//    _glView = [[UIImageView alloc] initWithFrame:frameCenter decoder:_decoder];
+    _glView = [[UIImageView alloc] initWithFrame:frameCenter];
     _glView.contentMode = UIViewContentModeScaleToFill;//UIViewContentModeScaleAspectFill;UIViewContentModeScaleAspectFit
     _glView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleBottomMargin;
     [self.view insertSubview:_glView atIndex:0];
@@ -768,7 +769,9 @@
 - (CGFloat)presentVideoFrame: (KxVideoFrame *) frame
 {
     //修改成OPENGL 贴图RGB与YUV两种方式
-    [_glView render:frame];
+//    [_glView render:frame];
+    KxVideoFrameRGB *rgbImg = (KxVideoFrameRGB *)frame;
+    [_glView setImage:[rgbImg asImage]];
     return 0;
 }
 
@@ -989,8 +992,7 @@
     if ([_decoder getRealType]==1)
     {
         //P2P方式  直接转换
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0f * NSEC_PER_SEC)), dispatch_get_global_queue(0, 0),
-        ^{
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0f * NSEC_PER_SEC)), dispatch_get_global_queue(0, 0),^{
                if (__weakSelf.decoder)
                {
                    [__weakSelf.decoder switchP2PCode:__nCode];
@@ -1031,15 +1033,14 @@
     [[NSNotificationCenter defaultCenter] removeObserver:self name:NS_SWITCH_TRAN_OPEN_VC object:nil];
 }
 
-
-
 #pragma mark 抓拍
 -(void)shotoPic:(UIButton*)btnSender
 {
     //YUV 方式抓拍  captureToPhotoAlbum:(UIView *)_glView name:(NSString*)devName;
     btnSender.enabled = NO;
-    UIImage *image = [_decoder capturePhoto];
-    BOOL bFlag = [CaptureService captureToPhotoYUV:image name:_strName];//width:_decoder.frameWidth height:_decoder.frameHeight];
+//    UIImage *image = [_decoder capturePhoto];
+    BOOL bFlag = [CaptureService captureToPhotoRGB:_glView devName:_strName];
+//    BOOL bFlag = [CaptureService captureToPhotoYUV:image name:_strName];
     if (bFlag)
     {
         __weak PlayP2PViewController *weakSelf = self;
@@ -1056,7 +1057,7 @@
             });
         }
     }
-    image = nil;
+//    image = nil;
     [self performSelector:@selector(snaptBtnEnYes) withObject:nil afterDelay:1.5];
 }
 -(void)snaptBtnEnYes
@@ -1085,15 +1086,15 @@
     else
     {
         _btnRecord.enabled = NO;
-        UIImage *image = [_decoder capturePhoto];
-        DLog(@"image:%@",image);
+//        UIImage *image = [_decoder capturePhoto];
+//        DLog(@"image:%@",image);
         [self.view makeToast:XCLocalized(@"startRecord") duration:1.0 position:@"center"];
-        NSString *strPath = [CaptureService captrueRecordYUV:image];
+        NSString *strPath = [CaptureService captureRecordRGB:_glView];
         [_decoder recordStart:strPath name:_strName];
         _progressLabel.hidden = NO;
         _startDuration = _movieDuration;
         bRecord = !bRecord;
-        image = nil;
+//        image = nil;
         [self performSelector:@selector(recordBtnEnYes) withObject:nil afterDelay:1.5];
     }
     _btnRecord.selected = bRecord;

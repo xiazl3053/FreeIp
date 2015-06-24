@@ -333,7 +333,6 @@
     ^{
         [ProgressHUD showPlayRight:XCLocalized(@"videoSwitch") viewInfo:__self.view];
     });
-    
     if([playModel.decode getRealType]==1)
     {
          //使用sdk切换

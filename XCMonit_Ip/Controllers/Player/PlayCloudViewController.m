@@ -226,8 +226,8 @@
     else
     {
         //暂停视频
-        [self stopVideo];
-//        [self pauseVideo];
+//        [self stopVideo];
+        [self pauseVideo];
     }
 }
 
@@ -246,6 +246,11 @@
         });
     };
     [cloudDec checkView:timeView.strDate];
+}
+
+-(void)enterBackgroud
+{
+    [cloudDec stopDecode];
 }
 
 -(void)viewDidAppear:(BOOL)animated
@@ -347,12 +352,10 @@
         [__self startPlay];
     });
     //开始解码模块
-    
 }
 
 -(void)initGlView
 {
-    
     if (imgView == nil)
     {
         imgView = [[UIImageView alloc] initWithFrame:Rect(0, 0, fWidth, fHeight)];
@@ -362,7 +365,6 @@
     [imgView addGestureRecognizer:_tapGestureRecognizer];
     [imgView addGestureRecognizer:pinchGesture];
     [imgView addGestureRecognizer:_panGesture];
-    
 }
 
 -(void)startPlay

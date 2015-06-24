@@ -294,20 +294,20 @@ int P2PSDK_New::RELAY_PlayDeviceRecord(struct _playrecordmsg*   playrecord_req)
 
 int P2PSDK_New::closeTranServer()
 {
-    if (conn)
+    if (relayconn)
     {
-        delete conn;
-        conn = NULL;
+        delete relayconn;
+        relayconn = NULL;
     }
     return 1;
 }
 
 int P2PSDK_New::closeP2PService()
 {
-    if (relayconn)
+    if (conn)
     {
-        delete relayconn;
-        relayconn = NULL;
+        delete conn;
+        conn = NULL;
     }
     return 1;
 }

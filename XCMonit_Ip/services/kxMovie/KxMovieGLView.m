@@ -285,9 +285,6 @@ static void mat4f_LoadOrtho(float left, float right, float bottom, float top, fl
         DLog(@"yuvFrame=nil");
         return ;
     }
-//    assert(yuvFrame.luma.length == yuvFrame.width * yuvFrame.height);
-//    assert(yuvFrame.chromaB.length == (yuvFrame.width * yuvFrame.height) / 4);
-//    assert(yuvFrame.chromaR.length == (yuvFrame.width * yuvFrame.height) / 4);
 
     const NSUInteger frameWidth = frame.width;
     const NSUInteger frameHeight = frame.height;    
@@ -642,10 +639,8 @@ exit:
             return;
         }
     #endif
-        
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);        
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     }
-    
     glBindRenderbuffer(GL_RENDERBUFFER, _renderbuffer);
     [_context presentRenderbuffer:GL_RENDERBUFFER];
 }

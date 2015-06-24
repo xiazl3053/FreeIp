@@ -9,7 +9,6 @@
 #import "XCDecoder.h"
 #import "P2PSDKService.h"
 #import "UtilsMacro.h"
-
 #import "xcnotification.h"
 #import "P2PInitService.h"
 #include <sys/time.h>
@@ -191,7 +190,7 @@ NSData * copyFrameData(UInt8 *src, int linesize, int width, int height)
     NSInteger _nType ;
     
     NSInteger nsiFrame;
-    
+    CGFloat fSrcWidth,fSrcHeight;
 }
 
 @property (readwrite) BOOL isEOF;
@@ -207,6 +206,7 @@ NSData * copyFrameData(UInt8 *src, int linesize, int width, int height)
 -(void)startP2PServer:(NSString*)nsDevId;
 
 @end
+
 #define kMaxDuration    0.07
 #define kMinDuration    0.02
 
@@ -939,10 +939,12 @@ Release_open_input:
     }
     else
     {
-        
-        if (!_swsContext && ![self setupScaler])
+        if (fSrcWidth != pCodecCtx->width || fSrcHeight != pCodecCtx->height)
         {
-            DLog(@"fail setup video scaler");
+            avcodec_flush_buffers(pCodecCtx);
+            [self setupScaler];
+            fSrcWidth = pCodecCtx->width;
+            fSrcHeight = pCodecCtx->height;
             return nil;
         }
         sws_scale(_swsContext,
@@ -965,6 +967,7 @@ Release_open_input:
     frame.position = pts;
     return frame;
 }
+
 #pragma mark rgb
 - (BOOL) setupScaler
 {
