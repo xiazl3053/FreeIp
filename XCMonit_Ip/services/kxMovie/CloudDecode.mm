@@ -10,7 +10,7 @@
 #import "P2PSDK_New.h"
 #import "P2PInitService.h"
 #import "DecoderPublic.h"
-
+#import "TimeView.h"
 extern "C"
 {
     #include "libavformat/avformat.h"
@@ -103,16 +103,84 @@ extern "C"
     recordreq.startTime = time;
     recordreq.endTime = time+86400;
     recordreq.nalarmFileType = 1;
-    if(bPTP)
+   if(bPTP)
     {
-        sdkNew->P2P_RecordSearch(&recordreq,responsedata);
+        int nRef = sdkNew->P2P_RecordSearch(&recordreq,responsedata);
+        if (nRef!=0)
+        {
+            if (_cloudBlock)
+            {
+                _cloudBlock(0,nil);
+            }
+            return ;
+        }
+        int nCount;
+        memcpy((char*)&nCount,responsedata,4);
+        DLog(@"nCout:%d",nCount);
+        if (nCount>0)
+        {
+            struct _playrecordmsg recordMsg;
+            NSMutableArray *aryItem = [NSMutableArray array];
+            size_t size_msg = sizeof(struct _playrecordmsg);
+            for (int i=0; i<nCount; i++)
+            {
+                memcpy((char *)&recordMsg,responsedata+4+i*size_msg, size_msg);
+                CloudTime *time = [[CloudTime alloc] init];
+                time.iStart = recordMsg.startTime;
+                time.iEnd = recordMsg.endTime;
+                [aryItem addObject:time];
+            }
+            if(_cloudBlock)
+            {
+                _cloudBlock(nCount,aryItem);
+            }
+        }
+        else
+        {
+            if(_cloudBlock)
+            {
+                _cloudBlock(0,nil);
+            }
+        }
     }
     else if(bTran)
     {
-        sdkNew->TRAN_RecordSerach(&recordreq,responsedata);
+        int nRef = sdkNew->TRAN_RecordSerach(&recordreq,responsedata);
+        if (nRef!=0) {
+            if (_cloudBlock)
+            {
+                _cloudBlock(0,nil);
+            }
+            return ;
+        }
         memcpy(&_recordreq,responsedata+4,sizeof(struct _playrecordmsg));
         DLog(@"%d--%d--%u--%u",_recordreq.frameType,_recordreq.channelNo,_recordreq.startTime,_recordreq.endTime);
-    }
+        int nCount;
+        memcpy((char*)&nCount,responsedata,4);
+        DLog(@"nCout:%d",nCount);
+        if (nCount>0)
+        {
+            struct _playrecordmsg recordMsg;
+            NSMutableArray *aryItem = [NSMutableArray array];
+            size_t size_msg = sizeof(struct _playrecordmsg);
+            for (int i=0; i<nCount; i++)
+            {
+                memcpy((char *)&recordMsg,responsedata+4+i*size_msg, size_msg);
+                CloudTime *time = [[CloudTime alloc] init];
+                time.iStart = recordMsg.startTime;
+                time.iEnd = recordMsg.endTime;
+                [aryItem addObject:time];
+            }
+            if(_cloudBlock)
+            {
+                _cloudBlock(nCount,aryItem);
+            }
+        }
+        else
+        {
+            
+        }
+    } 
 }
 
 -(void)thread_p2p

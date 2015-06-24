@@ -16,6 +16,8 @@
 
 @property (nonatomic,strong) NSDate *dateInfo;
 
+@property (nonatomic,strong) NSMutableArray *aryDate;
+
 @property (nonatomic,strong) NSString *strTime;
 @property (nonatomic,strong) NSString *strDate;
 
@@ -23,7 +25,14 @@
 
 -(void)settingTime:(NSString *)strTime;
 
+-(void)drawDate:(CGContextRef)context;
 
+@end
+
+@interface CloudTime : NSObject
+
+@property (nonatomic,assign) NSInteger iStart;
+@property (nonatomic,assign) NSInteger iEnd;
 
 
 @end

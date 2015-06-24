@@ -234,6 +234,17 @@
 -(void)cloudInit
 {
     cloudDec = [[CloudDecode alloc] initWithCloud:@"9743200000001" channel:1 codeType:0];
+    __weak TimeView *__timeView = timeView;
+    cloudDec.cloudBlock = ^(int nStatus,NSArray *ary)
+    {
+        DLog(@"nStatus:%d----%u",nStatus,ary.count);
+        [__timeView.aryDate removeAllObjects];
+        [__timeView.aryDate addObjectsFromArray:ary];
+        __strong TimeView *__strongView = __timeView;
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [__strongView setNeedsDisplay];
+        });
+    };
     [cloudDec checkView:timeView.strDate];
 }
 

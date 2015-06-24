@@ -8,10 +8,13 @@
 
 #import <Foundation/Foundation.h>
 
+typedef void(^RecordBlockCloud)(int nStatus,NSArray *aryInfo);
+
 @interface CloudDecode : NSObject
 
 @property (nonatomic,assign) CGFloat fps;
 @property (nonatomic,copy) NSString *strTime;
+@property (nonatomic,copy) RecordBlockCloud cloudBlock;
 
 -(id)initWithCloud:(NSString*)strNo channel:(int)nChannel codeType:(int)nCode;
 

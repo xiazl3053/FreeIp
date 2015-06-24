@@ -249,6 +249,8 @@ int P2PSDK_New::P2P_RecordSearch(struct _playrecordmsg*   recordsearch_req,char*
 
 bool P2PSDK_New::DeviceDisconnectNotify()
 {
+    DLog(@"设备丢失了");
+    StopRecv();
     return YES;
 }
 
