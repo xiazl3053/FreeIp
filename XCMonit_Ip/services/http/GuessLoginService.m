@@ -14,7 +14,7 @@
 
 -(void)connectionHttpLogin
 {
-    NSString *strUrl = [[NSString alloc] initWithFormat:@"%@index.php?r=login/login/PhoneGuestLogin",XCLocalized(@"httpserver")];
+    NSString *strUrl = [[NSString alloc] initWithFormat:@"%@index.php?r=login/login/PhoneGuestLogin",kHTTP_Host];
     DLog(@"strUrl:%@",strUrl);
     [self sendRequest:strUrl];
 }

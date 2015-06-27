@@ -18,7 +18,7 @@
 -(void)requestUpload:(UIImage*)image
 {
     NSString *strUrl = [[NSString alloc] initWithFormat:@"%@index.php?r=service/service/setuserimg&session_id=%@"
-                        ,XCLocalized(@"httpserver"),[UserInfo sharedUserInfo].strSessionId];
+                        ,kHTTP_Host,[UserInfo sharedUserInfo].strSessionId];
     NSData *imageData = UIImageJPEGRepresentation(image,0.5);
     FileDetail *file = [FileDetail fileWithName:@"avatar.jpg" data:imageData];
     NSDictionary *params = [NSDictionary dictionaryWithObjectsAndKeys:

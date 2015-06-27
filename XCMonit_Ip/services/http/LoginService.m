@@ -83,7 +83,7 @@
     [UserInfo sharedUserInfo].strPwd = strPwd;
     NSString *strMD5 = [DecodeJson XCmdMd5String:strPwd];
     [UserInfo sharedUserInfo].strMd5 = strMD5;
-    NSString *strUrl = [[NSString alloc] initWithFormat:@"%@index.php?r=login/login/PhoneLogin&user_name=%@&password=%@",XCLocalized(@"httpserver"),[strUser stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding],strMD5];
+    NSString *strUrl = [[NSString alloc] initWithFormat:@"%@index.php?r=login/login/PhoneLogin&user_name=%@&password=%@",kHTTP_Host,[strUser stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding],strMD5];
     DLog(@"strUrl:%@",strUrl);
     [self sendRequest:strUrl];
 }

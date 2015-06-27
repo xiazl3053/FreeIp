@@ -10,10 +10,6 @@
 
 @implementation HttpManager
 
-
-
-
-
 -(void)sendRequest:(NSString *)strPath
 {
     NSURL *url=[NSURL URLWithString:strPath];

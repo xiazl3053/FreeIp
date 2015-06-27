@@ -14,7 +14,7 @@
 -(void)requestUpdNick:(NSString*)strReal
 {
     NSString *strUrl = [[NSString alloc] initWithFormat:@"%@index.php?r=service/service/setnickname&session_id=%@&nickname=%@"
-                        ,XCLocalized(@"httpserver"),[UserInfo sharedUserInfo].strSessionId,[strReal stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+                        ,kHTTP_Host,[UserInfo sharedUserInfo].strSessionId,[strReal stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
     [self sendRequest:strUrl];
 }
 

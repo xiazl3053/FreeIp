@@ -7,7 +7,7 @@
 "LoginpwdAgain" = "Подтвердите пароль";
 "Loginregister" = "Регистрация";
 
-"httpserver" = "http://www.freeip.com/";
+"httpserver" = "www.freeip.com";
 "p2pserver" = "heart.freeip.com";
 
 "offline" = "Не в сети";

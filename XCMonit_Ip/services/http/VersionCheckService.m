@@ -17,7 +17,7 @@
 
 -(void)requestVersion
 {
-    NSString *strUrl = [NSString stringWithFormat:@"%@index.php?r=login/login/AppVersion",XCLocalized(@"httpserver")];
+    NSString *strUrl = [NSString stringWithFormat:@"%@index.php?r=login/login/AppVersion",kHTTP_Host];
     [self sendRequest:strUrl];
 }
 

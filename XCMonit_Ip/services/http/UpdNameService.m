@@ -58,7 +58,7 @@
 }
 -(void)requestUpdName:(NSString*)strDevNO name:(NSString *)strDevName
 {
-    NSString *strUrl = [[NSString alloc] initWithFormat:@"%@index.php?r=service/service/updatedevice&session_id=%@&device_id=%@&new_device_name=%@",XCLocalized(@"httpserver"),
+    NSString *strUrl = [[NSString alloc] initWithFormat:@"%@index.php?r=service/service/updatedevice&session_id=%@&device_id=%@&new_device_name=%@",kHTTP_Host,
                         [UserInfo sharedUserInfo].strSessionId,strDevNO,[strDevName stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
     DLog(@"strUrl:%@",strUrl);
     [self sendRequest:strUrl];

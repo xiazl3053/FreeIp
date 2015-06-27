@@ -17,7 +17,7 @@
     #import <Foundation/Foundation.h>
     #import "GlobalDefine.h"
     #define XCLocalized(x) NSLocalizedString(x, "")
-
+#define    kHTTP_Host  @"http://www.freeip.com/"
 #define    kUSER_INFO_MAX_LENGTH   64
 #import "UtilsMacro.h"
 

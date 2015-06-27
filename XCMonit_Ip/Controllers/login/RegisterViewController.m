@@ -86,7 +86,7 @@
                 {
                     __weakSelf.strAuthCode16 = strImg;
                     NSString *strUrl = [[NSString alloc] initWithFormat:@"%@class/yzm2/phone_yzm.php?captchacheck=%@",
-                                    XCLocalized(@"httpserver"),strImg];
+                                    kHTTP_Host,strImg];
                     NSData *data=[NSData dataWithContentsOfURL:[NSURL URLWithString:strUrl]];
                     UIImage *image=[UIImage imageWithData:data];
                     dispatch_async(dispatch_get_main_queue(), ^{

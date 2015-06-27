@@ -4,7 +4,7 @@
 "Loginpwd" = "请输入密码";
 "LoginpwdAgain" = "请再次输入密码";
 "Loginregister" = "注册账号";
-"httpserver" = "http://www.freeip.com/";
+"httpserver" = "www.freeip.com";
 "p2pserver" = "heart.freeip.com";//"heart.freeip.com"
 "offline" = "离线";
 "online" = "在线";

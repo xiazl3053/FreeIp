@@ -13,7 +13,7 @@
 
 -(void)requestAuthCode
 {
-    NSString *strUrl = [[NSString alloc] initWithFormat:@"%@index.php?r=login/login/CaptchaSession",XCLocalized(@"httpserver")];
+    NSString *strUrl = [[NSString alloc] initWithFormat:@"%@index.php?r=login/login/CaptchaSession",kHTTP_Host];
     NSURL *url=[NSURL URLWithString:strUrl];//创建URL
     NSMutableURLRequest *request=[[NSMutableURLRequest alloc]initWithURL:url];//通过URL创建网络请求
     [request setTimeoutInterval:XC_HTTP_TIMEOUT];//设置超时时间
@@ -66,7 +66,7 @@
 }
 -(void)requestRegister:(NSString*)strUser pwd:(NSString*)strPwd auth:(NSString *)strAuth code:(NSString *)strCodeImg
 {
-    NSString *strUrl = [[NSString alloc] initWithFormat:@"%@index.php?r=login/login/PhoneSignupAdd&captchacheck=%@&captcha=%@&user_name=%@&pwd=%@",XCLocalized(@"httpserver"),strCodeImg,strAuth,strUser,strPwd];
+    NSString *strUrl = [[NSString alloc] initWithFormat:@"%@index.php?r=login/login/PhoneSignupAdd&captchacheck=%@&captcha=%@&user_name=%@&pwd=%@",kHTTP_Host,strCodeImg,strAuth,strUser,strPwd];
     NSURL *url=[NSURL URLWithString:strUrl];//创建URL
     NSMutableURLRequest *request=[[NSMutableURLRequest alloc]initWithURL:url];//通过URL创建网络请求
     [request setTimeoutInterval:XC_HTTP_TIMEOUT];//设置超时时间
@@ -121,7 +121,7 @@
 
 -(void)requestAuthUsername:(NSString *)strUser
 {
-    NSString *strUrl = [[NSString alloc] initWithFormat:@"%@index.php?r=login/login/CheckUserName&user_name=%@",XCLocalized(@"httpserver"),strUser];
+    NSString *strUrl = [[NSString alloc] initWithFormat:@"%@index.php?r=login/login/CheckUserName&user_name=%@",kHTTP_Host,strUser];
     NSURL *url=[NSURL URLWithString:strUrl];//创建URL
     NSMutableURLRequest *request=[[NSMutableURLRequest alloc]initWithURL:url];//通过URL创建网络请求
     [request setTimeoutInterval:XC_HTTP_TIMEOUT];//设置超时时间

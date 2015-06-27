@@ -98,12 +98,12 @@ extern "C"
     fmt.locale = [[NSLocale alloc] initWithLocaleIdentifier:@"zh_CN"];
     fmt.dateFormat = @"yyyy-MM-dd HH:mm:ss";
     NSDate *testTime = [fmt dateFromString:_strTime];
-
-    int time = abs((int)[testTime timeIntervalSinceNow]);
+    int time = abs((int)[testTime timeIntervalSince1970]);
     recordreq.startTime = time;
-    recordreq.endTime = time+86400;
-    recordreq.nalarmFileType = 1;
-   if(bPTP)
+    DLog(@"time:%d",time);
+    recordreq.endTime = time+86399;
+    recordreq.nrecordFileType = 1;
+   if(bPTP)//
     {
         int nRef = sdkNew->P2P_RecordSearch(&recordreq,responsedata);
         if (nRef!=0)
@@ -473,11 +473,13 @@ extern "C"
 
 -(void)dealloc
 {
-    if (sdkNew) {
+    if (sdkNew)
+    {
         sdkNew->StopRecv();
         delete sdkNew;
         sdkNew = NULL;
     }
+    [self closeFile];
 }
 
 @end

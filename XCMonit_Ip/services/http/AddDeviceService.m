@@ -25,7 +25,7 @@
 {
 
     NSString *strUrl = [[NSString alloc] initWithFormat:@"%@index.php?r=service/service/binddevice&session_id=%@&device_id=%@&device_verify=%@",
-                        XCLocalized(@"httpserver"),
+                        kHTTP_Host,
                         [UserInfo sharedUserInfo].strSessionId,strNO,strAuth];
     [self sendRequest:strUrl];
 }
@@ -81,7 +81,7 @@
 -(void)queryDeviceIsExits:(NSString*)strNO auth:(NSString*)strAuth
 {
     NSString *strUrl = [[NSString alloc] initWithFormat:@"%@index.php?r=service/service/getonedevice&session_id=%@&device_id=%@",
-                        XCLocalized(@"httpserver"),[UserInfo sharedUserInfo].strSessionId,strNO];
+                        kHTTP_Host,[UserInfo sharedUserInfo].strSessionId,strNO];
     //查询设备是否已经添加
     _strNO = strNO;
     _strAuth = strAuth;

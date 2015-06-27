@@ -16,7 +16,7 @@
 -(void)requestUpdEmail:(NSString*)strEmail
 {
     NSString *strUrl = [[NSString alloc] initWithFormat:@"%@index.php?r=service/service/setemail&session_id=%@&email_addr=%@",
-                        XCLocalized(@"httpserver"),[UserInfo sharedUserInfo].strSessionId,strEmail];
+                        kHTTP_Host,[UserInfo sharedUserInfo].strSessionId,strEmail];
     [self sendRequest:strUrl];
 }
 -(void)reciveLoginInfo:(NSURLResponse*) response data:(NSData*)data error:(NSError*)connectionError

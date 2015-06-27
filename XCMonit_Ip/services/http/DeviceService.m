@@ -99,7 +99,7 @@
  */
 -(void)requestDeviceLimit:(int)nIndex count:(int)nCount
 {
-    NSString *strUrl = [[NSString alloc] initWithFormat:@"%@index.php?r=service/service/GetDrviceInfo&session_id=%@&index=%d&count=%d",XCLocalized(@"httpserver"),[UserInfo sharedUserInfo].strSessionId,nIndex,nCount];
+    NSString *strUrl = [[NSString alloc] initWithFormat:@"%@index.php?r=service/service/GetDrviceInfo&session_id=%@&index=%d&count=%d",kHTTP_Host,[UserInfo sharedUserInfo].strSessionId,nIndex,nCount];
     DLog(@"strUrl:%@",strUrl);
     [self sendRequest:strUrl];
   
@@ -111,7 +111,7 @@
 -(void)queryDeviceNumber
 {
     NSString *strUrl = [[NSString alloc] initWithFormat:@"%@index.php?r=service/service/GetCountDrvice&session_id=%@",
-                        XCLocalized(@"httpserver"),[UserInfo sharedUserInfo].strSessionId];
+                        kHTTP_Host,[UserInfo sharedUserInfo].strSessionId];
     [self sendRequest:strUrl];
 }
 

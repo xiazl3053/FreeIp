@@ -114,7 +114,7 @@ typedef struct _playrecordmsg
 	unsigned short        frameType;		// 帧类型(0:视频,1:音频,2:音视频) 
 	unsigned int            startTime;	                // 开始时间
 	unsigned int            endTime;		        // 结束时间
-	unsigned int            nalarmFileType;        // 1:普通录像文件   2:报警录像文件
+	unsigned int            nrecordFileType;        // 1:普通录像文件   2:报警录像文件
 	char                       reserve[8];                //保留
 }PP_PACKED PlayRecordMsg;
 typedef struct  _playrecordresp

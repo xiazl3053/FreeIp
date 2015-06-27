@@ -47,7 +47,7 @@
 -(void)requestDelDevInfo:(NSString*)strDevNO auth:(NSString *)strDevAuth
 {
     NSString *strUrl = [[NSString alloc] initWithFormat:@"%@index.php?r=service/service/breakdevice&session_id=%@&device_id=%@",
-                        XCLocalized(@"httpserver"),
+                        kHTTP_Host,
                         [UserInfo sharedUserInfo].strSessionId,strDevNO];
     [self sendRequest:strUrl];
 }

@@ -10,7 +10,7 @@
 
 "Loginregister" = "Register";
 
-"httpserver" = "http://www.freeip.com/";
+"httpserver" = "www.freeip.com";
 
 "p2pserver" = "heart.freeip.com";
 

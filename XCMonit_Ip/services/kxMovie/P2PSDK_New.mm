@@ -145,32 +145,32 @@ int P2PSDK_New::TRAN_RecordSerach(struct _playrecordmsg*   recordsearch_req,char
             else
             {
                 DLog(@"get recordinfo success!!!record count is %d\n",recordsearch_resp->count);
-                for(i=0;i<recordsearch_resp->count;i++)
-                {
-                    
-                    struct tm *p=NULL;
-                    char month;
-                    char day;
-                    char hour;
-                    char minute;
-                    char Second;
-                    p = localtime((const long*)&(recordmsg[i].startTime));
-                    month = p->tm_mon + 1;
-                    day = p->tm_mday;
-                    hour = p->tm_hour;
-                    minute = p->tm_min;
-                    Second = p->tm_sec;
-                    printf("record:%d--%d--%d\n",recordmsg[i].frameType,recordmsg[i].channelNo,recordmsg[i].nalarmFileType);
-                    printf("record[%d] start time is %d-%d %d:%d:%d\n",i,month,day,hour,minute,Second);
-                    
-                    p = localtime((const long*)&(recordmsg[i].endTime));
-                    month = p->tm_mon + 1;
-                    day = p->tm_mday;
-                    hour = p->tm_hour;
-                    minute = p->tm_min;
-                    Second = p->tm_sec;
-                    printf("record[%d] end time is %d-%d %d:%d:%d\n",i,month,day,hour,minute,Second);
-                }
+//                for(i=0;i<recordsearch_resp->count;i++)
+//                {
+//                    
+//                    struct tm *p=NULL;
+//                    char month;
+//                    char day;
+//                    char hour;
+//                    char minute;
+//                    char Second;
+//                    p = localtime((const long*)&(recordmsg[i].startTime));
+//                    month = p->tm_mon + 1;
+//                    day = p->tm_mday;
+//                    hour = p->tm_hour;
+//                    minute = p->tm_min;
+//                    Second = p->tm_sec;
+//                    printf("record:%d--%d--%d\n",recordmsg[i].frameType,recordmsg[i].channelNo,recordmsg[i].nrecordFileType);
+//                    printf("record[%d] start time is %d-%d %d:%d:%d\n",i,month,day,hour,minute,Second);
+//                    
+//                    p = localtime((const long*)&(recordmsg[i].endTime));
+//                    month = p->tm_mon + 1;
+//                    day = p->tm_mday;
+//                    hour = p->tm_hour;
+//                    minute = p->tm_min;
+//                    Second = p->tm_sec;
+//                    printf("record[%d] end time is %d-%d %d:%d:%d\n",i,month,day,hour,minute,Second);
+//                }
                 return 0;
             }
         }
@@ -206,43 +206,35 @@ int P2PSDK_New::P2P_RecordSearch(struct _playrecordmsg*   recordsearch_req,char*
             {
                 printf("get recordinfo success!!!record count is %d\n",recordsearch_resp->count);
                 
-                for(i=0;i<recordsearch_resp->count;i++)
-                {
-                    struct tm *p=NULL;
-                    char month;
-                    char day;
-                    char hour;
-                    char minute;
-                    char Second;
-                    p = localtime((const long*)&(recordmsg[i].startTime));
-                    month = p->tm_mon + 1;
-                    day = p->tm_mday;
-                    hour = p->tm_hour;
-                    minute = p->tm_min;
-                    /*
-                     unsigned short        channelNo;                 // Õ®µ¿∫≈
-                     unsigned short        frameType;		// ÷°¿‡–Õ(0: ”∆µ,1:“Ù∆µ,2:“Ù ”∆µ)
-                     unsigned int            startTime;	                // ø™ º ±º‰
-                     unsigned int            endTime;		        // Ω· ¯ ±º‰
-                     unsigned int            nalarmFileType;        // 1:∆’Õ®¬ºœÒŒƒº˛   2:±®æØ¬ºœÒŒƒº˛
-                     char                       reserve[8];
-                     */
-                    Second = p->tm_sec;
-                    printf("record:%d--%d\n",recordmsg[i].frameType,recordmsg[i].channelNo);
-                    printf( "record[%d] start time is %d-%d %d:%d:%d\n",i,month,day,hour,minute,Second);
-                    
-                    p = localtime((const long*)&(recordmsg[i].endTime));
-                    month = p->tm_mon + 1;
-                    day = p->tm_mday;
-                    hour = p->tm_hour;
-                    minute = p->tm_min;
-                    Second = p->tm_sec;
-                    printf( "record[%d] end time is %d-%d %d:%d:%d\n",i,month,day,hour,minute,Second);
-                }
+//                for(i=0;i<recordsearch_resp->count;i++)
+//                {
+//                    struct tm *p=NULL;
+//                    char month;
+//                    char day;
+//                    char hour;
+//                    char minute;
+//                    char Second;
+//                    p = localtime((const long*)&(recordmsg[i].startTime));
+//                    month = p->tm_mon + 1;
+//                    day = p->tm_mday;
+//                    hour = p->tm_hour;
+//                    minute = p->tm_min;
+
+//                    Second = p->tm_sec;
+//                    printf("record:%d--%d\n",recordmsg[i].frameType,recordmsg[i].channelNo);
+//                    printf( "record[%d] start time is %d-%d %d:%d:%d\n",i,month,day,hour,minute,Second);
+//                    
+//                    p = localtime((const long*)&(recordmsg[i].endTime));
+//                    month = p->tm_mon + 1;
+//                    day = p->tm_mday;
+//                    hour = p->tm_hour;
+//                    minute = p->tm_min;
+//                    Second = p->tm_sec;
+//                    printf( "record[%d] end time is %d-%d %d:%d:%d\n",i,month,day,hour,minute,Second);
+//                }
                 return 0;
             }
         }
-        
     }
     return -1;
 }

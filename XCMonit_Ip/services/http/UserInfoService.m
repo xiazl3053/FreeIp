@@ -73,7 +73,7 @@
 }
 -(void)requestUserInfo
 {
-    NSString *strUrl = [[NSString alloc] initWithFormat:@"%@index.php?r=service/service/getuserinfo&session_id=%@",XCLocalized(@"httpserver"),[UserInfo sharedUserInfo].strSessionId];
+    NSString *strUrl = [[NSString alloc] initWithFormat:@"%@index.php?r=service/service/getuserinfo&session_id=%@",kHTTP_Host,[UserInfo sharedUserInfo].strSessionId];
     [self sendRequest:strUrl];
 }
 

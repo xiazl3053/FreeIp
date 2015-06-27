@@ -24,7 +24,7 @@ DEFINE_SINGLETON_FOR_CLASS(UpdateForEmailService);
 {
     NSString *strNewPwd = [DecodeJson XCmdMd5String:strPwd];
     NSString *strUrl = [[NSString alloc] initWithFormat:@"%@index.php?r=login/login/CaptchaUpdatePwd&language=en&user_name=%@&pwd=%@&code=%@&session_id=%@"
-                        ,XCLocalized(@"httpserver"),[UserInfo sharedUserInfo].strUser,strNewPwd,strCode,[UserInfo sharedUserInfo].strSessionId];
+                        ,kHTTP_Host,[UserInfo sharedUserInfo].strUser,strNewPwd,strCode,[UserInfo sharedUserInfo].strSessionId];
     NSURL *url=[NSURL URLWithString:strUrl];//创建URL
     NSMutableURLRequest *request=[[NSMutableURLRequest alloc]initWithURL:url];//通过URL创建网络请求
     [request setTimeoutInterval:XC_HTTP_TIMEOUT];//设置超时时间
@@ -93,7 +93,7 @@ DEFINE_SINGLETON_FOR_CLASS(UpdateForEmailService);
 -(void)requestAuthCode:(NSString*)strEmail
 {
     NSString *strUrl = [[NSString alloc] initWithFormat:@"%@index.php?r=login/login/SendEmail&user_name=%@&language=en"
-                        ,XCLocalized(@"httpserver"),strEmail];
+                        ,kHTTP_Host,strEmail];
     [UserInfo sharedUserInfo].strUser = strEmail;
     NSURL *url=[NSURL URLWithString:strUrl];//创建URL
     NSMutableURLRequest *request=[[NSMutableURLRequest alloc]initWithURL:url];//通过URL创建网络请求

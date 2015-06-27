@@ -489,7 +489,9 @@
     {
         [_videoFrames removeAllObjects];
     }
-    _videoFrames = nil;
+//    _videoFrames = nil;
+    [timeView removeFromSuperview];
+    timeView = nil;
 }
 
 -(void)captureView

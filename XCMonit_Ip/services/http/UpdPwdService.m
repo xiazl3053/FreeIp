@@ -18,7 +18,7 @@
     NSString *strNewMD5 = [DecodeJson XCmdMd5String:strNewPwd];
     NSString *strMD5 = [DecodeJson XCmdMd5String:strOldPwd];
     NSString *strUrl = [[NSString alloc] initWithFormat:@"%@index.php?r=service/service/setpassword&session_id=%@&old_pwd=%@&new_pwd=%@"
-                    ,XCLocalized(@"httpserver"),[UserInfo sharedUserInfo].strSessionId,strMD5,strNewMD5];
+                    ,kHTTP_Host,[UserInfo sharedUserInfo].strSessionId,strMD5,strNewMD5];
     [self sendRequest:strUrl];
 }
 -(void)reciveHttp:(NSURLResponse*) response data:(NSData*)data error:(NSError*)connectionError
