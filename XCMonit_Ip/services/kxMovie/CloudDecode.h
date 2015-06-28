@@ -22,7 +22,7 @@ typedef void(^RecordBlockCloud)(int nStatus,NSArray *aryInfo);
 
 -(BOOL)playDeviceCloud:(NSDate*)dateTime;
 
--(BOOL)startVideo:(NSString *)strTime;
+-(BOOL)startVideo:(long)lTime;
 
 -(void)checkView:(NSString *)strTime;
 

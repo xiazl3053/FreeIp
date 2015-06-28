@@ -8,6 +8,7 @@
 
 #import "UIView+Extension.h"
 #import "CloudDecode.h"
+#import "DecodeJson.h"
 #import "CaptureService.h"
 #import "PlayCloudViewController.h"
 #import "TimeView.h"
@@ -15,8 +16,10 @@
 #import "CloudButton.h"
 #import "NSDate+convenience.h"
 #import "Toast+UIView.h"
+#import "ProgressHUD.h"
 #import "DecoderPublic.h"
-
+#import "DeviceInfoModel.h"
+#import "XCNotification.h"
 @interface PlayCloudViewController ()
 {
     UIView *topView;
@@ -35,19 +38,33 @@
     CGFloat lastX,lastY;
     CGFloat lastScale;
     
+    UIScrollView *scrolView;
+    int nAllCount;
+    
     UITapGestureRecognizer *_tapGestureRecognizer;
     UIPinchGestureRecognizer *pinchGesture;
     UIPanGestureRecognizer *_panGesture;
     NSString *strDevName;
+    UIView *rightView;
+    UIButton *rightBtn;
     UIImageView *imgView;
 }
 @property (nonatomic,assign) BOOL bDecoding;
 @property (nonatomic,assign) BOOL bPlaying;
+@property (nonatomic,copy) NSString *strNO;
 @property (nonatomic,strong) NSMutableArray *videoFrames;
 @end
 
 @implementation PlayCloudViewController
 
+-(id)initWithDev:(DeviceInfoModel*)devInfo
+{
+    self = [super init];
+    _strNO = devInfo.strDevNO;
+    NSString *strChannel = [DecodeJson getDeviceTypeByType:[devInfo.strDevType intValue]];
+    nAllCount = [[strChannel componentsSeparatedByString:@"-"][1] intValue];
+    return self;
+}
 - (void)viewDidLoad
 {
     [super viewDidLoad];
@@ -56,6 +73,46 @@
     pinchGesture = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(pinchEvent:)];
     _panGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(panEvent:)];
     [self initBodyView];
+    [self initWithScrol];
+}
+
+-(void)initWithScrol
+{
+    rightView = [[UIView alloc] initWithFrame:Rect(0, 0, 100,320)];
+    [self.view addSubview:rightView];
+    rightView.hidden = YES;
+    scrolView = [[UIScrollView alloc] initWithFrame:Rect(40, 0, 60, 320)];
+    [rightView addSubview:scrolView];
+    rightBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+    rightBtn.frame = Rect(0, 160,40, 40);
+    [rightBtn addTarget:self action:@selector(clickRightBtn) forControlEvents:UIControlEventTouchUpInside];
+    [rightBtn setImage:[UIImage imageNamed:@"NaviBtn_Back_play"] forState:UIControlStateNormal];
+    [rightView addSubview:rightBtn];
+    
+    for (int i=0; i<nAllCount; i++)
+    {
+        UIButton *btnAction = [UIButton buttonWithType:UIButtonTypeCustom];
+        [btnAction setTitle:[NSString stringWithFormat:@"%d",i+1] forState:UIControlStateNormal];
+        [btnAction setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+        [btnAction setBackgroundColor:[UIColor blackColor]];
+        [scrolView addSubview:btnAction];
+        btnAction.frame = Rect(0,i*60,60,60);
+    }
+//    [scrolView sets];
+    [scrolView setShowsHorizontalScrollIndicator:NO];
+    [scrolView setShowsVerticalScrollIndicator:NO];
+}
+
+-(void)clickRightBtn
+{
+    if (rightView.x == fWidth-100)//显示
+    {
+        rightView.frame = Rect(fWidth-40, 0, 40, fHeight);
+    }
+    else
+    {
+        rightView.frame = Rect(fWidth-100 , 0, 100, fHeight);
+    }
 }
 
 -(void)panEvent:(UIPanGestureRecognizer*)sender
@@ -69,7 +126,7 @@
     }
     CGPoint curPoint = [sender locationInView:self.view];
     CGFloat frameX = (imgView.x + (curPoint.x-lastX)) > 0 ? 0 : (abs(imgView.x+(curPoint.x-lastX))+fWidth >= imgView.width ? -(imgView.width-fWidth) : (imgView.x+(curPoint.x-lastX)));
-    CGFloat frameY =(imgView.y + (curPoint.y-lastY))>0?0: (abs(imgView.y+(curPoint.y-lastY))+fHeight >= imgView.height ? -(imgView.height-fHeight) : (imgView.y+(curPoint.y-lastY)));
+    CGFloat frameY =(imgView.y + (curPoint.y-lastY))>0 ? 0: (abs(imgView.y+(curPoint.y-lastY))+fHeight >= imgView.height ? -(imgView.height-fHeight) : (imgView.y+(curPoint.y-lastY)));
     imgView.frame = Rect(frameX,frameY , imgView.width, imgView.height);
     lastX = curPoint.x;
     lastY = curPoint.y;
@@ -190,7 +247,7 @@
     //CloudButton
     btnPause = [[CloudButton alloc] initWithFrame:Rect(60, 200,60, 49) normal:@"play_cl" high:@"pause_cl_h" select:@"pause_cl"];
     [downView addSubview:btnPause];
-    [btnPause addTarget:self action:@selector(startPlayCloud:) forControlEvents:UIControlEventTouchUpInside];
+    [btnPause addTarget:self action:@selector(startPlayCloudEvent:) forControlEvents:UIControlEventTouchUpInside];
     
     btnCamera = [[CloudButton alloc] initWithFrame:Rect(btnPause.x+btnPause.width+14, 200,60, 49) normal:@"photo_cl" high:@"photo_cl_h"];
     [downView addSubview:btnCamera];
@@ -205,44 +262,50 @@
     [downView addSubview:btnDate];
 }
 
--(void)startPlayCloud:(UIButton *)sender
+-(void)startPlayCloud
+{
+    unsigned int nTime = (unsigned int)[timeView currentTime];
+    BOOL bFlag = [cloudDec startVideo:nTime];
+    if (!bFlag)
+    {
+        return ;
+    }
+    __weak PlayCloudViewController *__self = self;
+    dispatch_async(dispatch_get_global_queue(0, 0),
+    ^{
+       [__self startPlayCloud_gcd];
+    });
+    btnPause.selected = YES;
+    [ProgressHUD dismiss];
+}
+
+-(void)startPlayCloudEvent:(UIButton *)sender
 {
     sender.selected = !sender.selected;
     if (sender.selected)
     {
         //播放视频
-        NSString *strTime = timeView.strTime;
-        BOOL bFlag = [cloudDec startVideo:strTime];
-        if (!bFlag)
-        {
-            return ;
-        }
-        __weak PlayCloudViewController *__self = self;
-        dispatch_async(dispatch_get_global_queue(0, 0),
-        ^{
-            [__self startPlayCloud_gcd];
-        });
+        [self startPlayCloud];
     }
     else
     {
         //暂停视频
-//        [self stopVideo];
         [self pauseVideo];
     }
 }
 
 -(void)cloudInit
 {
-    cloudDec = [[CloudDecode alloc] initWithCloud:@"9743200000001" channel:1 codeType:0];
+    cloudDec = [[CloudDecode alloc] initWithCloud:_strNO channel:1 codeType:0];
     __weak TimeView *__timeView = timeView;
+    __weak PlayCloudViewController *__self = self;
     cloudDec.cloudBlock = ^(int nStatus,NSArray *ary)
     {
-        DLog(@"nStatus:%d----%u",nStatus,ary.count);
         [__timeView.aryDate removeAllObjects];
         [__timeView.aryDate addObjectsFromArray:ary];
-        __strong TimeView *__strongView = __timeView;
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [__strongView setNeedsDisplay];
+        [__timeView startTimeCome];
+        dispatch_async(dispatch_get_main_queue(),^{
+            [__self startPlayCloud];
         });
     };
     [cloudDec checkView:timeView.strDate];
@@ -279,8 +342,6 @@
     downView.frame = Rect(0, fHeight-120, fWidth, 120);
     [downView viewWithTag:10089].frame = downView.bounds;
     
-    
-    
     NSDate *date = [NSDate date];
     NSDateFormatter *nsFormat = [[NSDateFormatter alloc] init];
     nsFormat.locale = [[NSLocale alloc] initWithLocaleIdentifier:@"zh_CN"];
@@ -297,11 +358,58 @@
     btnStop.frame = Rect(fStart+180,65, 60, 48);
     btnDate.frame = Rect(fStart+240,65, 60, 48);
     
+    rightView.hidden = NO;
+    rightView.frame = Rect(fWidth - 40, 0, 40, fHeight);
+    scrolView.frame = Rect(40, 0, 60,fHeight);
+    scrolView.contentSize = CGSizeMake(60,60*nAllCount);
     __weak PlayCloudViewController *__self = self;
     dispatch_async(dispatch_get_global_queue(0,0),
     ^{
         [__self cloudInit];
     });
+}
+
+-(void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(rePlayInfo) name:NS_TIME_CURRENT_PAN_EVENT_VC object:nil];
+}
+
+-(void)viewWillDisappear:(BOOL)animated
+{
+    [super viewWillDisappear:animated];
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+-(void)rePlayInfo
+{
+    if (_bPlaying)
+    {
+        if ([NSThread isMainThread])
+        {
+            [self stopVideo];
+            DLog(@"主线程");
+            if (IOS_SYSTEM_8)
+            {
+                [ProgressHUD show:XCLocalized(@"loading") viewInfo:self.view];
+            }
+            else
+            {
+                [ProgressHUD showPlayRight:XCLocalized(@"loading") viewInfo:self.view];
+            }
+            [self performSelector:@selector(startPlayCloud) withObject:nil afterDelay:1.5f];
+            
+        }
+        else
+        {
+            __weak PlayCloudViewController *__self = self;
+            dispatch_async(dispatch_get_main_queue(), ^{
+                DLog(@"子线程!");
+                [__self stopVideo];
+                [__self startPlayCloud];
+            });
+        }
+    }
 }
 
 -(void)doneDidTouch
@@ -312,7 +420,6 @@
 -(void)viewWillLayoutSubviews
 {
     [super viewWillLayoutSubviews];
-    
 }
 
 -(BOOL)prefersStatusBarHidden

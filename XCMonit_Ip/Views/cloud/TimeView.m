@@ -7,11 +7,13 @@
 //
 
 #import "TimeView.h"
+#import "XCNotification.h"
 #import <time.h>
+
 @interface TimeView()
 {
     UIPanGestureRecognizer *panGesture;
-    long lStartWidth;
+    long lCurrentTime;
     CGSize labelsize;
     long lStartTime;
     long lEndTime;
@@ -56,9 +58,9 @@
     NSTimeInterval time = [testTime timeIntervalSince1970];
     
     NSLog(@"2015-05-10--time:%li",(long)time);
-    lStartWidth = time;
-    lStartTime = lStartWidth - allTime/2;
-    lEndTime = lStartWidth + allTime/2;
+    lCurrentTime = time;
+    lStartTime = lCurrentTime - allTime/2;
+    lEndTime = lCurrentTime + allTime/2;
     UIFont *font = [UIFont fontWithName:@"Helvetica" size:15];
     labelsize = [@"1970-01-01 00:00:00" sizeWithFont:font constrainedToSize:CGSizeMake(200.0f, MAXFLOAT) lineBreakMode:NSLineBreakByWordWrapping];
 }
@@ -72,7 +74,7 @@
     char minute;
     char Second;
     
-    p = localtime(&(lStartWidth));
+    p = localtime(&(lCurrentTime));
     
     month = p->tm_mon + 1;
     day = p->tm_mday;
@@ -92,7 +94,7 @@
     char minute;
     char Second;
     
-    p = localtime(&(lStartWidth));
+    p = localtime(&(lCurrentTime));
     
     month = p->tm_mon + 1;
     day = p->tm_mday;
@@ -108,15 +110,16 @@
     CGPoint pt = [pan translationInView:self];
     CGFloat fWid = pt.x;
     //  1 * 36 秒
-    lStartWidth -= ((int)fWid*36);
-    lStartTime = lStartWidth - allTime/2;
-    lEndTime = lStartWidth + allTime/2;
+    lCurrentTime -= ((int)fWid*36);
+    lStartTime = lCurrentTime - allTime/2;
+    lEndTime = lCurrentTime + allTime/2;
     
     [pan setTranslation:CGPointZero inView:self];
     [self setNeedsDisplay];
     if ([pan state]==UIGestureRecognizerStateEnded)
     {
         DLog(@"发送当前时间");
+        [[NSNotificationCenter defaultCenter] postNotificationName:NS_TIME_CURRENT_PAN_EVENT_VC object:nil];
     }
 }
 
@@ -143,7 +146,7 @@
     char minute;
     char Second;
     
-    p = localtime(&(lStartWidth));
+    p = localtime(&(lCurrentTime));
     month = p->tm_mon + 1;
     day = p->tm_mday;
     hour = p->tm_hour;
@@ -157,26 +160,24 @@
     for (int i=0; i<nTime; i++)
     {
         [self drawHour:context pointX:rect.size.width/2-fWidth-_nWidth*i];
-        CGContextSetRGBFillColor (context, 0, 0, 0, 1.0); //使用黑色填充
+        [[UIColor whiteColor] set];
         int nHour = (p->tm_hour-i) < 0 ? (24-abs(p->tm_hour-i)) : (p->tm_hour-i);//设置时间范围不会小于0
         //写左边时间
         NSString *strStartTime = [NSString stringWithFormat:@"%02d:00",nHour];
-        [strStartTime drawAtPoint:CGPointMake(rect.size.width/2-fWidth-_nWidth*i-10, 20) withAttributes:@{
-                                                                                                          NSFontAttributeName:XCFontInfo(10.0f)}];
+        [strStartTime drawAtPoint:CGPointMake(rect.size.width/2-fWidth-_nWidth*i-10, 20)
+            withAttributes:@{NSForegroundColorAttributeName:[[UIColor whiteColor] colorWithAlphaComponent:1],                                              NSFontAttributeName:XCFontInfo(10.0f)}];
         
         [self drawHour:context pointX:rect.size.width/2+(_nWidth-fWidth)+_nWidth*i];
         //写右边的时间
         nHour = (p->tm_hour+i+1) > 23 ? (abs(p->tm_hour+i+1)%24) : (p->tm_hour+i+1);//设置时间范围不会超过24小时
         NSString *strEndTime = [NSString stringWithFormat:@"%02d:00",nHour];
         [strEndTime drawAtPoint:CGPointMake(rect.size.width/2+(_nWidth-fWidth)+_nWidth*i-10, 20)
-                 withAttributes:@{NSFontAttributeName:XCFontInfo(10.0f)}];
+                 withAttributes:@{NSForegroundColorAttributeName:[[UIColor whiteColor] colorWithAlphaComponent:1],NSFontAttributeName:XCFontInfo(10.0f)}];
     }
     //写总体时间
     NSString *strTime = [NSString stringWithFormat:@"%d-%02d-%02d %02d:%02d:%02d",1900+p->tm_year,month,day,hour,minute,Second];
-    CGContextSetRGBFillColor (context,  0, 0, 0, 1.0);//设置笔的颜色
-    CGContextSetLineWidth(context, 1);
-    [strTime drawAtPoint:CGPointMake(rect.size.width/2-labelsize.width/2, 1)  withAttributes:@{
-                                                                                               NSFontAttributeName:XCFontInfo(15.0f)}];
+    
+    [strTime drawAtPoint:CGPointMake(rect.size.width/2-labelsize.width/2, 1)  withAttributes:@{NSForegroundColorAttributeName:[[UIColor whiteColor] colorWithAlphaComponent:1],NSFontAttributeName:XCFontInfo(15.0f)}];
     
     CGContextSetRGBStrokeColor(context,234/255.0,87/255.0,52/255.0, 1.0);
     CGContextSetLineWidth(context, 2);
@@ -229,6 +230,34 @@
             CGContextStrokePath(context);
         }
     }
+}
+
+-(void)startTimeCome
+{
+    if (_aryDate.count>0)
+    {
+        CloudTime *cloud = [_aryDate objectAtIndex:0];
+        lCurrentTime = cloud.iStart;
+        lStartTime = lCurrentTime - allTime/2;
+        lEndTime = lCurrentTime + allTime/2;
+        if ([NSThread isMainThread])
+        {
+            [self setNeedsDisplay];
+        }
+        else
+        {
+            __weak TimeView *__self = self;
+            dispatch_async(dispatch_get_main_queue()
+            , ^{
+                [__self setNeedsDisplay];
+            });
+        }
+    }
+    
+}
+-(unsigned int)currentTime
+{
+    return lCurrentTime;
 }
 
 @end

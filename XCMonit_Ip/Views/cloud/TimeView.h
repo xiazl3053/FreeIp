@@ -21,6 +21,10 @@
 @property (nonatomic,strong) NSString *strTime;
 @property (nonatomic,strong) NSString *strDate;
 
+-(long)currentTime;
+
+-(void)startTimeCome;
+
 -(id)initWithFrame:(CGRect)frame time:(NSString *)strTime;
 
 -(void)settingTime:(NSString *)strTime;

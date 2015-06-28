@@ -7,11 +7,10 @@
 //
 
 #import <UIKit/UIKit.h>
-
+@class DeviceInfoModel;
 @interface PlayCloudViewController : UIViewController
 
 
--(id)initWithNO:(NSString *)strNO devName:(NSString *)strDevName;
-
+-(id)initWithDev:(DeviceInfoModel*)devInfo;
 
 @end

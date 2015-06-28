@@ -101,6 +101,7 @@ extern "C"
     int time = abs((int)[testTime timeIntervalSince1970]);
     recordreq.startTime = time;
     DLog(@"time:%d",time);
+    size_t size_msg = sizeof(struct _playrecordmsg);
     recordreq.endTime = time+86399;
     recordreq.nrecordFileType = 1;
    if(bPTP)//
@@ -121,10 +122,9 @@ extern "C"
         {
             struct _playrecordmsg recordMsg;
             NSMutableArray *aryItem = [NSMutableArray array];
-            size_t size_msg = sizeof(struct _playrecordmsg);
             for (int i=0; i<nCount; i++)
             {
-                memcpy((char *)&recordMsg,responsedata+4+i*size_msg, size_msg);
+                memcpy(&recordMsg,responsedata+4+i*size_msg,size_msg);
                 CloudTime *time = [[CloudTime alloc] init];
                 time.iStart = recordMsg.startTime;
                 time.iEnd = recordMsg.endTime;
@@ -162,10 +162,9 @@ extern "C"
         {
             struct _playrecordmsg recordMsg;
             NSMutableArray *aryItem = [NSMutableArray array];
-            size_t size_msg = sizeof(struct _playrecordmsg);
             for (int i=0; i<nCount; i++)
             {
-                memcpy((char *)&recordMsg,responsedata+4+i*size_msg, size_msg);
+                memcpy(&recordMsg,responsedata+4+i*size_msg,size_msg);
                 CloudTime *time = [[CloudTime alloc] init];
                 time.iStart = recordMsg.startTime;
                 time.iEnd = recordMsg.endTime;
@@ -220,12 +219,18 @@ extern "C"
     return NO;
 }
 
--(BOOL)startVideo:(NSString *)strTime
+
+-(BOOL)startVideo:(long)lTime
 {
     theLock = [[NSRecursiveLock alloc] init];
-    bStop = YES;
+    _recordreq.channelNo = _nChannel;
+    _recordreq.startTime = lTime;
+    _recordreq.endTime = lTime + 3600;
+    _recordreq.nrecordFileType = 1;
+    _recordreq.frameType = nStreamType;
     if (bTran)
     {
+        _recordreq.channelNo = _nChannel;
         DLog(@"%d--%d--%u--%u",_recordreq.frameType,_recordreq.channelNo,_recordreq.startTime,_recordreq.endTime);
         if(sdkNew->RELAY_PlayDeviceRecord(&_recordreq)==0)
         {
@@ -239,6 +244,8 @@ extern "C"
     }
     else if(bPTP)
     {
+        _recordreq.channelNo = _nChannel;
+        DLog(@"%d--%d--%u--%u",_recordreq.frameType,_recordreq.channelNo,_recordreq.startTime,_recordreq.endTime);
         if(sdkNew->P2P_PlayDeviceRecord(&_recordreq)==0)
         {
             __weak CloudDecode *__self = self;
@@ -304,9 +311,9 @@ extern "C"
             [NSThread sleepForTimeInterval:0.03f];
             continue;
         }
+        [theLock lock];
         if(nRef>=0 && bStop)
         {
-            [theLock lock];
             int len = avcodec_decode_video2(pCodecCtx,pVideoFrame,&gotframe,&packet);
             if (gotframe)
             {
@@ -324,12 +331,12 @@ extern "C"
                 [theLock unlock];
                 continue;
             }
-            [theLock unlock];
         }
         else
         {
             break;
         }
+        [theLock unlock];
     }
     av_free_packet(&packet);
     free(puf);
@@ -339,12 +346,9 @@ extern "C"
 #pragma mark yuv 转换
 - (KxVideoFrame *) handleVideoFrame
 {
-    if (!pVideoFrame->data[0])
+    if (!pVideoFrame || !pVideoFrame->data[0])
         return nil;
-    
     KxVideoFrame *frame;
-    
-    
         if (!_swsContext && ![self setupScaler])
         {
             DLog(@"fail setup video scaler");
@@ -427,7 +431,7 @@ extern "C"
     }
     _fps = 30;
     DLog(@"fps:%f",_fps);
-    
+    bStop = YES;
     return YES;
 }
 
@@ -441,6 +445,8 @@ extern "C"
 
 -(void)closeFile
 {
+    
+    [[[P2PInitService sharedP2PInitService] getTheLock] lock];
     if (pVideoFrame)
     {
         av_free(pVideoFrame);
@@ -448,9 +454,7 @@ extern "C"
     }
     if (pCodecCtx)
     {
-        [[[P2PInitService sharedP2PInitService] getTheLock] lock];
         avcodec_close(pCodecCtx);
-        [[[P2PInitService sharedP2PInitService] getTheLock] unlock];
         pCodecCtx = NULL;
     }
     if (pFormatCtx)
@@ -460,6 +464,7 @@ extern "C"
         avformat_close_input(&pFormatCtx);
         pFormatCtx = NULL;
     }
+    [[[P2PInitService sharedP2PInitService] getTheLock] unlock];
 }
 
 -(void)pauseVideo

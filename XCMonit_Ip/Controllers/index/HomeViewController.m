@@ -260,19 +260,21 @@
 #pragma mark 修改
 -(void)recordVideo:(NSString *)strNO name:(NSString *)strDevName line:(int)nLine
 {
-    PlayCloudViewController *playCloud = [[PlayCloudViewController alloc] init];
+    DeviceInfoModel *devModel = nil;
+    for (DeviceInfoModel *devInfoModel in _array)
+    {
+        if([devInfoModel.strDevNO isEqualToString:strNO])
+        {
+            devModel = devInfoModel;
+            break;
+        }
+    }
+    if ([devModel.strDevType intValue]<2000) {
+        return ;
+    }
+    PlayCloudViewController *playCloud = [[PlayCloudViewController alloc] initWithDev:devModel];
     [self presentViewController:playCloud animated:YES completion:nil];
-    
-//    CloudViewController *cloundView = [[CloudViewController alloc] init];
-//    [self presentViewController:cloundView animated:YES completion:nil];
-//    NSArray *aryRecord = [RecordDb queryRecord:strNO];
-//    if (aryRecord.count<1)
-//    {
-//        [self.view makeToast:XCLocalized(@"noRecords") duration:1.0f position:@"center"];
-//        return;
-//    }
-//    RecordViewController *record = [[RecordViewController alloc] initWithNo:strNO status:nLine];
-//    [self presentViewController:record animated:YES completion:nil];
+   
 }
 -(void)playVideo:(NSString*)strNO name:(NSString*)strDevName type:(NSInteger)nType
 {
@@ -297,7 +299,6 @@
         //多屏幕播放视频
         PlayFourViewController *playController = [[PlayFourViewController alloc] initWithDevInfo:devModel];
         [self presentViewController:playController animated:YES completion:nil];
-        
     }
 #endif
 #if 0

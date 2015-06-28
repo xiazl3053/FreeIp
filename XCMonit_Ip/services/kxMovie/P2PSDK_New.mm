@@ -8,6 +8,8 @@
 
 #import "P2PSDK_New.h"
 
+#import "XCNotification.h"
+
 bool P2PSDK_New::ProcessFrameData(char* aFrameData, int aFrameDataLength)
 {
     NSData *dataInfo = [NSData dataWithBytes:aFrameData length:aFrameDataLength];
@@ -145,32 +147,6 @@ int P2PSDK_New::TRAN_RecordSerach(struct _playrecordmsg*   recordsearch_req,char
             else
             {
                 DLog(@"get recordinfo success!!!record count is %d\n",recordsearch_resp->count);
-//                for(i=0;i<recordsearch_resp->count;i++)
-//                {
-//                    
-//                    struct tm *p=NULL;
-//                    char month;
-//                    char day;
-//                    char hour;
-//                    char minute;
-//                    char Second;
-//                    p = localtime((const long*)&(recordmsg[i].startTime));
-//                    month = p->tm_mon + 1;
-//                    day = p->tm_mday;
-//                    hour = p->tm_hour;
-//                    minute = p->tm_min;
-//                    Second = p->tm_sec;
-//                    printf("record:%d--%d--%d\n",recordmsg[i].frameType,recordmsg[i].channelNo,recordmsg[i].nrecordFileType);
-//                    printf("record[%d] start time is %d-%d %d:%d:%d\n",i,month,day,hour,minute,Second);
-//                    
-//                    p = localtime((const long*)&(recordmsg[i].endTime));
-//                    month = p->tm_mon + 1;
-//                    day = p->tm_mday;
-//                    hour = p->tm_hour;
-//                    minute = p->tm_min;
-//                    Second = p->tm_sec;
-//                    printf("record[%d] end time is %d-%d %d:%d:%d\n",i,month,day,hour,minute,Second);
-//                }
                 return 0;
             }
         }
@@ -181,7 +157,7 @@ int P2PSDK_New::TRAN_RecordSerach(struct _playrecordmsg*   recordsearch_req,char
 int P2PSDK_New::P2P_RecordSearch(struct _playrecordmsg*   recordsearch_req,char*  resp)
 {
     DLog(@"RecordSearch \n");
-    int  result=-1;
+    int result=-1;
     int i=0;
     struct  _playrecordresp*  recordsearch_resp=NULL;
     struct  _playrecordmsg*    recordmsg=NULL;
@@ -205,33 +181,7 @@ int P2PSDK_New::P2P_RecordSearch(struct _playrecordmsg*   recordsearch_req,char*
             else
             {
                 printf("get recordinfo success!!!record count is %d\n",recordsearch_resp->count);
-                
-//                for(i=0;i<recordsearch_resp->count;i++)
-//                {
-//                    struct tm *p=NULL;
-//                    char month;
-//                    char day;
-//                    char hour;
-//                    char minute;
-//                    char Second;
-//                    p = localtime((const long*)&(recordmsg[i].startTime));
-//                    month = p->tm_mon + 1;
-//                    day = p->tm_mday;
-//                    hour = p->tm_hour;
-//                    minute = p->tm_min;
 
-//                    Second = p->tm_sec;
-//                    printf("record:%d--%d\n",recordmsg[i].frameType,recordmsg[i].channelNo);
-//                    printf( "record[%d] start time is %d-%d %d:%d:%d\n",i,month,day,hour,minute,Second);
-//                    
-//                    p = localtime((const long*)&(recordmsg[i].endTime));
-//                    month = p->tm_mon + 1;
-//                    day = p->tm_mday;
-//                    hour = p->tm_hour;
-//                    minute = p->tm_min;
-//                    Second = p->tm_sec;
-//                    printf( "record[%d] end time is %d-%d %d:%d:%d\n",i,month,day,hour,minute,Second);
-//                }
                 return 0;
             }
         }
@@ -242,7 +192,8 @@ int P2PSDK_New::P2P_RecordSearch(struct _playrecordmsg*   recordsearch_req,char*
 bool P2PSDK_New::DeviceDisconnectNotify()
 {
     DLog(@"设备丢失了");
-    StopRecv();
+    [[NSNotificationCenter defaultCenter] postNotificationName:NSCONNECT_P2P_DISCONNECT object:nil];
+//    StopRecv();
     return YES;
 }
 
@@ -306,10 +257,6 @@ int P2PSDK_New::closeP2PService()
 
 int P2PSDK_New::stopDeviceRecord(struct _playrecordmsg* playrecord_req)
 {
-//    PlayRecordCtrlMsg msg;
-//    msg.ctrl = PB_STOP;
-//    msg.channelNo = 1;
-//    msg.frameType = 0;
     if (conn)
     {
         conn->StopBackRecord(playrecord_req);
@@ -317,6 +264,10 @@ int P2PSDK_New::stopDeviceRecord(struct _playrecordmsg* playrecord_req)
     else
     {
         relayconn->StopBackRecord(playrecord_req);
+    }
+    @synchronized(aryVideo)
+    {
+        [aryVideo removeAllObjects];
     }
     return 1;
 }
