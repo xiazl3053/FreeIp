@@ -25,7 +25,7 @@
     UIView *topView;
     UIView *downView;
     UILabel *_lblName;
-    CloudDecode *cloudDec;
+//    CloudDecode *cloudDec;
     TimeView *timeView;
     CloudButton *btnPause;
     CloudButton *btnStop;
@@ -48,6 +48,8 @@
     UIView *rightView;
     UIButton *rightBtn;
     UIImageView *imgView;
+    int nChannel;
+    NSMutableArray *aryDecode;
 }
 @property (nonatomic,assign) BOOL bDecoding;
 @property (nonatomic,assign) BOOL bPlaying;
@@ -63,11 +65,13 @@
     _strNO = devInfo.strDevNO;
     NSString *strChannel = [DecodeJson getDeviceTypeByType:[devInfo.strDevType intValue]];
     nAllCount = [[strChannel componentsSeparatedByString:@"-"][1] intValue];
+    nChannel = 0;
     return self;
 }
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    aryDecode = [NSMutableArray array];
     [self.view setBackgroundColor:RGB(255, 255, 255)];
     _tapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTapNew:)];
     pinchGesture = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(pinchEvent:)];
@@ -94,13 +98,36 @@
         UIButton *btnAction = [UIButton buttonWithType:UIButtonTypeCustom];
         [btnAction setTitle:[NSString stringWithFormat:@"%d",i+1] forState:UIControlStateNormal];
         [btnAction setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+        [btnAction setTitleColor:RGB(15, 173, 225) forState:UIControlStateHighlighted];
         [btnAction setBackgroundColor:[UIColor blackColor]];
         [scrolView addSubview:btnAction];
         btnAction.frame = Rect(0,i*60,60,60);
+        btnAction.layer.borderColor = RGB(255, 255, 255).CGColor;
+        btnAction.layer.borderWidth = 0.5f;
+        [btnAction.layer setMasksToBounds:YES];
+        [btnAction.layer setCornerRadius:3];
+        btnAction.tag = i;
+        [btnAction addTarget:self action:@selector(switchChannel:) forControlEvents:UIControlEventTouchUpInside];
     }
-//    [scrolView sets];
     [scrolView setShowsHorizontalScrollIndicator:NO];
     [scrolView setShowsVerticalScrollIndicator:NO];
+}
+
+-(void)switchChannel:(UIButton *)sender
+{
+    DLog(@"切换到通道:%li",(long)sender.tag);
+    if (aryDecode.count==0) {
+        
+    }
+    else
+    {
+        CloudDecode *cloudDec = [aryDecode objectAtIndex:0];
+        [cloudDec stopDecode];
+        [aryDecode removeObjectAtIndex:0];
+        cloudDec = nil;
+    }
+    nChannel = (int)sender.tag;
+    [self cloudInit];
 }
 
 -(void)clickRightBtn
@@ -265,6 +292,12 @@
 -(void)startPlayCloud
 {
     unsigned int nTime = (unsigned int)[timeView currentTime];
+    CloudDecode *cloudDec = nil;
+    if(aryDecode.count==0)
+    {
+        return ;
+    }
+    cloudDec = [aryDecode objectAtIndex:0];
     BOOL bFlag = [cloudDec startVideo:nTime];
     if (!bFlag)
     {
@@ -296,7 +329,7 @@
 
 -(void)cloudInit
 {
-    cloudDec = [[CloudDecode alloc] initWithCloud:_strNO channel:1 codeType:0];
+    CloudDecode *cloudDec = [[CloudDecode alloc] initWithCloud:_strNO channel:nChannel codeType:0];
     __weak TimeView *__timeView = timeView;
     __weak PlayCloudViewController *__self = self;
     cloudDec.cloudBlock = ^(int nStatus,NSArray *ary)
@@ -309,11 +342,16 @@
         });
     };
     [cloudDec checkView:timeView.strDate];
+    [aryDecode addObject:cloudDec];
 }
 
 -(void)enterBackgroud
 {
-    [cloudDec stopDecode];
+    if(aryDecode.count > 1)
+    {
+        CloudDecode *cloudDec = [aryDecode objectAtIndex:0];
+        [cloudDec stopDecode];
+    }
 }
 
 -(void)viewDidAppear:(BOOL)animated
@@ -446,12 +484,15 @@
     });
     _bPlaying = YES;
     _bDecoding = NO;
-    
+    if(aryDecode.count==0)
+    {
+        return ;
+    }
+    CloudDecode *cloudDec = [aryDecode objectAtIndex:0];
     while (cloudDec.fps!=30)
     {
         [NSThread sleepForTimeInterval:0.1];
     }
-    
     _videoFrames = [NSMutableArray array];
     DLog(@"开始播放");
     dispatch_async(dispatch_get_global_queue(0, 0),
@@ -504,6 +545,13 @@
     }
     _bDecoding = YES;
     __weak PlayCloudViewController *__weakSelf = self;
+    
+    if(aryDecode.count==0)
+    {
+        return ;
+    }
+    CloudDecode *cloudDec = [aryDecode objectAtIndex:0];
+    
     __weak CloudDecode *__decoder = cloudDec;
     dispatch_async(dispatch_get_global_queue(0, 0), ^{
         BOOL bGood = YES;
@@ -558,6 +606,12 @@
 
 -(void)pauseVideo
 {
+    if(aryDecode.count==0)
+    {
+        return ;
+    }
+    CloudDecode *cloudDec = [aryDecode objectAtIndex:0];
+ 
     [cloudDec pauseVideo];
     _bPlaying = NO;
     _bDecoding = YES;
@@ -565,6 +619,11 @@
 
 -(void)stopVideo
 {
+    if(aryDecode.count==0)
+    {
+        return ;
+    }
+    CloudDecode *cloudDec = [aryDecode objectAtIndex:0];
     [cloudDec stopDecode];
     _bPlaying = NO;
     _bDecoding = YES;
@@ -596,7 +655,6 @@
     {
         [_videoFrames removeAllObjects];
     }
-//    _videoFrames = nil;
     [timeView removeFromSuperview];
     timeView = nil;
 }

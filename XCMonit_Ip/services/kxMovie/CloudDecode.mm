@@ -38,10 +38,10 @@ extern "C"
     struct _playrecordmsg _recordreq;
     BOOL bStop;
     NSRecursiveLock *theLock;
+    
 }
+
 @end
-
-
 
 @implementation CloudDecode
 
@@ -52,7 +52,7 @@ extern "C"
     _nChannel = nChannel;
     _strNO = strNo;
     nStreamType = nCode;
-    
+    memset(&_recordreq, 0, sizeof(struct _playrecordmsg));
     __weak CloudDecode *__self = self;
     dispatch_async(dispatch_get_global_queue(0, 0), ^{
         [__self newSdkInfo];
@@ -61,6 +61,7 @@ extern "C"
     return self;
 }
 
+#pragma mark 创建p2p、tran对象
 -(void)newSdkInfo
 {
     P2PSDKClient *sdk = [[P2PInitService sharedP2PInitService] getP2PSDK];
@@ -77,6 +78,7 @@ extern "C"
     });
 }
 
+#pragma mark 云存储查询
 -(void)checkView:(NSString *)strTime
 {
     _strTime = [strTime copy];
@@ -188,7 +190,15 @@ extern "C"
     if (bFlag)
     {
         bPTP = YES;
-        bTran = NO;
+        if(bTran==YES)
+        {
+            if (_recordreq.startTime!=0)
+            {
+                sdkNew->stopDeviceRecord(&_recordreq);
+                sdkNew->P2P_PlayDeviceRecord(&_recordreq);
+            }
+            bTran = NO;
+        }
         connectStatus = 1;
     }
 }
@@ -201,6 +211,7 @@ extern "C"
         DLog(@"中转成功!!!!");
         if (bPTP)
         {
+            sdkNew->closeTranServer();
             bTran = NO;
         }
         bTran = YES;
@@ -437,7 +448,11 @@ extern "C"
 
 -(void)stopDecode
 {
-    sdkNew->stopDeviceRecord(&_recordreq);
+    if(_recordreq.startTime!=0)
+    {
+        sdkNew->stopDeviceRecord(&_recordreq);
+    }
+    memset(&_recordreq, 0, sizeof(struct _playrecordmsg));
     bStop = NO;
     [self closeScaler];
     [self closeFile];
