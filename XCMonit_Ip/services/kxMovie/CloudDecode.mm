@@ -92,6 +92,15 @@ extern "C"
             return ;
         }
     }
+    if (connectStatus==-1)
+    {
+        if (_cloudBlock)
+        {
+            _cloudBlock(0,nil);
+        }
+        return;
+    }
+    
     struct _playrecordmsg recordreq;
     char responsedata[MAX_MSG_DATA_LEN];
     recordreq.channelNo = 1;
@@ -156,10 +165,8 @@ extern "C"
             return ;
         }
         memcpy(&_recordreq,responsedata+4,sizeof(struct _playrecordmsg));
-        DLog(@"%d--%d--%u--%u",_recordreq.frameType,_recordreq.channelNo,_recordreq.startTime,_recordreq.endTime);
         int nCount;
         memcpy((char*)&nCount,responsedata,4);
-        DLog(@"nCout:%d",nCount);
         if (nCount>0)
         {
             struct _playrecordmsg recordMsg;
@@ -179,7 +186,7 @@ extern "C"
         }
         else
         {
-            
+            DLog(@"error count");
         }
     } 
 }
@@ -208,13 +215,15 @@ extern "C"
     BOOL bFlag = sdkNew->initTranServer();
     if (bFlag)
     {
-        DLog(@"中转成功!!!!");
         if (bPTP)
         {
             sdkNew->closeTranServer();
             bTran = NO;
         }
-        bTran = YES;
+        else
+        {
+            bTran = YES;
+        }
         connectStatus = 1;
     }
 }

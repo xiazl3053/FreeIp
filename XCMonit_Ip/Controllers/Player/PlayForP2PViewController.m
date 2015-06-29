@@ -115,7 +115,7 @@
         DLog(@"连接失败");
         dispatch_async(dispatch_get_main_queue(),
         ^{
-            [__weakSelf.view makeToast:@"连接失败"];
+            [__weakSelf.view makeToast:XCLocalized(@"connectFail")];
         });
     }
 }

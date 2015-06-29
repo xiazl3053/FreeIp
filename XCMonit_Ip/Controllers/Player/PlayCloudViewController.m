@@ -115,19 +115,25 @@
 
 -(void)switchChannel:(UIButton *)sender
 {
-    DLog(@"切换到通道:%li",(long)sender.tag);
+    __weak PlayCloudViewController *__self = self;
+    dispatch_async(dispatch_get_global_queue(0, 0),^{
+        [__self stopVideo];
+    });
+    [ProgressHUD show:@"切换通道"];
     if (aryDecode.count==0) {
         
     }
     else
     {
         CloudDecode *cloudDec = [aryDecode objectAtIndex:0];
-        [cloudDec stopDecode];
         [aryDecode removeObjectAtIndex:0];
         cloudDec = nil;
     }
     nChannel = (int)sender.tag;
-    [self cloudInit];
+    dispatch_async(dispatch_get_global_queue(0, 0),
+    ^{
+        [__self cloudInit];
+    });
 }
 
 -(void)clickRightBtn
@@ -189,8 +195,7 @@
     {
         lastScale = 1.5f;
         [imgView addGestureRecognizer:_panGesture];
-        CGPoint point = [sender locationInView:self.view];
-        DLog(@"point:%f--%f",point.x,point.y);
+//        CGPoint point = [sender locationInView:self.view];
         CGFloat nowWidth = glWidth*fScale>fWidth*4?fWidth*4:glWidth*fScale;
         CGFloat nowHeight =glHeight*fScale >fHeight* 4?fHeight*4:glHeight*fScale;
         imgView.frame = Rect(fWidth/2 - nowWidth/2,fHeight/2- nowHeight/2,nowWidth,nowHeight);
@@ -295,6 +300,7 @@
     CloudDecode *cloudDec = nil;
     if(aryDecode.count==0)
     {
+        DLog(@"个数为0");
         return ;
     }
     cloudDec = [aryDecode objectAtIndex:0];
@@ -330,19 +336,36 @@
 -(void)cloudInit
 {
     CloudDecode *cloudDec = [[CloudDecode alloc] initWithCloud:_strNO channel:nChannel codeType:0];
+    [aryDecode addObject:cloudDec];
     __weak TimeView *__timeView = timeView;
     __weak PlayCloudViewController *__self = self;
     cloudDec.cloudBlock = ^(int nStatus,NSArray *ary)
     {
-        [__timeView.aryDate removeAllObjects];
-        [__timeView.aryDate addObjectsFromArray:ary];
-        [__timeView startTimeCome];
-        dispatch_async(dispatch_get_main_queue(),^{
-            [__self startPlayCloud];
-        });
+        if(nStatus==0)
+        {
+            __strong PlayCloudViewController *__strongSelf = __self;
+            dispatch_async(dispatch_get_main_queue(),
+            ^{
+                [__strongSelf.view makeToast:XCLocalized(@"connectFail")];
+            });
+        }
+        else
+        {
+            [__timeView.aryDate removeAllObjects];
+            [__timeView.aryDate addObjectsFromArray:ary];
+            DLog(@"请求播放视频");
+            [__timeView startTimeCome];
+            dispatch_async(dispatch_get_main_queue(),
+            ^{
+                [ProgressHUD dismiss];
+            });
+            __strong PlayCloudViewController *__strongSelf = self;
+            dispatch_async(dispatch_get_global_queue(0, 0), ^{
+                [__strongSelf startPlayCloud];
+            });
+        }
     };
     [cloudDec checkView:timeView.strDate];
-    [aryDecode addObject:cloudDec];
 }
 
 -(void)enterBackgroud
@@ -411,6 +434,25 @@
 {
     [super viewWillAppear:animated];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(rePlayInfo) name:NS_TIME_CURRENT_PAN_EVENT_VC object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(disconnect) name:NSCONNECT_P2P_DISCONNECT object:nil];
+}
+
+-(void)disconnect
+{
+    __weak PlayCloudViewController *__self = self;
+    dispatch_async(dispatch_get_main_queue(),
+    ^{
+        [__self.view makeToast:XCLocalized(@"Disconnect") duration:1.5f position:@"center"];
+    });
+    if (aryDecode.count==0)
+    {}
+    else
+    {
+        CloudDecode *cloudDec = [aryDecode objectAtIndex:0];
+        [cloudDec stopDecode];
+        [aryDecode removeObjectAtIndex:0];
+        cloudDec = nil;
+    }
 }
 
 -(void)viewWillDisappear:(BOOL)animated
@@ -611,7 +653,6 @@
         return ;
     }
     CloudDecode *cloudDec = [aryDecode objectAtIndex:0];
- 
     [cloudDec pauseVideo];
     _bPlaying = NO;
     _bDecoding = YES;
@@ -648,6 +689,7 @@
 
 -(void)dealloc
 {
+    [self stopVideo];
     _bDecoding = YES;
     _bPlaying = NO;
     [imgView removeFromSuperview];
