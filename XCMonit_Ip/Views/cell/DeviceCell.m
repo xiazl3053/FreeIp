@@ -72,12 +72,13 @@
 -(void)setPlayModel
 {
     //79  25  54
-    UIImageView *imgView = [[UIImageView alloc] initWithFrame:Rect(kScreenWidth-60, kTableviewDeviceCellHeight/2-22, 44, 44)];
-    [self.contentView addSubview:imgView];
-    [imgView setImage:[UIImage imageNamed:@"recordImage"]];
-    _recordGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(recordClick)];
-    [imgView addGestureRecognizer:_recordGesture];
-    [imgView setUserInteractionEnabled:YES];
+    
+    UIButton *btnRemote = [UIButton buttonWithType:UIButtonTypeCustom];
+    [btnRemote setImage:[UIImage imageNamed:@"remote_cl"] forState:UIControlStateNormal];
+    [btnRemote setImage:[UIImage imageNamed:@"reomte_cl_h"] forState:UIControlStateHighlighted];
+    [self.contentView addSubview:btnRemote];
+    [btnRemote addTarget:self action:@selector(recordClick) forControlEvents:UIControlEventTouchUpInside];
+    btnRemote.frame = Rect(kScreenWidth-60, kTableviewDeviceCellHeight/2-22, 44, 44);
 }
 -(void)recordClick
 {
