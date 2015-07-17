@@ -24,7 +24,6 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    
     [self.view setBackgroundColor:RGB(255, 255, 255)];
     [self initHeadView];
     [self initBodyView];

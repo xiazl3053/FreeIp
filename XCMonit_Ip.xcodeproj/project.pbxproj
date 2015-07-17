@@ -198,6 +198,8 @@
 		BB5640831941CEA2007CF682 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 160133B81921BC54003DB845 /* Foundation.framework */; };
 		BB7BDBAA1A35980700E92C00 /* PTZView.m in Sources */ = {isa = PBXBuildFile; fileRef = BB7BDBA91A35980700E92C00 /* PTZView.m */; };
 		BB7CFE921AD65A630021C15A /* RtspWlanCell.m in Sources */ = {isa = PBXBuildFile; fileRef = BB7CFE911AD65A630021C15A /* RtspWlanCell.m */; };
+		BB8412D51B58D821002EB328 /* LoginSNService.m in Sources */ = {isa = PBXBuildFile; fileRef = BB8412D41B58D821002EB328 /* LoginSNService.m */; };
+		BB8412D81B58F14F002EB328 /* LoginSNViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BB8412D71B58F14F002EB328 /* LoginSNViewController.m */; };
 		BB9F47791AB97E8E002AF594 /* LoginUserDB.m in Sources */ = {isa = PBXBuildFile; fileRef = BB9F47781AB97E8E002AF594 /* LoginUserDB.m */; };
 		BBAC41681AAE74FB00EB1F8B /* PlayViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BBAC41671AAE74FB00EB1F8B /* PlayViewController.m */; };
 		BBB600711A5392610084E1F1 /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = BBB600701A5392610084E1F1 /* Reachability.m */; };
@@ -585,6 +587,10 @@
 		BB7BDBA91A35980700E92C00 /* PTZView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PTZView.m; sourceTree = "<group>"; };
 		BB7CFE901AD65A630021C15A /* RtspWlanCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RtspWlanCell.h; sourceTree = "<group>"; };
 		BB7CFE911AD65A630021C15A /* RtspWlanCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RtspWlanCell.m; sourceTree = "<group>"; };
+		BB8412D31B58D821002EB328 /* LoginSNService.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoginSNService.h; sourceTree = "<group>"; };
+		BB8412D41B58D821002EB328 /* LoginSNService.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LoginSNService.m; sourceTree = "<group>"; };
+		BB8412D61B58F14F002EB328 /* LoginSNViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoginSNViewController.h; sourceTree = "<group>"; };
+		BB8412D71B58F14F002EB328 /* LoginSNViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LoginSNViewController.m; sourceTree = "<group>"; };
 		BB8BD6751A5A8D5B00E81412 /* pt-PT */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "pt-PT"; path = "pt-PT.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		BB8BD6771A5A94C300E81412 /* pt */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pt; path = pt.lproj/Localizable.strings; sourceTree = "<group>"; };
 		BB97F8E41A6F4C8500EC7703 /* UIButton+Extension.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "UIButton+Extension.h"; sourceTree = "<group>"; };
@@ -908,6 +914,8 @@
 				BB2193D91A1444AF00CCFE5E /* FirstStepViewController.m */,
 				BB2193DB1A1444C100CCFE5E /* TwoStepViewController.h */,
 				BB2193DC1A1444C100CCFE5E /* TwoStepViewController.m */,
+				BB8412D61B58F14F002EB328 /* LoginSNViewController.h */,
+				BB8412D71B58F14F002EB328 /* LoginSNViewController.m */,
 			);
 			path = login;
 			sourceTree = "<group>";
@@ -1276,6 +1284,8 @@
 				BB23E3AB1AA99C9F0074BCB5 /* HttpManager.m */,
 				BB3EF4C41AEE090A00F9D765 /* VersionCheckService.h */,
 				BB3EF4C51AEE090A00F9D765 /* VersionCheckService.m */,
+				BB8412D31B58D821002EB328 /* LoginSNService.h */,
+				BB8412D41B58D821002EB328 /* LoginSNService.m */,
 			);
 			path = http;
 			sourceTree = "<group>";
@@ -1728,6 +1738,7 @@
 				BB1F850719A4A950004BE9AA /* RtspDecoder.mm in Sources */,
 				BB1F84EC19A4A950004BE9AA /* AppDelegate.m in Sources */,
 				BBE93A7B1B15528D00200E79 /* CloudDecode.mm in Sources */,
+				BB8412D81B58F14F002EB328 /* LoginSNViewController.m in Sources */,
 				BB1F84A219A4A950004BE9AA /* PlayFourViewController.m in Sources */,
 				BB1F84C319A4A950004BE9AA /* UIView+Extension.m in Sources */,
 				BB2193DA1A1444AF00CCFE5E /* FirstStepViewController.m in Sources */,
@@ -1878,6 +1889,7 @@
 				BB1F850E19A4A950004BE9AA /* DevReocrdCell.m in Sources */,
 				BB1F84E919A4A950004BE9AA /* UserAllInfoModel.m in Sources */,
 				BB1F84AD19A4A950004BE9AA /* UtilityFunc.m in Sources */,
+				BB8412D51B58D821002EB328 /* LoginSNService.m in Sources */,
 				BB1F84DF19A4A950004BE9AA /* XCTabBar.m in Sources */,
 				BB1F84FE19A4A950004BE9AA /* UpdNameService.m in Sources */,
 				BB1F849D19A4A950004BE9AA /* IndexViewController.mm in Sources */,
@@ -2042,7 +2054,7 @@
 					_FOR_DEBUG_,
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "377cc6b8-17ec-4795-8c22-6050e4b2871b";
+				PROVISIONING_PROFILE = "bfdac09b-79e7-475e-b942-c16e18a2b39a";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = 1;
 				VALID_ARCHS = armv7;
@@ -2083,7 +2095,7 @@
 					_FOR_DEBUG_,
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "377cc6b8-17ec-4795-8c22-6050e4b2871b";
+				PROVISIONING_PROFILE = "bfdac09b-79e7-475e-b942-c16e18a2b39a";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = 1;
 				VALID_ARCHS = armv7;
