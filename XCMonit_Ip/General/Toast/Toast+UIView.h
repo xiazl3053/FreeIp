@@ -42,6 +42,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // displays toast with an activity spinner
 - (void)makeToastActivity;
 - (void)makeToastActivity:(id)position;
+- (void)makeToastNew;
 - (void)hideToastActivity;
 
 // the showToast methods display any view as toast

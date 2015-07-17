@@ -19,6 +19,9 @@
 -(int)year;
 -(int)month;
 -(int)day;
+-(int)second;
+-(int)minute;
+-(int)hour;
 
 +(NSDate *)dateStartOfDay:(NSDate *)date;
 +(NSDate *)dateStartOfWeek;

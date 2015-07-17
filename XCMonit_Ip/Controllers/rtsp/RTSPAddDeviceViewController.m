@@ -112,27 +112,26 @@
             _segChannel.hidden = NO ;
             [self clickDeviceType:_btnNVR];
         }
-//        _rtspInfo.nChannel
-        
-//        [_segChannel setSelectedSegmentIndex:];
         int nIndex = 0;
         switch (_rtspInfo.nChannel) {
-            case 1:
+            case 4:
                 nIndex = 0;
                 break;
-            case 4:
+            case 8:
                 nIndex = 1;
                 break;
-            case 8:
+            case 16:
                 nIndex = 2;
                 break;
-            case 16:
+            case 24:
                 nIndex = 3;
                 break;
-            case 24:
+            case 25:
                 nIndex = 4;
+                break;
+            case 32:
+                nIndex = 5;
             default:
-                
                 break;
         }
         [_segChannel setSelectedSegmentIndex:nIndex];
@@ -423,7 +422,7 @@
     [srcView addSubview:_txtPwd];
     
     
-    segmentedArray1 = [[NSArray alloc]initWithObjects:@"4",@"8",@"16",@"24",@"32",nil];
+    segmentedArray1 = [[NSArray alloc]initWithObjects:@"4",@"8",@"16",@"24",@"25",@"32",nil];
     //初始化UISegmentedControl
     _segChannel = [[UISegmentedControl alloc]initWithItems:segmentedArray1];
     _segChannel.frame = CGRectMake(20.0,_txtPwd.y+_txtPwd.height+10, 280.0, 30.0);
@@ -519,7 +518,7 @@
         [self.view makeToast:XCLocalized(@"devPortNULL")];
         return ;
     }
-    NSString *strChannel = [segmentedArray1  objectAtIndex:_segChannel.selectedSegmentIndex];
+    NSString *strChannel = [segmentedArray1 objectAtIndex:_segChannel.selectedSegmentIndex];
     if(_rtspInfo)
     {
         _rtspInfo.strAddress = _txtAddress.text;

@@ -32,4 +32,12 @@ typedef void(^RecordBlockCloud)(int nStatus,NSArray *aryInfo);
 
 -(void)pauseVideo;
 
+-(void)regainVideo;
+
+-(void)dragTime:(long)lTime;
+
+-(void)startRecord:(NSString *)strPath devName:(NSString *)strDevName;
+-(void)stopRecord;
+
+
 @end

@@ -208,8 +208,11 @@
     while(rs.next)
     {
             NSArray *array = [[NSArray alloc] initWithObjects:[rs stringForColumn:@"id"],[rs stringForColumn:@"devName"],[rs stringForColumn:@"startTIme"],[rs stringForColumn:@"file"],nil];
+        if (array.count==4)
+        {
             PictureModel *recordModel = [[PictureModel alloc] initWithItems:array];
             [arrayTable addObject:recordModel];
+        }
     }
     return arrayTable;
 }

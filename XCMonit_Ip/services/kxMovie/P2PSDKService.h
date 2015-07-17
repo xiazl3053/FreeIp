@@ -43,6 +43,7 @@ public:
     void thread();
     virtual bool ProcessFrameData(char* aFrameData, int aFrameDataLength);
     virtual bool DeviceDisconnectNotify();
+    virtual bool RecordEndNotify(char* aNotifyData, int aNotifyDataLength);
     void StopRecv();
     void backword();
     void forword();

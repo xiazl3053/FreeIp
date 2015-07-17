@@ -21,7 +21,8 @@ public:
     EventHandler() {};
     virtual ~EventHandler() {};
     virtual bool ProcessFrameData(char* aFrameData, int aFrameDataLength) = 0;  
-    virtual bool DeviceDisconnectNotify() =0;	//设备掉线通知
+    virtual bool DeviceDisconnectNotify() =0;
+    virtual bool RecordEndNotify(char* aNotifyData, int aNotifyDataLength) =0;	//??????????
 };
 
 class  ConnectionImpl;
@@ -56,7 +57,7 @@ public:
     int StopBackRecord(PlayRecordMsg* msg);	
     int PlayBackRecordCtrl(PlayRecordCtrlMsg* msg);
     
-    
+    int  DragRecordStream(RecordDragMsg* msg);
 private:
     bool     connectstatue;	
     ConnectionImpl* impl;
@@ -82,6 +83,7 @@ public:
        int StopBackRecord(PlayRecordMsg* msg);
     int PlayBackRecordCtrl(PlayRecordCtrlMsg* msg);
     int GetDeviceStreamInfo(short channelNo, short streamType,DeviceStreamInfoResp*  deviceinfo); 	
+   int DragRecordStream(RecordDragMsg* msg);  
 private:
     bool     connectstatue;	
     RelayConnectionImpl* impl;

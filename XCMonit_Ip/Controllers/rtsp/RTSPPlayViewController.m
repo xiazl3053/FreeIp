@@ -690,7 +690,6 @@
         [ProgressHUD dismiss];
         [weakSelf updateImage:nil];
         [__imageView removeFromSuperview];
-    
         [weakSelf.btnPlay setEnabled:YES];
         [weakSelf.btnPlay setSelected:NO];
         [weakSelf.btnRecord setEnabled:NO];
@@ -698,6 +697,7 @@
         [weakSelf.btnHD setEnabled:NO];
         [weakSelf.btnBD setEnabled:NO];
     });
+    
     bPlay = NO;
     [NSThread sleepForTimeInterval:0.3f];
     _glView = nil;

@@ -24,59 +24,6 @@ bool RecvFile::ProcessFrameData(char* aFrameData, int aFrameDataLength)
     {
         return YES;
     }
-    unsigned char *unFrame = (unsigned char *)aFrameData;
-//    DLog(@"%hhu--%hhu--%hhu--%hhu--%hhu--%d",unFrame[0],unFrame[1],unFrame[2],unFrame[3],unFrame[4],aFrameDataLength);
-//    if (!aryData)
-//    {
-//        aryData = [NSMutableData data];
-//        [aryData appendBytes:aFrameData length:aFrameDataLength];
-//    }
-//    else
-//    {
-//        if (unFrame[0] != 0x00 || unFrame[1] != 0x00)
-//        {
-//            [aryData appendBytes:aFrameData length:aFrameDataLength];
-//            @synchronized(aryVideo)
-//            {
-//                [aryVideo addObject:aryData];
-//            }
-//        }
-//        else
-//        {
-//            @synchronized(aryVideo)
-//            {
-//                [aryVideo addObject:aryData];
-//            }
-//            aryData = nil;
-//            aryData = [NSMutableData data];
-//            [aryData appendBytes:aFrameData length:aFrameDataLength];
-//        }
-//    }
-//    if(unFrame[3] == 0x67 || unFrame[4] == 0x67)
-//    {
-//        aryData = [NSMutableData data];
-//        [aryData appendBytes:aFrameData length:aFrameDataLength];
-//    }
-//    else if(unFrame[3] == 0x61 || unFrame[4] == 0x61)
-//    {
-//        NSData *dataInfo = [NSData dataWithBytes:aFrameData length:aFrameDataLength];
-//        if(aryData)
-//        {
-//            @synchronized(aryVideo)
-//            {
-//                [aryVideo addObject:aryData];
-//            }
-//            aryData = nil;
-//        }
-//        @synchronized(aryVideo)
-//        {
-//            [aryVideo addObject:dataInfo];
-//        }
-//    }
-//    else
-//    {
-//        [aryData appendBytes:aFrameData length:aFrameDataLength];
-//    }
     NSData *dataInfo = [NSData dataWithBytes:aFrameData length:aFrameDataLength];
     @synchronized(aryVideo)
     {
@@ -110,7 +57,10 @@ bool RecvFile::ProcessFrameData(char* aFrameData, int aFrameDataLength)
     }
     return true;
 }
-
+bool RecvFile::RecordEndNotify(char* aNotifyData, int aNotifyDataLength)
+{
+    return false;
+}
 bool RecvFile::DeviceDisconnectNotify()
 {
     printf("device is disconnect\n");
@@ -243,13 +193,13 @@ void RecvFile::closeTran()
 void RecvFile::backword()
 {
     PlayRecordCtrlMsg msg;
-    msg.ctrl = PB_BACKWARD;
+//    msg.ctrl = PB_BACKWARD;
     conn->PlayBackRecordCtrl(&msg);
 }
 void RecvFile::forword()
 {
     PlayRecordCtrlMsg msg;
-    msg.ctrl = PB_FORWARD;
+//    msg.ctrl = PB_FORWARD;
     conn->PlayBackRecordCtrl(&msg);
 }
 void RecvFile::pause()
@@ -262,8 +212,8 @@ void RecvFile::seek()
 {
     PlayRecordMsg msg;
     msg.channelNo = 0;
-    msg.startTime = 1372219200;
-    msg.endTime = 1372222800;
+//    msg.startTime = 1372219200;
+//    msg.endTime = 1372222800;
     conn->PlayBackRecord(&msg);
 }
 void RecvFile::pause2play()
@@ -434,8 +384,6 @@ BOOL RecvFile::connectP2PStream(int nCodeType)
     {
         PlayRecordMsg msg;
         msg.channelNo = 0;
-        msg.startTime = 1373439705;
-        msg.endTime = 1373439861;
         ret = conn->PlayBackRecord(&msg);
         if(ret != 0)
         {
@@ -520,7 +468,6 @@ void RecvFile::stopRecord(CGFloat fEnd,long lFrameNumber,int nBit)
         return ;
     }
     bRecord = NO;
- //   end = fEnd-start;
     [fileHandle closeFile];//新加入的
     bStart = NO;
     BOOL success = [[NSURL fileURLWithPath:strFile] setResourceValue: [NSNumber numberWithBool: YES]
@@ -553,11 +500,11 @@ void RecvFile::stopRecord(CGFloat fEnd,long lFrameNumber,int nBit)
     [RecordDb insertRecord:record];
     data = nil;
 }
+
 void RecvFile::startRecord(CGFloat fStart,const char * cPath,const char *cRecordDevName)
 {
     start = 0;
     end = 0;
-//  创建文件  获取系统时间  序列号  peerName
     NSDate *senddate=[NSDate date];
     start = fStart;
     DLog(@"start:%f",start);

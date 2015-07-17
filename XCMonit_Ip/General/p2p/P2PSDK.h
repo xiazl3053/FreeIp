@@ -10,7 +10,7 @@ extern "C" {
 
 //#include <string>
 #include <stdio.h>
-#define MAX_MSG_DATA_LEN 2048
+#define MAX_MSG_DATA_LEN  1024*100
 #define  MAX_VERSION_LENGTH   32
 
 #ifdef _MSC_VER_
@@ -107,13 +107,22 @@ typedef struct  _playrecordresp
 	char              recordmsg[MAX_MSG_DATA_LEN];//录像文件信息(DVR录像文件信息和NVR录像文件信息结构体不一样)
 }PP_PACKED PlayRecordResMsg;
 #endif
+typedef  struct _recordtimemsg
+{
+	int  myear;
+	int  mmonth;
+	int  mday;
+	int  mhour;
+	int  mminute;
+	int  msec;
+}PP_PACKED RecordTime;
 // 录像回放应答消息
 typedef struct _playrecordmsg
 {
 	unsigned short        channelNo;                 // 通道号
 	unsigned short        frameType;		// 帧类型(0:视频,1:音频,2:音视频) 
-	unsigned int            startTime;	                // 开始时间
-	unsigned int            endTime;		        // 结束时间
+	RecordTime            startTime;	                // 开始时间
+	RecordTime            endTime;		        // 结束时间
 	unsigned int            nrecordFileType;        // 1:普通录像文件   2:报警录像文件
 	char                       reserve[8];                //保留
 }PP_PACKED PlayRecordMsg;
@@ -128,13 +137,20 @@ typedef enum {
 	PB_PAUSE			    	= 1,	//暂停
 	PB_STEPFORWARD		      = 2,	//单帧进
 	PB_STEPBACKWARD		      = 3,	//单帧退
-	PB_FORWARD			      = 4,	//快进
-	PB_BACKWARD			      = 5,	//快退
+	PB_FORWARD_1X			      = 4,	//快进1X
+	PB_FORWARD_2X			      = 5,	//快进2X
+	PB_FORWARD_3X			      = 6,	//快进3X
+	PB_FORWARD_4X			      = 7,	//快进4X
+	PB_BACKWARD_1X		      = 8,	//快退1X
+	PB_BACKWARD_2X		      = 9,	//快退2X
+	PB_BACKWARD_3X		      = 10,	//快退3X
+	PB_BACKWARD_4X		      = 11,	//快退4X
 }PlayBackControl;
 
 // 录像回放控制消息
 typedef struct 
 {
+    int                          msessionid;	
     unsigned short        channelNo;                 // 通道号
     unsigned short        frameType;		// 帧类型(0:视频,1:音频,2:音视频) 	
     PlayBackControl ctrl;
@@ -145,6 +161,20 @@ typedef struct
 {
     NetMsgResHeader header;
 }PP_PACKED PlayRecordCtrlResMsg;
+typedef struct 
+{
+    int                          msessionid;	             //设备端需要用上(app端将此参数直接置为0即可)
+    unsigned short        channelNo;                 // 通道号(通道号从0开始)
+    unsigned short        recordvideoType;		// 录像媒体流类型(0:视频,1:音频,2:音视频) 	
+    RecordTime            startTime;	                // 开始时间
+    RecordTime           endTime;		        // 结束时间
+}PP_PACKED RecordDragMsg;
+typedef struct 
+{
+    unsigned short        channelNo;                 // 通道号(通道号从0开始)
+    RecordTime            startTime;	                // 开始时间
+    RecordTime            endTime;		        // 结束时间
+}PP_PACKED RecordEndNotifyMsg;
 typedef enum {
 	PTZCONTROLTYPE_INVALID		= 0,
 	PTZCONTROLTYPE_UP_START 	= 1,    //开始向上转动
@@ -213,6 +243,12 @@ typedef enum
     GET_DEVICE_RECORDINFO_RES = 16,
     STOP_RECORD_STREAM = 17,   // 停止回放录像流消息类型
     STOP_RECORD_STREAM_RES = 18,
+    DRAG_RECORD_STREAM = 19,   // 录像拖放请求
+    DRAG_RECORD_STREAM_RES = 20,
+    CURRENT_RECORD_ENDNOTIFY = 21,   // 当前录像段播放完毕通知
+    CURRENT_RECORD_ENDNOTIFY_RES = 22,
+    HEARTBEAT_REQ = 23,    //心跳请求
+    HEARTBEAT_RSP = 24,
 }MsgType;
 // 请求消息
 typedef struct _NetMsg

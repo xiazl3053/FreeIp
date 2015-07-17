@@ -23,6 +23,8 @@
 
 -(long)currentTime;
 
+-(void)setTimeInfo:(long)lTime;
+
 -(void)startTimeCome;
 
 -(id)initWithFrame:(CGRect)frame time:(NSString *)strTime;
@@ -31,12 +33,13 @@
 
 -(void)drawDate:(CGContextRef)context;
 
+-(void)setDragTime:(long)longTime;
+
 @end
 
 @interface CloudTime : NSObject
 
 @property (nonatomic,assign) NSInteger iStart;
 @property (nonatomic,assign) NSInteger iEnd;
-
 
 @end

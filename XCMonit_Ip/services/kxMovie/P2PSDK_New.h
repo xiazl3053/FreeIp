@@ -44,6 +44,7 @@ public:
     void thread();
     virtual bool ProcessFrameData(char* aFrameData, int aFrameDataLength);
     virtual bool DeviceDisconnectNotify();
+    virtual bool RecordEndNotify(char* aNotifyData, int aNotifyDataLength);
     void StopRecv();
     
     int  P2P_GetDeviceRecordInfo(struct _playrecordmsg*   recordsearch_req,struct  _playrecordresp*  recordsearch_resp);
@@ -65,10 +66,31 @@ public:
     
     int controlDeviceRecord(PlayRecordCtrlMsg *control);
     
+    int  P2P_RecordDrag(RecordDragMsg* recorddragmsg);
+    int  RELAY_RecordDrag(RecordDragMsg* recorddragmsg);
+    
+    void startRecord(const char * cPath,const char *cRecordDevName);
+    void clearVideoInfo();
+    void stopRecord(int nBit);
 public:
     int nChannel;
-//    NSFileHandle * fileHandle;
-//    BOOL sendheartinfoflag;
+    NSString *strFile;
+    NSString *strDir;
+    NSFileHandle *fileHandle;
+    int nNumberCatch;
+    BOOL bStart;
+    BOOL bRecord;
+    char cRecordPath[512];
+    char cDevName[512];
+    char cStart[80];
+    char cEnd[80];
+    char cFileName[80];
+    BOOL bFirst;
+    int nFrameNum;
+    
+    
+    
+    
     P2PSDKClient* mSdk;
     Connection* conn;
     RelayConnection* relayconn;

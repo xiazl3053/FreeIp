@@ -16,6 +16,29 @@
     return (int)[components year];
 }
 
+-(int)hour
+{
+    NSCalendar *gregorian = [[NSCalendar alloc]
+                             initWithCalendarIdentifier:NSGregorianCalendar];
+    NSDateComponents *components = [gregorian components:NSYearCalendarUnit fromDate:self];
+    return (int)[components hour];
+}
+
+-(int)minute
+{
+    NSCalendar *gregorian = [[NSCalendar alloc]
+                             initWithCalendarIdentifier:NSGregorianCalendar];
+    NSDateComponents *components = [gregorian components:NSYearCalendarUnit fromDate:self];
+    return (int)[components minute];
+}
+
+-(int)second
+{
+    NSCalendar *gregorian = [[NSCalendar alloc]
+                             initWithCalendarIdentifier:NSGregorianCalendar];
+    NSDateComponents *components = [gregorian components:NSYearCalendarUnit fromDate:self];
+    return (int)[components second];
+}
 
 -(int)month
 {

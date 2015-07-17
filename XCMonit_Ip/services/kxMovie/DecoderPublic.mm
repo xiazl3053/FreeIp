@@ -53,11 +53,11 @@ bool bIsCodeNeedExit;
 - (UIImage *) asImage
 {
     UIImage *image = nil;
-    
     CGDataProviderRef provider = CGDataProviderCreateWithCFData((__bridge CFDataRef)(_rgb));
     if (provider) {
         CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-        if (colorSpace) {
+        if (colorSpace)
+        {
             CGImageRef imageRef = CGImageCreate(self.width,
                                                 self.height,
                                                 8,
@@ -70,7 +70,8 @@ bool bIsCodeNeedExit;
                                                 YES, // NO
                                                 kCGRenderingIntentDefault);
             
-            if (imageRef) {
+            if (imageRef)
+            {
                 image = [UIImage imageWithCGImage:imageRef];
                 CGImageRelease(imageRef);
             }
@@ -78,7 +79,6 @@ bool bIsCodeNeedExit;
         }
         CGDataProviderRelease(provider);
     }
-    
     return image;
 }
 @end

@@ -375,6 +375,12 @@
 }
 -(void)loginServer
 {
+//    if (UIApplicationOpenSettingsURLString != NULL)
+//    {
+//        NSURL *appSettings = [NSURL URLWithString:UIApplicationOpenSettingsURLString];
+//        [[UIApplication sharedApplication] openURL:appSettings];
+//    }
+//    return ;
     NSString *nsUser = [_txtUser text];
     NSString *nsPwd = [_txtPwd text];
     if(_bLogin)

@@ -88,6 +88,7 @@
 -(NSString*)strDate
 {
     struct tm *p=NULL;
+    
     char month;
     char day;
     char hour;
@@ -239,6 +240,7 @@
         CloudTime *cloud = [_aryDate objectAtIndex:0];
         lCurrentTime = cloud.iStart;
         lStartTime = lCurrentTime - allTime/2;
+        
         lEndTime = lCurrentTime + allTime/2;
         if ([NSThread isMainThread])
         {
@@ -248,17 +250,58 @@
         {
             __weak TimeView *__self = self;
             dispatch_async(dispatch_get_main_queue()
-            , ^{
+            ,^{
                 [__self setNeedsDisplay];
             });
         }
     }
+    else
+    {
+        if ([NSThread isMainThread])
+        {
+            [self setNeedsDisplay];
+        }
+        else
+        {
+            __weak TimeView *__self = self;
+            dispatch_async(dispatch_get_main_queue()
+            ,^{
+                 [__self setNeedsDisplay];
+            });
+        }
+ 
+    }
     
 }
--(unsigned int)currentTime
+-(long)currentTime
 {
     return lCurrentTime;
 }
+
+-(void)setTimeInfo:(long)lTime
+{
+    lCurrentTime = lTime;
+}
+
+-(void)setDragTime:(long)longTime
+{
+    lCurrentTime = longTime;
+    lStartTime = lCurrentTime - allTime/2;
+    lEndTime = lCurrentTime + allTime/2;
+    if ([NSThread isMainThread])
+    {
+        [self setNeedsDisplay];
+    }
+    else
+    {
+        __weak TimeView *__self = self;
+        dispatch_async(dispatch_get_main_queue()
+                       ,^{
+                           [__self setNeedsDisplay];
+                       });
+    }
+}
+
 
 @end
 

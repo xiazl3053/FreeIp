@@ -117,6 +117,48 @@ static const NSString * CSToastActivityViewKey  = @"CSToastActivityViewKey";
     [self makeToastActivity:CSToastActivityDefaultPosition];
 }
 
+-(void)makeToastNew
+{
+    [self makeToastNew:CSToastActivityDefaultPosition];
+}
+
+-(void)makeToastNew:(id)position
+{
+    UIView *existingActivityView = (UIView *)objc_getAssociatedObject(self, &CSToastActivityViewKey);
+    if (existingActivityView != nil) return;
+    
+    UIView *activityView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, CSToastActivityWidth, CSToastActivityHeight)] ;
+    activityView.center = [self centerPointForPosition:position withToast:activityView];
+    activityView.backgroundColor = [[UIColor clearColor] colorWithAlphaComponent:0.4];
+    activityView.alpha = 0.5;
+    activityView.autoresizingMask = (UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin);
+    activityView.layer.cornerRadius = CSToastCornerRadius;
+    if (CSToastDisplayShadow)
+    {
+        activityView.layer.shadowColor = [UIColor blackColor].CGColor;
+        activityView.layer.shadowOpacity = CSToastShadowOpacity;
+        activityView.layer.shadowRadius = CSToastShadowRadius;
+        activityView.layer.shadowOffset = CSToastShadowOffset;
+    }
+    //UIActivityIndicatorViewStyleGray
+    
+    UIActivityIndicatorView *activityIndicatorView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
+    activityIndicatorView.center = CGPointMake(activityView.bounds.size.width / 2, activityView.bounds.size.height / 2);
+    [activityView addSubview:activityIndicatorView];
+    [activityIndicatorView startAnimating];
+    
+    objc_setAssociatedObject (self, &CSToastActivityViewKey, activityView, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    
+    [self addSubview:activityView];
+    
+    [UIView animateWithDuration:CSToastFadeDuration
+                          delay:0.0
+                        options:UIViewAnimationOptionCurveEaseOut
+                     animations:^{
+                         activityView.alpha = 1.0;
+                     } completion:nil];
+}
+
 - (void)makeToastActivity:(id)position {
     // sanity
     UIView *existingActivityView = (UIView *)objc_getAssociatedObject(self, &CSToastActivityViewKey);

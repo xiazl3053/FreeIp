@@ -8,6 +8,7 @@
 
 #import "CloudDecode.h"
 #import "P2PSDK_New.h"
+#import "NSDate+convenience.h"
 #import "P2PInitService.h"
 #import "DecoderPublic.h"
 #import "TimeView.h"
@@ -39,7 +40,12 @@ extern "C"
     BOOL bStop;
     NSRecursiveLock *theLock;
     
+    
 }
+
+@property (nonatomic,strong) NSMutableArray *aryDateInfo;
+
+
 
 @end
 
@@ -50,10 +56,12 @@ extern "C"
     self = [super init];
     connectStatus = 0;
     _nChannel = nChannel;
+    DLog(@"nChannel:%d",nChannel);
     _strNO = strNo;
     nStreamType = nCode;
     memset(&_recordreq, 0, sizeof(struct _playrecordmsg));
     __weak CloudDecode *__self = self;
+    _aryDateInfo = [NSMutableArray array];
     dispatch_async(dispatch_get_global_queue(0, 0), ^{
         [__self newSdkInfo];
     });
@@ -68,6 +76,7 @@ extern "C"
     if(!sdk)
     {
         DLog(@"初始化失败");
+        connectStatus = -1;
         return ;
     }
     sdkNew = new P2PSDK_New(sdk,0,_nChannel);
@@ -94,28 +103,41 @@ extern "C"
     }
     if (connectStatus==-1)
     {
+        
         if (_cloudBlock)
         {
             _cloudBlock(0,nil);
         }
         return;
     }
-    
+    //请求录像记录
     struct _playrecordmsg recordreq;
     char responsedata[MAX_MSG_DATA_LEN];
-    recordreq.channelNo = 1;
+    recordreq.channelNo = _nChannel;
     recordreq.frameType = 0;
     NSDateFormatter* fmt = [[NSDateFormatter alloc] init];
-    fmt.locale = [[NSLocale alloc] initWithLocaleIdentifier:@"zh_CN"];
+//    fmt.locale = [[NSLocale alloc] initWithLocaleIdentifier:@"zh_CN"];
     fmt.dateFormat = @"yyyy-MM-dd HH:mm:ss";
+    //1436500800
     NSDate *testTime = [fmt dateFromString:_strTime];
-    int time = abs((int)[testTime timeIntervalSince1970]);
-    recordreq.startTime = time;
-    DLog(@"time:%d",time);
+    recordreq.startTime.myear = testTime.year;
+    recordreq.startTime.mmonth = testTime.month;
+    recordreq.startTime.mday = testTime.day;
+    recordreq.startTime.mhour = 0;
+    recordreq.startTime.mminute = 0;
+    recordreq.startTime.msec = 0;
+    
+    DLog(@"time:%@",testTime);
+    
     size_t size_msg = sizeof(struct _playrecordmsg);
-    recordreq.endTime = time+86399;
+    recordreq.endTime.myear = testTime.year;
+    recordreq.endTime.mmonth = testTime.month;
+    recordreq.endTime.mday = testTime.day;
+    recordreq.endTime.mhour = 23;
+    recordreq.endTime.mminute = 59;
+    recordreq.endTime.msec = 59;
     recordreq.nrecordFileType = 1;
-   if(bPTP)//
+   if(bPTP)
     {
         int nRef = sdkNew->P2P_RecordSearch(&recordreq,responsedata);
         if (nRef!=0)
@@ -137,12 +159,17 @@ extern "C"
             {
                 memcpy(&recordMsg,responsedata+4+i*size_msg,size_msg);
                 CloudTime *time = [[CloudTime alloc] init];
-                time.iStart = recordMsg.startTime;
-                time.iEnd = recordMsg.endTime;
+                
+                time.iStart = [self getTime:recordMsg.startTime];
+                time.iEnd = [self getTime:recordMsg.endTime];
+                
+                DLog(@"start:%d---end:%d",time.iStart,time.iEnd);
                 [aryItem addObject:time];
             }
             if(_cloudBlock)
             {
+                [_aryDateInfo removeAllObjects];
+                [_aryDateInfo addObjectsFromArray:aryItem];
                 _cloudBlock(nCount,aryItem);
             }
         }
@@ -175,12 +202,14 @@ extern "C"
             {
                 memcpy(&recordMsg,responsedata+4+i*size_msg,size_msg);
                 CloudTime *time = [[CloudTime alloc] init];
-                time.iStart = recordMsg.startTime;
-                time.iEnd = recordMsg.endTime;
+                time.iStart = [self getTime:recordMsg.startTime];
+                time.iEnd = [self getTime:recordMsg.endTime];
                 [aryItem addObject:time];
             }
             if(_cloudBlock)
             {
+                [_aryDateInfo removeAllObjects];
+                [_aryDateInfo addObjectsFromArray:aryItem];
                 _cloudBlock(nCount,aryItem);
             }
         }
@@ -199,7 +228,7 @@ extern "C"
         bPTP = YES;
         if(bTran==YES)
         {
-            if (_recordreq.startTime!=0)
+            if (_recordreq.startTime.myear!=0)
             {
                 sdkNew->stopDeviceRecord(&_recordreq);
                 sdkNew->P2P_PlayDeviceRecord(&_recordreq);
@@ -244,14 +273,34 @@ extern "C"
 {
     theLock = [[NSRecursiveLock alloc] init];
     _recordreq.channelNo = _nChannel;
-    _recordreq.startTime = lTime;
-    _recordreq.endTime = lTime + 3600;
+    struct tm *m_start = localtime(&lTime);
+    if(_aryDateInfo.count==0)
+    {
+        return NO;
+    }
+    _recordreq.startTime.myear = m_start->tm_year+1900;
+    _recordreq.startTime.mmonth = m_start->tm_mon+1;
+    _recordreq.startTime.mday = m_start->tm_mday;
+    _recordreq.startTime.mhour = m_start->tm_hour;
+    _recordreq.startTime.mminute = m_start->tm_min;
+    _recordreq.startTime.msec = m_start->tm_sec;
+    CloudTime *cloud = [_aryDateInfo objectAtIndex:_aryDateInfo.count - 1];
+   
+    long lEnd = cloud.iEnd;
+    struct tm *m_end = localtime(&lEnd);
+    _recordreq.endTime.myear = m_end->tm_year+1900;
+    _recordreq.endTime.mmonth = m_end->tm_mon+1;
+    _recordreq.endTime.mday = m_end->tm_mday;
+    _recordreq.endTime.mhour = m_end->tm_hour;
+    _recordreq.endTime.mminute = m_end->tm_min;
+    _recordreq.endTime.msec = m_end->tm_sec;
     _recordreq.nrecordFileType = 1;
     _recordreq.frameType = nStreamType;
     if (bTran)
     {
         _recordreq.channelNo = _nChannel;
-        DLog(@"%d--%d--%u--%u",_recordreq.frameType,_recordreq.channelNo,_recordreq.startTime,_recordreq.endTime);
+        DLog(@"_recordreq.chh:%d",_recordreq.channelNo);
+        DLog(@"%d--%d--%u--%u",_recordreq.frameType,_recordreq.channelNo,_recordreq.startTime.mhour,_recordreq.endTime.mhour);
         if(sdkNew->RELAY_PlayDeviceRecord(&_recordreq)==0)
         {
             __weak CloudDecode *__self = self;
@@ -265,7 +314,7 @@ extern "C"
     else if(bPTP)
     {
         _recordreq.channelNo = _nChannel;
-        DLog(@"%d--%d--%u--%u",_recordreq.frameType,_recordreq.channelNo,_recordreq.startTime,_recordreq.endTime);
+        DLog(@"%d--%d--%u--%u",_recordreq.frameType,_recordreq.channelNo,_recordreq.startTime.mhour,_recordreq.endTime.mhour);
         if(sdkNew->P2P_PlayDeviceRecord(&_recordreq)==0)
         {
             __weak CloudDecode *__self = self;
@@ -305,21 +354,18 @@ extern "C"
     NSMutableArray *result = [[NSMutableArray alloc] init];
     BOOL bFinish = NO;
     int nRef = 0;
-    uint8_t *puf = nil;
     while (!bFinish)
     {
         nRef = 0;
+        NSData *data = nil;
         @synchronized(sdkNew->aryVideo)
         {
             if (sdkNew->aryVideo.count>0)
             {
-                NSData *data = [sdkNew->aryVideo objectAtIndex:0];
-                puf = (uint8_t *)malloc([data length]);
+                data = [sdkNew->aryVideo objectAtIndex:0];
                 packet.size = (int)data.length;
-                memcpy(puf, [data bytes], data.length);
                 [sdkNew->aryVideo removeObjectAtIndex:0];
-                data = nil;
-                packet.data = puf;
+                packet.data = (uint8_t*)[data bytes];
             }
             else
             {
@@ -328,7 +374,7 @@ extern "C"
         }
         if (packet.size==0)
         {
-            [NSThread sleepForTimeInterval:0.03f];
+            [NSThread sleepForTimeInterval:0.001];
             continue;
         }
         [theLock lock];
@@ -340,7 +386,6 @@ extern "C"
                 KxVideoFrame *frameVideo = [self handleVideoFrame];
                 if (frameVideo)
                 {
-                    
                     [result addObject:frameVideo];
                     bFinish = YES;
                 }
@@ -348,27 +393,33 @@ extern "C"
             }
             if (0 == len || -1 == len)
             {
+                data = nil;
                 [theLock unlock];
                 continue;
             }
         }
         else
         {
+            
+            data = nil;
+            [theLock unlock];
             break;
         }
+        data = nil;
         [theLock unlock];
     }
     av_free_packet(&packet);
-    free(puf);
     return result;
 }
 
 #pragma mark yuv 转换
 - (KxVideoFrame *) handleVideoFrame
 {
-    if (!pVideoFrame || !pVideoFrame->data[0])
-        return nil;
-    KxVideoFrame *frame;
+       if (!pVideoFrame || !pVideoFrame->data[0])
+       {
+           return nil;
+       }
+       KxVideoFrame *frame;
         if (!_swsContext && ![self setupScaler])
         {
             DLog(@"fail setup video scaler");
@@ -385,11 +436,11 @@ extern "C"
         rgbFrame.linesize = _picture.linesize[0];
         rgbFrame.rgb = [NSData dataWithBytes:_picture.data[0]
                                       length:rgbFrame.linesize * pCodecCtx->height];
-        frame = rgbFrame;
-        frame.width = pCodecCtx->width;
-        frame.height = pCodecCtx->height;
-    
+    frame = rgbFrame;
+    frame.width = pCodecCtx->width;
+    frame.height = pCodecCtx->height;
     frame.duration = 1.0 / _fps;
+    
     return frame;
 }
 
@@ -439,10 +490,15 @@ extern "C"
     AVCodec         *pCodec = NULL;
     pCodec = avcodec_find_decoder(AV_CODEC_ID_H264);
     pCodecCtx = avcodec_alloc_context3(pCodec);
+    
+    [[[P2PInitService sharedP2PInitService] getTheLock] lock];
     if(avcodec_open2(pCodecCtx, pCodec, NULL) < 0)
     {
+        
+        [[[P2PInitService sharedP2PInitService] getTheLock] unlock];
         return NO;
     }
+    [[[P2PInitService sharedP2PInitService] getTheLock] unlock];
     pVideoFrame = avcodec_alloc_frame();
     pNewVideoFrame = avcodec_alloc_frame();
     if( pVideoFrame == NULL )
@@ -457,7 +513,8 @@ extern "C"
 
 -(void)stopDecode
 {
-    if(_recordreq.startTime!=0)
+    [theLock lock];
+    if(_recordreq.startTime.mminute!=0)
     {
         sdkNew->stopDeviceRecord(&_recordreq);
     }
@@ -465,12 +522,13 @@ extern "C"
     bStop = NO;
     [self closeScaler];
     [self closeFile];
+    DLog(@"停止");
+    [theLock unlock];
 }
 
 -(void)closeFile
 {
     
-    [[[P2PInitService sharedP2PInitService] getTheLock] lock];
     if (pVideoFrame)
     {
         av_free(pVideoFrame);
@@ -478,7 +536,9 @@ extern "C"
     }
     if (pCodecCtx)
     {
+        [[[P2PInitService sharedP2PInitService] getTheLock] lock];
         avcodec_close(pCodecCtx);
+        [[[P2PInitService sharedP2PInitService] getTheLock] unlock];
         pCodecCtx = NULL;
     }
     if (pFormatCtx)
@@ -488,7 +548,15 @@ extern "C"
         avformat_close_input(&pFormatCtx);
         pFormatCtx = NULL;
     }
-    [[[P2PInitService sharedP2PInitService] getTheLock] unlock];
+}
+
+-(void)regainVideo
+{
+    PlayRecordCtrlMsg backControl;
+    backControl.channelNo = _nChannel;
+    backControl.frameType = 1;
+    backControl.ctrl = PB_PLAY;
+    sdkNew->controlDeviceRecord(&backControl);   
 }
 
 -(void)pauseVideo
@@ -509,6 +577,83 @@ extern "C"
         sdkNew = NULL;
     }
     [self closeFile];
+    DLog(@"stop");
 }
+
+
+-(void)dragTime:(long)lTime
+{
+    DLog(@"时间移动");
+    CloudTime *cloud = [_aryDateInfo objectAtIndex:_aryDateInfo.count - 1];
+    RecordDragMsg recordDrag;
+    memset(&recordDrag, 0, sizeof(RecordDragMsg));
+    struct tm *m_start = localtime(&lTime);
+    recordDrag.startTime.myear = m_start->tm_year+1900;
+    recordDrag.startTime.mmonth = m_start->tm_mon+1;
+    recordDrag.startTime.mday = m_start->tm_mday;
+    recordDrag.startTime.mhour = m_start->tm_hour;
+    recordDrag.startTime.mminute = m_start->tm_min;
+    recordDrag.startTime.msec = m_start->tm_sec;
+    
+    long lEnd = cloud.iEnd;
+    struct tm *tm_end = localtime(&lEnd);
+    recordDrag.endTime.myear = tm_end->tm_year+1900;
+    recordDrag.endTime.mmonth = tm_end->tm_mon+1;
+    recordDrag.endTime.mday = tm_end->tm_mday;
+    recordDrag.endTime.mhour = tm_end->tm_hour;
+    recordDrag.endTime.mminute = tm_end->tm_min;
+    recordDrag.endTime.msec = tm_end->tm_sec;
+    recordDrag.recordvideoType = _recordreq.nrecordFileType;
+    if (bPTP)
+    {
+        if (sdkNew)
+        {
+            sdkNew->P2P_RecordDrag(&recordDrag);
+        }
+    }
+    else if(bTran)
+    {
+        if (sdkNew)
+        {
+            sdkNew->RELAY_RecordDrag(&recordDrag);
+        }       
+    }
+    else
+    {
+        
+    }
+    sdkNew->clearVideoInfo();
+}
+
+-(NSTimeInterval)getTime:(RecordTime)time
+{
+    NSDateFormatter* fmt = [[NSDateFormatter alloc] init];
+    fmt.locale = [[NSLocale alloc] initWithLocaleIdentifier:@"zh_CN"];
+    fmt.dateFormat = @"yyyy-MM-dd HH:mm:ss";
+    //1436500800
+    NSString *strTime = [NSString stringWithFormat:@"%d-%02d-%02d %02d:%02d:%02d",
+                         time.myear,time.mmonth,time.mday,time.mhour,time.mminute,time.msec];
+    NSDate *testTime = [fmt dateFromString:strTime];
+    
+    NSTimeInterval timeInfo = [testTime timeIntervalSince1970];
+    return timeInfo;
+}
+
+-(void)startRecord:(NSString *)strPath devName:(NSString *)strDevName
+{
+    if (sdkNew)
+    {
+        sdkNew->startRecord([strPath UTF8String], [strDevName UTF8String]);
+    }
+}
+
+-(void)stopRecord
+{
+    if (sdkNew)
+    {
+        sdkNew->stopRecord(25);
+    }
+}
+
 
 @end
