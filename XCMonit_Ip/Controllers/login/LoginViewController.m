@@ -8,6 +8,7 @@
 #import "LoginViewController.h"
 #import "IndexViewController.h"
 #import "UtilsMacro.h"
+#import "LoginSNViewController.h"
 #import "LoginSNService.h"
 #import "IQKeyboardManager.h"
 #import "UserModel.h"
@@ -85,8 +86,6 @@
     av_register_all();
     avcodec_register_all();
     
-    CGFloat fTxtHeight = isPhone6p ? 46 : 39.5;
-
     headView = [[UIView alloc] initWithFrame:Rect(0, 0, self.view.width,64)];
     [self.view addSubview:headView];
     [headView setBackgroundColor:RGB(15,173,225)];
@@ -248,7 +247,6 @@
     [self.view addSubview:lblContent1];
     [lblContent1 setBackgroundColor:UIColorFromRGBHex(0xd8e6ea)];
     
-    
     UILabel *lblTemp1 = [[UILabel alloc] initWithFrame:Rect(kScreenWidth/2-40, _btnFind.y+_btnFind.height+10, 80, 20)];
     [lblTemp1 setText:@"其他方式登录"];
     [lblTemp1 setBackgroundColor:UIColorFromRGBHex(0xf7f7f7)];
@@ -268,8 +266,12 @@
     [btnGuess setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
     [btnGuess setTitle:@"游客登录" forState:UIControlStateNormal];
     [btnGuess setBackgroundColor:RGB(0, 218, 95)];
+    btnGuess.layer.masksToBounds = YES;
+    btnGuess.layer.cornerRadius = 3;
+    
     [self.view addSubview:btnSN];
     [self.view addSubview:btnGuess];
+    
     btnSN.frame = Rect(30, lblTemp1.y+lblTemp1.height+20,kScreenWidth-60, 44);
     btnGuess.frame = Rect(30, btnSN.y+btnSN.height+11, kScreenWidth-60, 44);
     
@@ -298,7 +300,8 @@
 //        loginSN = [[LoginSNService alloc] init];
 //    }
 //    [loginSN requestLoginSN:strUser pwd:strPwd sn:@"9743200000001"];
-    
+    LoginSNViewController *index = [[LoginSNViewController alloc] init];
+    [self presentViewController:index animated:YES completion:^{}];
 }
 
 -(void)loginGuess

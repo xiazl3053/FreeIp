@@ -32,7 +32,7 @@
         if (dic && dic.count > 0)
         {
             NSArray *array = [dic objectForKey:@"data"];
-            if (array && array.count == 2)
+            if (array && array.count == 1)
             {
                 [UserInfo sharedUserInfo].strSessionId = array[0];
                 [self requestAuth];
