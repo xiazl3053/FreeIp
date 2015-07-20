@@ -4,7 +4,7 @@
 "Loginpwd" = "请输入密码";
 "LoginpwdAgain" = "请再次输入密码";
 "Loginregister" = "注册账号";
-"httpserver" = "www.freeip.com";
+"httpserver" = "http://www.freeip.com";
 "p2pserver" = "heart.freeip.com";//"heart.freeip.com"
 "offline" = "离线";
 "online" = "在线";
@@ -258,3 +258,6 @@
 "search"="局域网搜索";
 "searching"="正在搜索...";
 "WIFIOK"="请确认WIFI连接正常";
+"3Error"="连续失败粗疏过多";
+
+

@@ -7,7 +7,7 @@
 "LoginpwdAgain" = "Подтвердите пароль";
 "Loginregister" = "Регистрация";
 
-"httpserver" = "www.freeip.com";
+"httpserver" = "http://www.freeip.com";
 "p2pserver" = "heart.freeip.com";
 
 "offline" = "Не в сети";
@@ -239,6 +239,7 @@
 
 
 
+"3Error"="Последовательных неудачных слишком много раз";
 
 
 

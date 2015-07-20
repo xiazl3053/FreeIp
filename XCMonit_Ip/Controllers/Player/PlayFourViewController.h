@@ -12,6 +12,7 @@
 @class DeviceInfoModel;
 @interface PlayFourViewController : UIViewController
 
+-(id)initWithSNDevice:(DeviceInfoModel *)devModel;
 -(id)initWithDevInfo:(DeviceInfoModel*)devModel;
 //-(void)startPlayWithNO:(NSString*)strNO channel:(NSString*)strKey;
 -(void)initToolBar;

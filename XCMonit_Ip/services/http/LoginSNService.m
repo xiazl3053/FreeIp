@@ -63,6 +63,7 @@
     }
     else
     {
+        DLog(@"responseCode:%d",(int)responseCode);
         if (_sn_login)
         {
             _sn_login(0);
@@ -75,8 +76,8 @@
     NSString *strMD5 = [DecodeJson XCmdMd5String:_strPwd];
     [UserInfo sharedUserInfo].strMd5 = strMD5;
     
-    NSString *strUrl = [NSString stringWithFormat:@"%@index.php?r=login/login/snlogin&session_id=%@&device_id=%@&local_user=%@&local_pwd=%@",SN_HTTP_HOST,[UserInfo sharedUserInfo].strSessionId
-            ,_strSN,_strUser,_strPwd];
+    NSString *strUrl = [NSString stringWithFormat:@"%@/index.php?r=login/login/snlogin&session_id=%@&device_id=%@&local_user=%@&local_pwd=%@",XCLocalized(@"httpserver"),[UserInfo sharedUserInfo].strSessionId
+            ,_strSN,_strUser,strMD5];
     
     [self sendRequest:strUrl];
 }
@@ -91,10 +92,8 @@
 
 -(void)requestMd5
 {
-    NSString *strUrl = [NSString stringWithFormat:@"%@index.php?r=login/login/GetSnCheckCode",SN_HTTP_HOST];
-    
+    NSString *strUrl = [NSString stringWithFormat:@"%@/index.php?r=login/login/GetSnCheckCode",XCLocalized(@"httpserver")];
     [self sendRequest:strUrl];
-    
 }
 
 

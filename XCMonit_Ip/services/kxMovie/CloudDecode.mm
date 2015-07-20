@@ -65,7 +65,6 @@ extern "C"
     dispatch_async(dispatch_get_global_queue(0, 0), ^{
         [__self newSdkInfo];
     });
-    
     return self;
 }
 
@@ -82,7 +81,8 @@ extern "C"
     sdkNew = new P2PSDK_New(sdk,0,_nChannel);
     sdkNew->peerName = [_strNO UTF8String];
     __weak CloudDecode *__self = self;
-    dispatch_async(dispatch_get_global_queue(0, 0),^{
+    dispatch_async(dispatch_get_global_queue(0, 0),
+    ^{
         [__self startInitSdk];
     });
 }
@@ -103,10 +103,9 @@ extern "C"
     }
     if (connectStatus==-1)
     {
-        
         if (_cloudBlock)
         {
-            _cloudBlock(0,nil);
+            _cloudBlock(-1,nil);
         }
         return;
     }
@@ -116,9 +115,8 @@ extern "C"
     recordreq.channelNo = _nChannel;
     recordreq.frameType = 0;
     NSDateFormatter* fmt = [[NSDateFormatter alloc] init];
-//    fmt.locale = [[NSLocale alloc] initWithLocaleIdentifier:@"zh_CN"];
     fmt.dateFormat = @"yyyy-MM-dd HH:mm:ss";
-    //1436500800
+    
     NSDate *testTime = [fmt dateFromString:_strTime];
     recordreq.startTime.myear = testTime.year;
     recordreq.startTime.mmonth = testTime.month;

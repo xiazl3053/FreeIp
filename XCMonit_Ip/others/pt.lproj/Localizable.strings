@@ -4,7 +4,7 @@
 "Loginpwd" = "Favor digitar a senha de acesso";
 "LoginpwdAgain" = "Favor confirmar a senha de acesso";
 "Loginregister" = "Registrar";
-"httpserver" = "www.freeip.com";
+"httpserver" = "http://www.freeip.com";
 "p2pserver" = "heart.freeip.com";
 "offline" = "Desconectado";
 "online" = "Conectado";
@@ -238,5 +238,6 @@
 "versionUpdate"="Tem certeza de uma versão atualizada ?";
 
 
+"3Error"="Consecutivas falhadas muitas vezes";
 "regNameLength"="Caixa de Correio não mais do que 64";
 

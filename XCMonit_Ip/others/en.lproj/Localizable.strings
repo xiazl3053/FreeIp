@@ -10,7 +10,7 @@
 
 "Loginregister" = "Register";
 
-"httpserver" = "www.freeip.com";
+"httpserver" = "http://www.freeip.com";
 
 "p2pserver" = "heart.freeip.com";
 
@@ -277,4 +277,5 @@
 "regNameLength"="Mailbox not longer than 64";
 
 
+"3Error"="Consecutive failed too many times";
 

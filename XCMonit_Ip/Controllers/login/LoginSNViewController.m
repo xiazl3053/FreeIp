@@ -8,16 +8,26 @@
 
 #import "LoginSNViewController.h"
 #import "LoginSNService.h"
+#import "XCNotification.h"
+#import "ProgressHUD.h"
+#import "Toast+UIView.h"
 #import "UIView+Extension.h"
-@interface LoginSNViewController()
+#import "GetSnService.h"
+#import "PlayP2PViewController.h"
+#import "PlayFourViewController.h"
+
+#import "DeviceInfoModel.h"
+
+@interface LoginSNViewController()<UITextFieldDelegate>
 {
     LoginSNService *snService;
     UITextField *txtSN;
     UITextField *txtUser;
     UITextField *txtPwd;
+    GetSnService *getSn;
     
 }
-
+@property (nonatomic,copy) NSString *strNo;
 @end
 
 @implementation LoginSNViewController
@@ -115,6 +125,15 @@
     txtPwd.layer.masksToBounds = YES;
     txtPwd.layer.cornerRadius = 3;
     [self.view addSubview:txtPwd];
+    [txtPwd setSecureTextEntry:YES];
+    
+    txtPwd.delegate = self;
+    txtSN.delegate = self;
+    txtUser.delegate = self;
+    
+    [txtUser setText:@"admin"];
+    [txtPwd setText:@"88888888"];
+    [txtSN setText:@"9743200000001"];
     
     UIButton *btnLogin = [UIButton buttonWithType:UIButtonTypeCustom];
     [btnLogin setBackgroundColor:RGB(15, 173, 225)];
@@ -138,7 +157,6 @@
     [super viewDidLoad];
     [self initHeadView];
     [self initWithMiddle];
-    
 }
 
 -(void)viewDidAppear:(BOOL)animated
@@ -153,50 +171,207 @@
     {
         snService = [[LoginSNService alloc] init];
     }
+    NSString *strUser = txtUser.text;
+    NSString *strPwd = txtPwd.text;
+    NSString *strNO = txtSN.text;
+    if (strUser != nil && [strUser isEqualToString:@""]) {
+        [self.view makeToast:XCLocalized(@"userAuth")];
+        return ;
+    }
+    if (strPwd != nil  && [strPwd isEqualToString:@""]) {
+        [self.view makeToast:XCLocalized(@"pwdAuth")];
+        
+        return;
+    }
+    if (strNO !=nil && [strNO isEqualToString:@""]) {
+        [self.view makeToast:XCLocalized(@"xuleihao")];
+        return; 
+    }
+    [ProgressHUD show:XCLocalized(@"logining")];
+    
+    __weak LoginSNViewController *__self = self;
     snService.sn_login = ^(int nStatus)
     {
         NSString *strInfo = nil;
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [ProgressHUD dismiss];
+        });
         switch (nStatus) {
             case 0:
             {
-                
+                strInfo = XCLocalized(@"ServerException");
             }
             break;
+            case 1:
+            {
+               strInfo = @"OK";
+            }
+            break;
+            case 191:
+            {
+                strInfo = XCLocalized(@"ServerException");
+            }
+            break;
+            case 194:
+            {
+                strInfo = XCLocalized(@"3Error");
+            }
+            break;
+            case 192:
+            {
+                strInfo = XCLocalized(@"serialError");
+            }
+            break;
+            case 193:
+            {
+                strInfo = XCLocalized(@"authError");
+            }
+            break;
+            default:
+            {
+                strInfo = XCLocalized(@"ServerException");
+            }
+            break;
+        }
+        if (nStatus == 1)
+        {
+            [__self enterSuccess];
+        }
+        else
+        {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [__self.view makeToast:strInfo];
+            });
+        }
+    };
+    _strNo = strNO;
+    [snService requestLoginSN:strUser pwd:strPwd sn:strNO];
+    
+}
+
+-(void)enterSuccess
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [ProgressHUD show:@"获取设备信息"];
+    });
+    [self getServiceInfo];
+    
+}
+
+-(void)getServiceInfo
+{
+    if (getSn==nil) {
+        getSn = [[GetSnService alloc] init];
+    }
+    __weak LoginSNViewController *__self = self;
+    getSn.getSnInfo = ^(int nStatus,int nAllCout)
+    {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [ProgressHUD dismiss];
+        });
+        NSString *strInfo = @"";
+        switch (nStatus)
+        {
             case 1:
             {
                 
             }
             break;
-            case 191:
+            case 0:
             {
-                
+                strInfo = XCLocalized(@"ServerException");
             }
             break;
-            case 192:
+            case 201:
             {
                 
+                strInfo = XCLocalized(@"ServerException");
             }
                 break;
-            case 193:
+            case 202:
             {
                 
-            }
-            break;
-            case 194:
-            {
-                
+                strInfo = XCLocalized(@"loginTime");
             }
             break;
             default:
-                break;
+            {
+                
+                strInfo = XCLocalized(@"ServerException");
+            }
+            break;
+        }
+        if (nStatus==1)
+        {
+            if (nAllCout == 1)
+            {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    PlayP2PViewController *playP2p = [[PlayP2PViewController alloc] initWithNO:__self.strNo name:__self.strNo format:0];
+                    [__self presentViewController:playP2p animated:YES completion:nil];
+                });
+            }
+            else if(nAllCout > 1)
+            {
+                dispatch_async(dispatch_get_main_queue(),
+                ^{
+                    DeviceInfoModel *devInfo = [[DeviceInfoModel alloc] init];
+                    devInfo.strDevNO = __self.strNo;
+                    devInfo.strDevType = [NSString stringWithFormat:@"DVR-%d",nAllCout];
+                    devInfo.strDevName = __self.strNo;
+                    PlayFourViewController *playFour = [[PlayFourViewController alloc] initWithSNDevice:devInfo];
+                    [__self presentViewController:playFour animated:YES completion:nil];
+                });
+            }
+        }
+        else
+        {
+            dispatch_async(dispatch_get_main_queue(),
+            ^{
+                [__self.view makeToast:strInfo];
+            });
         }
     };
-    [snService requestLoginSN:@"admin" pwd:@"admin" sn:@"9743200000001"];
+    [getSn requestSn:@"2134567890"];
 }
 
 -(void)dealloc
 {
     
 }
+
+- (BOOL)textFieldShouldReturn:(UITextField *)textField
+{
+    [textField resignFirstResponder];
+    return  YES;
+}
+
+-(void)closekeyBoard
+{
+    if ([txtUser isFirstResponder])
+    {
+        [txtUser resignFirstResponder];
+    }
+    else if([txtPwd isFirstResponder])
+    {
+        [txtPwd resignFirstResponder];
+    }
+    else
+    {
+        [txtSN resignFirstResponder];
+    }
+}
+
+-(void)viewWillDisappear:(BOOL)animated
+{
+    [super viewWillDisappear:animated];
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+-(void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(closekeyBoard) name:NSKEY_BOARD_RETURN_VC object:nil];
+}
+
 
 @end

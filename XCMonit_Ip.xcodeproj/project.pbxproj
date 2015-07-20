@@ -172,6 +172,7 @@
 		BB267CEB19E7928C00FBAB1D /* UpdEmailService.m in Sources */ = {isa = PBXBuildFile; fileRef = BB267CEA19E7928C00FBAB1D /* UpdEmailService.m */; };
 		BB267CEE19E798D300FBAB1D /* UpdPwdService.m in Sources */ = {isa = PBXBuildFile; fileRef = BB267CED19E798D300FBAB1D /* UpdPwdService.m */; };
 		BB267CF119E7A21300FBAB1D /* UpdPwdViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BB267CF019E7A21300FBAB1D /* UpdPwdViewController.m */; };
+		BB2FC2F51B5C9292002D8FB8 /* GetSnService.m in Sources */ = {isa = PBXBuildFile; fileRef = BB2FC2F41B5C9292002D8FB8 /* GetSnService.m */; };
 		BB2FD0CC19C2C59500288D2F /* RecordNOCell.m in Sources */ = {isa = PBXBuildFile; fileRef = BB2FD0CB19C2C59500288D2F /* RecordNOCell.m */; };
 		BB33BD7B19B0837700A76D37 /* NSDate+convenience.m in Sources */ = {isa = PBXBuildFile; fileRef = BB33BD7219B0837700A76D37 /* NSDate+convenience.m */; };
 		BB33BD7C19B0837700A76D37 /* NSMutableArray+convenience.m in Sources */ = {isa = PBXBuildFile; fileRef = BB33BD7419B0837700A76D37 /* NSMutableArray+convenience.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
@@ -546,6 +547,8 @@
 		BB267CED19E798D300FBAB1D /* UpdPwdService.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UpdPwdService.m; sourceTree = "<group>"; };
 		BB267CEF19E7A21300FBAB1D /* UpdPwdViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UpdPwdViewController.h; sourceTree = "<group>"; };
 		BB267CF019E7A21300FBAB1D /* UpdPwdViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UpdPwdViewController.m; sourceTree = "<group>"; };
+		BB2FC2F31B5C9292002D8FB8 /* GetSnService.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GetSnService.h; sourceTree = "<group>"; };
+		BB2FC2F41B5C9292002D8FB8 /* GetSnService.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GetSnService.m; sourceTree = "<group>"; };
 		BB2FD0CA19C2C59500288D2F /* RecordNOCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RecordNOCell.h; sourceTree = "<group>"; };
 		BB2FD0CB19C2C59500288D2F /* RecordNOCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RecordNOCell.m; sourceTree = "<group>"; };
 		BB33BD7119B0837700A76D37 /* NSDate+convenience.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSDate+convenience.h"; sourceTree = "<group>"; };
@@ -1286,6 +1289,8 @@
 				BB3EF4C51AEE090A00F9D765 /* VersionCheckService.m */,
 				BB8412D31B58D821002EB328 /* LoginSNService.h */,
 				BB8412D41B58D821002EB328 /* LoginSNService.m */,
+				BB2FC2F31B5C9292002D8FB8 /* GetSnService.h */,
+				BB2FC2F41B5C9292002D8FB8 /* GetSnService.m */,
 			);
 			path = http;
 			sourceTree = "<group>";
@@ -1851,6 +1856,7 @@
 				BBDC513A1AB8273400C81D00 /* XLDecoderServiceImpl.m in Sources */,
 				BB1F84B519A4A950004BE9AA /* IQSegmentedNextPrevious.m in Sources */,
 				BB1F84E519A4A950004BE9AA /* DevModel.m in Sources */,
+				BB2FC2F51B5C9292002D8FB8 /* GetSnService.m in Sources */,
 				BB33BD7F19B0837700A76D37 /* VRGCalendarView.m in Sources */,
 				BB1F84AE19A4A950004BE9AA /* FMDatabase.m in Sources */,
 				BB1F84BE19A4A950004BE9AA /* MJRefreshConst.m in Sources */,

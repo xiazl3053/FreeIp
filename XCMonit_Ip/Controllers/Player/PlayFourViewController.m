@@ -8,6 +8,7 @@
 #import "VideoView.h"
 #import "PlayFourViewController.h"
 #import "XCDecoderNew.h"
+#import "PlayCloudViewController.h"
 #import "DecodeJson.h"
 #import "XCNotification.h"
 #import "DevInfoMacro.h"
@@ -88,6 +89,8 @@
     int nArray[32];
     BOOL bNewStatus;//切换状态
     UIButton *btnHD,*btnBD;
+    BOOL bSnLogin;
+    UIButton *btnRemote;
 }
 
 @property (nonatomic,strong) PTZView *view_Ptz;
@@ -116,6 +119,19 @@
     }
     return self;
 }
+
+-(id)initWithSNDevice:(DeviceInfoModel *)devModel
+{
+    self = [super init];
+    _devModel = devModel;
+    bSnLogin = YES;
+    _strNO = _devModel.strDevNO;
+    int nChannel = [[_devModel.strDevType componentsSeparatedByString:@"-"][1] intValue];
+    DLog(@"nChannel:%d",nChannel);
+    _nDevChannel = nChannel;
+    return  self;
+}
+
 -(id)initWithDevInfo:(DeviceInfoModel*)devModel
 {
     self = [super init];
@@ -127,32 +143,6 @@
     int nChannel = [[strChannel componentsSeparatedByString:@"-"][1] intValue];
     DLog(@"nChannel:%d",nChannel);
     _nDevChannel = nChannel;
-//    if ((nType>2000 && nType <2100) || (nType>4000 && nType < 4100))
-//    {
-//        DLog(@"4通道dvr或者nvr");
-//        _nDevChannel = 4;
-//    }
-//    else if((nType>2100 && nType <2200) || (nType>4100 && nType < 4200))
-//    {
-//        DLog(@"8通道dvr或者nvr");
-//        _nDevChannel = 8;
-//    }
-//    else if((nType>2200 && nType <2300) || (nType>4200 && nType < 4300))
-//    {
-//        DLog(@"16通道dvr或者nvr");
-//        _nDevChannel = 16;
-//    }
-//    else if((nType>2300 && nType <2400) || (nType>4300 && nType < 4400))
-//    {
-//        DLog(@"24通道dvr或者nvr");
-//        _nDevChannel = 24;
-//    }
-//    else if((nType>2400 && nType <2500) || (nType>4400 && nType < 4500))
-//    {
-//        DLog(@"32通道dvr或者nvr");
-//        _nDevChannel = 32;
-//    }
-//    
     return  self;
 }
 
@@ -250,7 +240,6 @@
     dispatch_group_async(group, dispatch_get_global_queue(0, 0), ^{
         [weakSelf stopVideo];
     });
-    
     dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
     
     DLog(@"GG");
@@ -272,7 +261,6 @@
     [super viewWillDisappear:animated];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
-
 
 - (void)viewDidLoad
 {
@@ -434,6 +422,19 @@
     _panGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(panEvent:)];
 }
 
+-(void)enterRemoteView
+{
+    __weak PlayFourViewController *weakSelf = self;
+    dispatch_group_t group = dispatch_group_create();
+    dispatch_group_async(group, dispatch_get_global_queue(0, 0), ^{
+        [weakSelf stopVideo];
+    });
+    dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
+    DLog(@"GG");
+    group = nil;
+    PlayCloudViewController *playcloud = [[PlayCloudViewController alloc] initWithSNDevice:_devModel];
+    [self presentViewController:playcloud animated:YES completion:nil];
+}
 
 #pragma mark 顶部导航栏初始化
 -(void)initTopView
@@ -442,6 +443,15 @@
     _topHUD.autoresizingMask = UIViewAutoresizingFlexibleWidth;
     [self.view addSubview:_topHUD];
     
+    btnRemote = [UIButton buttonWithType:UIButtonTypeCustom];
+    [btnRemote setImage:[UIImage imageNamed:@"remote_cl"] forState:UIControlStateNormal];
+    [btnRemote setImage:[UIImage imageNamed:@"remote_cl_h"] forState:UIControlStateHighlighted];
+    [btnRemote addTarget:self action:@selector(enterRemoteView) forControlEvents:UIControlEventTouchUpInside];
+    if (bSnLogin) {
+        [_topHUD addSubview:btnRemote];
+        btnRemote.frame = Rect(_topHUD.width-50, 2, 44, 44);
+        
+    }
     _topHUD.alpha = 1;
     
     UILabel *sLine1 = [[UILabel alloc] initWithFrame:CGRectMake(0, 49.6, kScreenWidth, 0.2)];
@@ -724,7 +734,6 @@
     if (bNewStatus) {
         return ;
     }
-//    CGFloat width,height;
     fWidth = kScreenHeight;
     fHeight = kScreenWidth;
     
@@ -732,6 +741,12 @@
     
     [_topHUD insertSubview:bgTopImg atIndex:0];
     [bgTopImg setFrame:_topHUD.bounds];
+    
+    if (bSnLogin)
+    {
+        btnRemote.frame = Rect(_topHUD.width-240,0,44,44);
+    }
+    
     
     [_lblName setTextColor:[UIColor whiteColor]];
     
@@ -785,7 +800,6 @@
     [_currentView removeGestureRecognizer:_pinchGester];
     [_currentView removeGestureRecognizer:_panGesture];
     
-    
     [_btnPtz removeFromSuperview];
     _view_Ptz.hidden = YES;
     
@@ -803,21 +817,22 @@
     [_downHUD viewWithTag:1003].frame = Rect(kScreenWidth/2-30,  0, 60, 48);
     [_downHUD viewWithTag:1004].frame =  Rect(kScreenWidth/2+30, 0, 60, 48);
    
-
-    
     [(UIButton*)[_downHUD viewWithTag:1002] setImage:[UIImage imageNamed:@"stop"] forState:UIControlStateNormal];
     [(UIButton*)[_downHUD viewWithTag:1002] setImage:[UIImage imageNamed:@"stop_h"] forState:UIControlStateHighlighted];
     [(UIButton*)[_downHUD viewWithTag:1003] setImage:[UIImage imageNamed:@"shotopic"] forState:UIControlStateNormal];
     [(UIButton*)[_downHUD viewWithTag:1004] setImage:[UIImage imageNamed:@"record"] forState:UIControlStateNormal];
     
     _topHUD.alpha = 1.0f;
+    if (bSnLogin)
+    {
+        btnRemote.frame = Rect(_topHUD.width-50,0,44,44);
+    }
     _downHUD.alpha = 1.0f;
     [_downHUD viewWithTag:10013].backgroundColor = RGB(198, 198, 198);
     [_downHUD viewWithTag:10014].backgroundColor = [UIColor grayColor];
     
     for (int i=0; i<4; i++)
     {
-        
         [((PlayControllerView*)[_array objectAtIndex:i]).mainView setFrame:((PlayControllerView*)[_array objectAtIndex:i]).mainRect];
     }
     

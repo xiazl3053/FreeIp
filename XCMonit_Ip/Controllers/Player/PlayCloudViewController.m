@@ -61,6 +61,17 @@
 
 @implementation PlayCloudViewController
 
+
+-(id)initWithSNDevice:(DeviceInfoModel*)devInfo
+{
+    self = [super init];
+    _strNO = devInfo.strDevNO;
+    strDevName = devInfo.strDevName;
+    nAllCount = [[devInfo.strDevType componentsSeparatedByString:@"-"][1] intValue];
+    nChannel = 0;
+    return self;
+}
+
 -(id)initWithDev:(DeviceInfoModel*)devInfo
 {
     self = [super init];
@@ -406,7 +417,17 @@
     __weak TimeView *__timeView = timeView;
     cloudDec.cloudBlock = ^(int nStatus,NSArray *ary)
     {
-        if(nStatus==0)
+        if(nStatus == 0)
+        {
+            [__aryDecode removeAllObjects];
+            dispatch_async(dispatch_get_main_queue(),
+               ^{
+                   [__self.view hideToastActivity];
+                   [__self.view makeToast:XCLocalized(@"noRecords")];
+                   __btnPause.selected = NO;
+               });
+        }
+        else if(nStatus==-1)
         {
             DLog(@"删除decode");
             [__aryDecode removeAllObjects];
