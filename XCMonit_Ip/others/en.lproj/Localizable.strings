@@ -270,9 +270,9 @@
 "versionCheck"="Version detection";
 "versionUpdate"="Are you sure an updated version?";
 "versionLaster"="The current version is the latest";
-
+"searchHistory"="Search";
 "otherLogin"="Other login";
-
+"Remote"="Remote playback";
 "regNameLength"="Mailbox not longer than 64";
 "testUser"="Visitor";
 "3Error"="Consecutive failed too many times";

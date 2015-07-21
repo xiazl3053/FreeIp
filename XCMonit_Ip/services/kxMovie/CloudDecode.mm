@@ -586,6 +586,7 @@ extern "C"
     RecordDragMsg recordDrag;
     memset(&recordDrag, 0, sizeof(RecordDragMsg));
     struct tm *m_start = localtime(&lTime);
+    recordDrag.channelNo = _nChannel;
     recordDrag.startTime.myear = m_start->tm_year+1900;
     recordDrag.startTime.mmonth = m_start->tm_mon+1;
     recordDrag.startTime.mday = m_start->tm_mday;

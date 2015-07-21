@@ -372,7 +372,6 @@ NSData * copyFrameData(UInt8 *src, int linesize, int width, int height)
         fTime += 0.25;
         if (fTime >= 30)
         {
-//            [[NSNotificationCenter defaultCenter] postNotificationName:NSCONNECT_P2P_FAIL_VC object:XCLocalized(@"connectFail")];
             DLog(@"开始时间超时");
             return NO;
         }

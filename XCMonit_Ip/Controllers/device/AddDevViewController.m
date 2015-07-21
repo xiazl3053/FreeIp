@@ -106,7 +106,7 @@
 {
     if ([_txtNo isFirstResponder])
     {
-        if (_txtNo.text.length>8)
+        if (_txtNo.text.length>12)
         {
             [self authDevice];
         }else
@@ -142,7 +142,7 @@
 
 -(void)authDevice
 {
-    if (_txtNo.text.length < 9)
+    if (_txtNo.text.length < 13)
     {
         DLog(@"序列号错误");
         return;

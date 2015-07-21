@@ -262,7 +262,6 @@
 "SNLogin"="序列号登录";
 "testUser"="游客";
 
-
-
+"searchHistory"="搜索";
 "otherLogin"="其他方式登录";
-
+"Remote"="远程回放";

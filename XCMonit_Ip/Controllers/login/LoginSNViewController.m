@@ -138,7 +138,7 @@
 //
     UIButton *btnLogin = [UIButton buttonWithType:UIButtonTypeCustom];
     [btnLogin setBackgroundColor:RGB(15, 173, 225)];
-    [btnLogin setTitle:@"登录" forState:UIControlStateNormal];
+    [btnLogin setTitle:XCLocalized(@"Loiginbtn") forState:UIControlStateNormal];
     [btnLogin setTitleColor:RGB(255, 255, 255) forState:UIControlStateNormal];
     btnLogin.layer.masksToBounds = YES;
     btnLogin.layer.cornerRadius = 3;

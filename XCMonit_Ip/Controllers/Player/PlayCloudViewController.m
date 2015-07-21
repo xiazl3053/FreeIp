@@ -116,7 +116,7 @@
     UIButton *btnDone = [UIButton buttonWithType:UIButtonTypeCustom];
     [viewPicker addSubview:btnDone];
     btnDone.frame = Rect(0, 216, 300, 44);
-    [btnDone setTitle:@"查询" forState:UIControlStateNormal];
+    [btnDone setTitle:XCLocalized(@"searchHistory") forState:UIControlStateNormal];
     [btnDone setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
     [btnDone addTarget:self action:@selector(dateValue) forControlEvents:UIControlEventTouchUpInside];
     viewPicker.hidden = YES;
@@ -296,7 +296,7 @@
     
     _lblName = [[UILabel alloc] initWithFrame:Rect(30,15,kScreenWidth-60,20)];
     [_lblName setTextAlignment:NSTextAlignmentCenter];
-    [_lblName setText:@"回放"];
+    [_lblName setText:XCLocalized(@"Remote")];
     [_lblName setFont:[UIFont fontWithName:@"Helvetica" size:15.0f]];
     
     [_lblName setTextColor:[UIColor whiteColor]];
