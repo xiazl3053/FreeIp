@@ -21,9 +21,9 @@
 #include <pthread.h>
 
 #define PPSHAREINIT [P2PInitService sharedP2PInitService]
-
 #define kMaxBufferDuration_DVR   0.02
 #define kMinBufferDuration_DVR   0.01
+
 extern "C"
 {
     #include "libavformat/avformat.h"
@@ -188,6 +188,7 @@ NSData* copyFrameDataNew(UInt8 *src, int linesize, int width, int height)
 -(BOOL)initVideoParam
 {
     DLog(@"开始时间");
+    CGFloat fTime = 0;
     while (YES)
     {
         if (nConnectStatus==1)
@@ -204,7 +205,13 @@ NSData* copyFrameDataNew(UInt8 *src, int linesize, int width, int height)
             DLog(@"退出了?");
             return NO;
         }
-        [NSThread sleepForTimeInterval:1.0f];
+        [NSThread sleepForTimeInterval:0.5f];
+        fTime += 0.5f;
+        if (fTime>=30)
+        {
+            DLog(@"超时建立连接");
+            return NO;
+        }
     }
     DLog(@"开始解码方法:%@",_strNO);
     nFFMpegStatus = 1;
@@ -383,6 +390,8 @@ Release_avformat_open_input:
         return  result;
     }
     uint8_t *puf = (uint8_t *)malloc(500*1024);
+    CGFloat fStart = 0;
+
     while (!bFinish)
     {
         if (!_bNotify)
@@ -390,6 +399,22 @@ Release_avformat_open_input:
             return result;
         }
         nRef = 0;
+        NSData *data = nil;
+        @synchronized(recv->aryVideo)
+        {
+            if (recv->aryVideo.count>0)
+            {
+                data = [recv->aryVideo objectAtIndex:0];
+                packet.size = (int)data.length;
+                [recv->aryVideo removeObjectAtIndex:0];
+                packet.data = (uint8_t*)[data bytes];
+            }
+            else
+            {
+                packet.size = 0;
+            }
+        }
+#if 0
         @synchronized(recv->aryVideo)
         {
             if (recv->aryVideo.count>0)
@@ -408,9 +433,22 @@ Release_avformat_open_input:
                 packet.size = 0;
             }
         }
+#endif
         if (packet.size==0)
         {
             [NSThread sleepForTimeInterval:0.03f];
+            fStart += 0.06;
+            if (fStart >= 30)
+            {
+                if (_bNotify)
+                {
+                    _nError = 3;//Disconnect
+                    _strError = XCLocalized(@"Disconnect");
+                    [[NSNotificationCenter defaultCenter] postNotificationName:NSCONNECT_P2P_DVR_FAIL_VC object:self];
+                    _bNotify = NO;
+                }
+ 
+            }
             continue;
         }
         if(nRef>=0)

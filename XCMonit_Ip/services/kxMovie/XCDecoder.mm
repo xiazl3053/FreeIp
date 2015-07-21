@@ -191,6 +191,7 @@ NSData * copyFrameData(UInt8 *src, int linesize, int width, int height)
     
     NSInteger nsiFrame;
     CGFloat fSrcWidth,fSrcHeight;
+    NSRecursiveLock *theLock;
 }
 
 @property (readwrite) BOOL isEOF;
@@ -251,6 +252,7 @@ NSData * copyFrameData(UInt8 *src, int linesize, int width, int height)
 {
     self = [super init];
     [self initDecodeInfo:strNO format:nFormat videoFormat:type codeType:2];
+    theLock = [[NSRecursiveLock alloc] init];
     return self;
 }
 
@@ -288,6 +290,7 @@ NSData * copyFrameData(UInt8 *src, int linesize, int width, int height)
 {
     self = [super init];
     [self initDecodeInfo:strNO format:nFormat videoFormat:type codeType:nType];
+    theLock = [[NSRecursiveLock alloc] init];
     return self;
 }
 
@@ -327,6 +330,7 @@ NSData * copyFrameData(UInt8 *src, int linesize, int width, int height)
 -(void)closeFile
 {
     _videoStream = -1;
+    [theLock lock];
     if (pVideoFrame)
     {
         av_free(pVideoFrame);
@@ -345,22 +349,33 @@ NSData * copyFrameData(UInt8 *src, int linesize, int width, int height)
         avformat_close_input(&pFormatCtx);
         pFormatCtx = NULL;
     }
+    [theLock unlock];
     fclose(file_record);
 }
 
 #pragma mark P2P与中转建立连接使用方式
 -(BOOL)initVideoParam
 {
+    CGFloat fTime = 0;
     while (YES)
     {
         if (nConnectStatus == 1)
         {
             break;
-        }else if(nConnectStatus == -1)
+        }
+        else if(nConnectStatus == -1)
         {
+            DLog(@"111111111");
             return NO;
         }
-        [NSThread sleepForTimeInterval:0.5f];
+        [NSThread sleepForTimeInterval:0.25f];
+        fTime += 0.25;
+        if (fTime >= 30)
+        {
+//            [[NSNotificationCenter defaultCenter] postNotificationName:NSCONNECT_P2P_FAIL_VC object:XCLocalized(@"connectFail")];
+            DLog(@"开始时间超时");
+            return NO;
+        }
     }
     _videoArray = [NSMutableArray array];
     pFormatCtx = NULL;
@@ -420,7 +435,6 @@ NSData * copyFrameData(UInt8 *src, int linesize, int width, int height)
     if(recv)
     {
         recv->StopRecv();
-        recv->mReciveQueue = NULL;
         recv = NULL;
     }
     if (bDestorySDK)
@@ -430,7 +444,6 @@ NSData * copyFrameData(UInt8 *src, int linesize, int width, int height)
     }
     [self closeScaler];
     [self closeFile];
-//    avformat_alloc_output_context2
     [[NSNotificationCenter defaultCenter] postNotificationName:NS_SWITCH_TRAN_OPEN_VC object:nil];
 }
 
@@ -616,7 +629,7 @@ int nInfoNum = 0;
     CGFloat minDuration = 0;
     CGFloat decodedDuration = 0;
     uint8_t *puf= (uint8_t*)malloc(500*1024);
-    
+    CGFloat fStart = 0;
     while (!bFinish)
     {
         if (!_bNotify)
@@ -624,6 +637,22 @@ int nInfoNum = 0;
             return result;
         }
         nRef = 0;
+        NSData *data = nil;
+        @synchronized(recv->aryVideo)
+        {
+            if (recv->aryVideo.count>0)
+            {
+                data = [recv->aryVideo objectAtIndex:0];
+                packet.size = (int)data.length;
+                [recv->aryVideo removeObjectAtIndex:0];
+                packet.data = (uint8_t*)[data bytes];
+            }
+            else
+            {
+                packet.size = 0;
+            }
+        }
+#if 0
         @synchronized(recv->aryVideo)
         {
             if (recv->aryVideo.count>0)
@@ -647,14 +676,21 @@ int nInfoNum = 0;
                 packet.size = 0;
             }
         }
+#endif
         if (packet.size==0)
         {
             [NSThread sleepForTimeInterval:0.03f];
+            fStart += 0.03f;
+            if (fStart >= 30)
+            {
+                [[NSNotificationCenter defaultCenter] postNotificationName:NSCONNECT_P2P_FAIL_VC object:XCLocalized(@"Disconnect")];
+            }
             continue;
         }
-
+        
         if(nRef>=0)
         {
+            [theLock lock];
             int len = avcodec_decode_video2(pCodecCtx,pVideoFrame,&gotframe,&packet);
             if (gotframe)
             {
@@ -675,7 +711,8 @@ int nInfoNum = 0;
             }
             if (0 == len || -1 == len)
             {
-//                DLog(@"PSP PPS");
+                data = nil;
+                [theLock unlock];
                 continue;
             }
         }
@@ -683,11 +720,15 @@ int nInfoNum = 0;
         {
             if(nTimeOut==1)
             {
+                data = nil;
+                [theLock unlock];
                 return result;
             }
             //结束
             _isEOF = YES;
             [[NSNotificationCenter defaultCenter] postNotificationName:NSCONNECT_P2P_FAIL_VC object:XCLocalized(@"Disconnect")];
+            data = nil;
+            [theLock unlock];
             break;
         }
     }
@@ -708,14 +749,13 @@ int nInfoNum = 0;
     int nRef = 0;
     CGFloat minDuration = 0;
     CGFloat decodedDuration = 0;
- //   uint8_t *puf= (uint8_t*)malloc(100*1024);
     while (!bFinish)
     {
         if(!_bNotify)
         {
             return result;
         }
-        nRef = av_read_frame(pFormatCtx, &packet);
+        nRef = av_read_frame(pFormatCtx,&packet);
         if(nRef>=0)
         {
             int len = avcodec_decode_video2(pCodecCtx,pVideoFrame,&gotframe,&packet);
@@ -755,7 +795,6 @@ int nInfoNum = 0;
         }
     }
     av_free_packet(&packet);
-//    free(puf);
     return result;
 }
 

@@ -1015,12 +1015,19 @@
         {
             [self recordVideo];
         }
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(restartTran) name:NS_SWITCH_TRAN_OPEN_VC object:nil];
-        dispatch_async(dispatch_get_main_queue(),
-        ^{
+        dispatch_group_t group = dispatch_group_create();
+        dispatch_group_async(group,dispatch_get_global_queue(0, 0), ^{
             [__weakSelf stopVideo];
         });
         _nCodeType = nCode;
+        dispatch_group_wait(group,DISPATCH_TIME_FOREVER);
+        
+        
+//        dispatch_async(dispatch_get_global_queue(0, 0), ^{
+//            DLog(@"重连");
+//            [__weakSelf restartTran];
+//        });
+        [self restartTran];
     }
 }
 -(void)restartTran
@@ -1030,7 +1037,6 @@
     ^{
         [__weakSelf decoderTran];
     });
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:NS_SWITCH_TRAN_OPEN_VC object:nil];
 }
 
 #pragma mark 抓拍
@@ -1086,15 +1092,12 @@
     else
     {
         _btnRecord.enabled = NO;
-//        UIImage *image = [_decoder capturePhoto];
-//        DLog(@"image:%@",image);
         [self.view makeToast:XCLocalized(@"startRecord") duration:1.0 position:@"center"];
         NSString *strPath = [CaptureService captureRecordRGB:_glView];
         [_decoder recordStart:strPath name:_strName];
         _progressLabel.hidden = NO;
         _startDuration = _movieDuration;
         bRecord = !bRecord;
-//        image = nil;
         [self performSelector:@selector(recordBtnEnYes) withObject:nil afterDelay:1.5];
     }
     _btnRecord.selected = bRecord;

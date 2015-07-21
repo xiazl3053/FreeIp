@@ -143,7 +143,7 @@
     btnLogin.layer.masksToBounds = YES;
     btnLogin.layer.cornerRadius = 3;
     [self.view addSubview:btnLogin];
-    [btnLogin addTarget:self action:@selector(loginServer) forControlEvents:UIControlEventTouchUpInside];
+    [btnLogin addTarget:self action:@selector(loginServerInfo) forControlEvents:UIControlEventTouchUpInside];
     btnLogin.frame = Rect(30, txtPwd.y+txtPwd.height+20, kScreenWidth-60, 44);
     
 }
@@ -159,6 +159,12 @@
 {
     [super viewDidAppear:animated];
     
+}
+
+-(void)loginServerInfo
+{
+    [ProgressHUD show:XCLocalized(@"logining")];
+    [self performSelector:@selector(loginServer) withObject:nil afterDelay:0.5f];
 }
 
 -(void)loginServer
@@ -183,15 +189,14 @@
         [self.view makeToast:XCLocalized(@"xuleihao")];
         return; 
     }
-    [ProgressHUD show:XCLocalized(@"logining")];
-    
     __weak LoginSNViewController *__self = self;
     snService.sn_login = ^(int nStatus)
     {
         NSString *strInfo = nil;
-        dispatch_async(dispatch_get_main_queue(), ^{
+//        dispatch_async(dispatch_get_main_queue(),
+//        ^{
             [ProgressHUD dismiss];
-        });
+//        });
         switch (nStatus) {
             case 0:
             {
@@ -250,7 +255,8 @@
     dispatch_async(dispatch_get_main_queue(), ^{
         [ProgressHUD show:@"获取设备信息"];
     });
-    [self getServiceInfo];
+    [self performSelector:@selector(getServiceInfo) withObject:nil afterDelay:0.5f];
+//    [self getServiceInfo];
     
 }
 
@@ -368,6 +374,14 @@
     [super viewWillAppear:animated];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(closekeyBoard) name:NSKEY_BOARD_RETURN_VC object:nil];
 }
-
+#pragma mark 重力处理
+- (BOOL)shouldAutorotate NS_AVAILABLE_IOS(6_0)
+{
+    return NO;
+}
+-(UIInterfaceOrientationMask)supportedInterfaceOrientations
+{
+    return UIInterfaceOrientationMaskPortrait;
+}
 
 @end

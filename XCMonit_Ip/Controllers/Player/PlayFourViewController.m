@@ -442,15 +442,14 @@
     _topHUD = [[UIView alloc] initWithFrame:CGRectMake(0,0,kScreenWidth,50)];
     _topHUD.autoresizingMask = UIViewAutoresizingFlexibleWidth;
     [self.view addSubview:_topHUD];
-    
     btnRemote = [UIButton buttonWithType:UIButtonTypeCustom];
     [btnRemote setImage:[UIImage imageNamed:@"remote_cl"] forState:UIControlStateNormal];
     [btnRemote setImage:[UIImage imageNamed:@"remote_cl_h"] forState:UIControlStateHighlighted];
     [btnRemote addTarget:self action:@selector(enterRemoteView) forControlEvents:UIControlEventTouchUpInside];
-    if (bSnLogin) {
+    if (bSnLogin)
+    {
         [_topHUD addSubview:btnRemote];
         btnRemote.frame = Rect(_topHUD.width-50, 2, 44, 44);
-        
     }
     _topHUD.alpha = 1;
     
