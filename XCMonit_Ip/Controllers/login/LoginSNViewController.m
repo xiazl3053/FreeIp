@@ -45,13 +45,18 @@
     btnBack.frame = Rect(0, 20, 44, 44);
     [btnBack setImage:[UIImage imageNamed:@"NaviBtn_Back_h"] forState:UIControlStateNormal];
     [btnBack setImage:[UIImage imageNamed:@"NaviBtn_Back"] forState:UIControlStateHighlighted];
-    
+    [btnBack addTarget:self action:@selector(navBack) forControlEvents:UIControlEventTouchUpInside];
     UILabel *lblName = [[UILabel alloc] initWithFrame:Rect(80, 25, kScreenWidth-160, 30)];
     [lblName setTextColor:RGB(255, 255, 255)];
     [headView addSubview:lblName];
-    [lblName setText:@"序列号登录"];
+    [lblName setText:XCLocalized(@"SNLogin")];
     [lblName setTextAlignment:NSTextAlignmentCenter];
     
+}
+
+-(void)navBack
+{
+    [self dismissViewControllerAnimated:YES completion:nil];
 }
 
 -(void)initWithMiddle
@@ -61,9 +66,8 @@
     [self.view addSubview:lblContent];
     [lblContent setBackgroundColor:UIColorFromRGBHex(0xd8e6ea)];
     
-    
     UILabel *lblTemp = [[UILabel alloc] initWithFrame:Rect(kScreenWidth/2-40, 90, 80, 20)];
-    [lblTemp setText:@"登  录"];
+    [lblTemp setText:XCLocalized(@"Loginbtn")];
     [lblTemp setBackgroundColor:UIColorFromRGBHex(0xf7f7f7)];
     [lblTemp setTextColor:UIColorFromRGBHex(0xbcc7cb)];
     [lblTemp setFont:XCFontInfo(12)];
@@ -78,10 +82,10 @@
     txtSN.layer.borderWidth = 0.5;
     txtSN.layer.masksToBounds = YES;
     txtSN.layer.cornerRadius = 3;
-    txtSN.attributedPlaceholder = [[NSAttributedString alloc] initWithString:XCLocalized(@"Loginuser") attributes:@{NSForegroundColorAttributeName: color}];
+    txtSN.attributedPlaceholder = [[NSAttributedString alloc] initWithString:XCLocalized(@"inputNO") attributes:@{NSForegroundColorAttributeName: color}];
     UIImageView *imgPwd = [[UIImageView alloc] init];
-    imgPwd.frame = Rect(0, 15, 45, 17);
-    imgPwd.image = [UIImage imageNamed:@"password_Icon"];
+    imgPwd.frame = Rect(0, 0, 44, 44);
+    imgPwd.image = [UIImage imageNamed:@"sn_login"];
     imgPwd.contentMode = UIViewContentModeScaleAspectFit;
     txtSN.leftView = imgPwd;
     txtSN.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
@@ -95,8 +99,8 @@
     [txtUser setBackgroundColor:RGB(255, 255, 255)];
     txtUser.attributedPlaceholder = [[NSAttributedString alloc] initWithString:XCLocalized(@"Loginuser") attributes:@{NSForegroundColorAttributeName: color}];
     UIImageView *imgPwd1 = [[UIImageView alloc] init];
-    imgPwd1.frame = Rect(0, 15, 45, 17);
-    imgPwd1.image = [UIImage imageNamed:@"userName_Icon"];
+    imgPwd1.frame = Rect(0, 0, 44, 44);
+    imgPwd1.image = [UIImage imageNamed:@"sn_user"];
     imgPwd1.contentMode = UIViewContentModeScaleAspectFit;
     txtUser.leftView = imgPwd1;
     txtUser.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
@@ -113,8 +117,8 @@
     [txtPwd setBackgroundColor:RGB(255, 255, 255)];
     [txtPwd setFont:XCFontInfo(12)];
     UIImageView *imgPwd2 = [[UIImageView alloc] init];
-    imgPwd2.frame = Rect(0, 15, 45, 17);
-    imgPwd2.image = [UIImage imageNamed:@"password_Icon"];
+    imgPwd2.frame = Rect(0, 0, 44, 44);
+    imgPwd2.image = [UIImage imageNamed:@"sn_pwd"];
     imgPwd2.contentMode = UIViewContentModeScaleAspectFit;
     txtPwd.leftView = imgPwd2;
     txtPwd.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
@@ -131,10 +135,7 @@
     txtSN.delegate = self;
     txtUser.delegate = self;
     
-    [txtUser setText:@"admin"];
-    [txtPwd setText:@"88888888"];
-    [txtSN setText:@"9743200000001"];
-    
+//
     UIButton *btnLogin = [UIButton buttonWithType:UIButtonTypeCustom];
     [btnLogin setBackgroundColor:RGB(15, 173, 225)];
     [btnLogin setTitle:@"登录" forState:UIControlStateNormal];
@@ -145,11 +146,6 @@
     [btnLogin addTarget:self action:@selector(loginServer) forControlEvents:UIControlEventTouchUpInside];
     btnLogin.frame = Rect(30, txtPwd.y+txtPwd.height+20, kScreenWidth-60, 44);
     
-}
-
--(void)navBack
-{
-    [self dismissViewControllerAnimated:YES completion:nil];
 }
 
 -(void)viewDidLoad

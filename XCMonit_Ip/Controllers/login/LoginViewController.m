@@ -248,7 +248,7 @@
     [lblContent1 setBackgroundColor:UIColorFromRGBHex(0xd8e6ea)];
     
     UILabel *lblTemp1 = [[UILabel alloc] initWithFrame:Rect(kScreenWidth/2-40, _btnFind.y+_btnFind.height+10, 80, 20)];
-    [lblTemp1 setText:@"其他方式登录"];
+    [lblTemp1 setText:XCLocalized(@"otherLogin")];
     [lblTemp1 setBackgroundColor:UIColorFromRGBHex(0xf7f7f7)];
     [lblTemp1 setTextColor:UIColorFromRGBHex(0xbcc7cb)];
     [lblTemp1 setFont:XCFontInfo(12)];
@@ -256,7 +256,7 @@
     [self.view addSubview:lblTemp1];
     
     UIButton *btnSN = [UIButton buttonWithType:UIButtonTypeCustom];
-    [btnSN setTitle:@"序列号登录" forState:UIControlStateNormal];
+    [btnSN setTitle:XCLocalized(@"SNLogin") forState:UIControlStateNormal];
     [btnSN setBackgroundColor:RGB(252, 173, 113)];
     [btnSN setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
     btnSN.layer.masksToBounds = YES;
@@ -264,7 +264,7 @@
     
     UIButton *btnGuess = [UIButton buttonWithType:UIButtonTypeCustom];
     [btnGuess setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-    [btnGuess setTitle:@"游客登录" forState:UIControlStateNormal];
+    [btnGuess setTitle:XCLocalized(@"testUser") forState:UIControlStateNormal];
     [btnGuess setBackgroundColor:RGB(0, 218, 95)];
     btnGuess.layer.masksToBounds = YES;
     btnGuess.layer.cornerRadius = 3;

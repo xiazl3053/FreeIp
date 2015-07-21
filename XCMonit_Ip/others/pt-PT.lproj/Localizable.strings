@@ -236,8 +236,9 @@
 
 
 "regNameLength"="Caixa de Correio não mais do que 64";
-
+"otherLogin"="outros Entrar";
 
 "3Error"="Consecutivas falhadas muitas vezes";
+"SNLogin"="Número de Série Entrar";
 
-
+"testUser"="visitante";

@@ -1,4 +1,4 @@
-"Loginbtn" = "登录";
+"Loginbtn" = "登  录";
 "Loginuser" = "请输入用户名";
 "regUser"="请输入邮箱";
 "Loginpwd" = "请输入密码";
@@ -259,5 +259,10 @@
 "searching"="正在搜索...";
 "WIFIOK"="请确认WIFI连接正常";
 "3Error"="连续失败粗疏过多";
+"SNLogin"="序列号登录";
+"testUser"="游客";
 
+
+
+"otherLogin"="其他方式登录";
 
