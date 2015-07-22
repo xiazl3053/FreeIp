@@ -330,10 +330,11 @@
         __block int __nCode = nCodeType;
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0f * NSEC_PER_SEC)), dispatch_get_global_queue(0, 0),
         ^{
-                BOOL bFlag = [__decoder switchP2PCode:__nCode];
-                dispatch_async(dispatch_get_main_queue(), ^{
+               BOOL bFlag = [__decoder switchP2PCode:__nCode];
+               dispatch_async(dispatch_get_main_queue(),
+               ^{
                         [ProgressHUD dismiss];
-                });
+               });
                if(bFlag)
                {
                    [__self playMovieWithChannel:__strKey];
@@ -354,8 +355,11 @@
         __block int __nChannel = nChannel;
         __block int __nCodeType = nCodeType;
         DLog(@"码流类型:%d",nCodeType);
+    
         dispatch_async(dispatch_get_main_queue(), ^{
+            [__self setBtnNO];
             [ProgressHUD dismiss];
+        
         });
         dispatch_async(dispatch_get_global_queue(0, 0),
         ^{
@@ -364,6 +368,14 @@
         
     }
 }
+
+-(void)setBtnNO
+{
+    [(UIButton*)[_downHUD viewWithTag:1002] setEnabled:NO];
+    [(UIButton*)[_downHUD viewWithTag:1003] setEnabled:NO];
+    [(UIButton*)[_downHUD viewWithTag:1004] setEnabled:NO];
+}
+
 
 #pragma mark view显示
 -(void)viewDidAppear:(BOOL)animated

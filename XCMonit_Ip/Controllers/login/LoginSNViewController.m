@@ -177,15 +177,27 @@
     NSString *strPwd = txtPwd.text;
     NSString *strNO = txtSN.text;
     if (strUser != nil && [strUser isEqualToString:@""]) {
+        dispatch_async(dispatch_get_main_queue(),
+                       ^{
+                           [ProgressHUD dismiss];
+                       });
         [self.view makeToast:XCLocalized(@"userAuth")];
         return ;
     }
     if (strPwd != nil  && [strPwd isEqualToString:@""]) {
+        dispatch_async(dispatch_get_main_queue(),
+                       ^{
+                           [ProgressHUD dismiss];
+                       });
         [self.view makeToast:XCLocalized(@"pwdAuth")];
         
         return;
     }
     if (strNO !=nil && [strNO isEqualToString:@""]) {
+        dispatch_async(dispatch_get_main_queue(),
+                       ^{
+                           [ProgressHUD dismiss];
+                       });
         [self.view makeToast:XCLocalized(@"xuleihao")];
         return; 
     }
@@ -193,10 +205,10 @@
     snService.sn_login = ^(int nStatus)
     {
         NSString *strInfo = nil;
-//        dispatch_async(dispatch_get_main_queue(),
-//        ^{
+        dispatch_async(dispatch_get_main_queue(),
+        ^{
             [ProgressHUD dismiss];
-//        });
+        });
         switch (nStatus) {
             case 0:
             {

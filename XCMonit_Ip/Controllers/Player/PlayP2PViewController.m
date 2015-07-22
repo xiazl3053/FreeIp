@@ -1021,12 +1021,11 @@
         });
         _nCodeType = nCode;
         dispatch_group_wait(group,DISPATCH_TIME_FOREVER);
+        __weak UIButton *__btnPlay = _btnPlay;
+        dispatch_async(dispatch_get_main_queue(), ^{
+            __btnPlay.enabled = NO;
+        });
         
-        
-//        dispatch_async(dispatch_get_global_queue(0, 0), ^{
-//            DLog(@"重连");
-//            [__weakSelf restartTran];
-//        });
         [self restartTran];
     }
 }

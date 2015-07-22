@@ -103,7 +103,7 @@
     
     
     UILabel *lblTemp = [[UILabel alloc] initWithFrame:Rect(kScreenWidth/2-40, 90, 80, 20)];
-    [lblTemp setText:@"账号密码登录"];
+    [lblTemp setText:XCLocalized(@"Loginbtn")];
     [lblTemp setBackgroundColor:UIColorFromRGBHex(0xf7f7f7)];
     [lblTemp setTextColor:UIColorFromRGBHex(0xbcc7cb)];
     [lblTemp setFont:XCFontInfo(12)];
