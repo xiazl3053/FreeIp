@@ -35,7 +35,6 @@
 @property (nonatomic,strong) UITableView *tableView;
 @property (nonatomic,strong) NSMutableArray *array;
 
-
 @end
 
 @implementation HomeViewController

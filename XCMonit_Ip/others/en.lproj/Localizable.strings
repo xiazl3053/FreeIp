@@ -168,6 +168,7 @@
 "rtspinterrup"="Connection interruption";
 "startRecord"="Begin recording...";
 "stopRecord"="End recording...";
+"recordFail"="Recording failure";
 "captureS"="Capture success";
 "captureF"="Capture fail";
 "playOK"="Finished playing";
@@ -266,7 +267,7 @@
 "search"="LAN Search";
 "searching"="Searching";
 "WIFIOK"="Make sure the wifi connection is normal";
-
+"SNEmpty"="Serial Number can not be empty";
 "versionCheck"="Version detection";
 "versionUpdate"="Are you sure an updated version?";
 "versionLaster"="The current version is the latest";

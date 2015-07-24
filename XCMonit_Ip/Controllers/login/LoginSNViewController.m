@@ -25,9 +25,10 @@
     UITextField *txtUser;
     UITextField *txtPwd;
     GetSnService *getSn;
-    
 }
+
 @property (nonatomic,copy) NSString *strNo;
+
 @end
 
 @implementation LoginSNViewController
@@ -138,7 +139,7 @@
 //
     UIButton *btnLogin = [UIButton buttonWithType:UIButtonTypeCustom];
     [btnLogin setBackgroundColor:RGB(15, 173, 225)];
-    [btnLogin setTitle:XCLocalized(@"Loiginbtn") forState:UIControlStateNormal];
+    [btnLogin setTitle:XCLocalized(@"Loginbtn") forState:UIControlStateNormal];
     [btnLogin setTitleColor:RGB(255, 255, 255) forState:UIControlStateNormal];
     btnLogin.layer.masksToBounds = YES;
     btnLogin.layer.cornerRadius = 3;
@@ -163,7 +164,18 @@
 
 -(void)loginServerInfo
 {
-    [ProgressHUD show:XCLocalized(@"logining")];
+    [self.view makeToastActivity];
+//    if([NSThread isMainThread])
+//    {
+//        [ProgressHUD show:XCLocalized(@"logining")];
+//    }
+//    else
+//    {
+//        dispatch_async(dispatch_get_main_queue(),
+//        ^{
+//            [ProgressHUD show:XCLocalized(@"logining")];
+//        });
+//    }
     [self performSelector:@selector(loginServer) withObject:nil afterDelay:0.5f];
 }
 
@@ -173,31 +185,25 @@
     {
         snService = [[LoginSNService alloc] init];
     }
+    
+    [self closekeyBoard];
+    
     NSString *strUser = txtUser.text;
     NSString *strPwd = txtPwd.text;
     NSString *strNO = txtSN.text;
     if (strUser != nil && [strUser isEqualToString:@""]) {
-        dispatch_async(dispatch_get_main_queue(),
-                       ^{
-                           [ProgressHUD dismiss];
-                       });
+        [self.view hideToastActivity];
         [self.view makeToast:XCLocalized(@"userAuth")];
         return ;
     }
     if (strPwd != nil  && [strPwd isEqualToString:@""]) {
-        dispatch_async(dispatch_get_main_queue(),
-                       ^{
-                           [ProgressHUD dismiss];
-                       });
+        [self.view hideToastActivity];
         [self.view makeToast:XCLocalized(@"pwdAuth")];
-        
         return;
     }
-    if (strNO !=nil && [strNO isEqualToString:@""]) {
-        dispatch_async(dispatch_get_main_queue(),
-                       ^{
-                           [ProgressHUD dismiss];
-                       });
+    if (strNO !=nil && [strNO isEqualToString:@""])
+    {
+        [self.view hideToastActivity];
         [self.view makeToast:XCLocalized(@"xuleihao")];
         return; 
     }
@@ -205,10 +211,7 @@
     snService.sn_login = ^(int nStatus)
     {
         NSString *strInfo = nil;
-        dispatch_async(dispatch_get_main_queue(),
-        ^{
-            [ProgressHUD dismiss];
-        });
+        [__self.view hideToastActivity];
         switch (nStatus) {
             case 0:
             {
@@ -264,32 +267,29 @@
 
 -(void)enterSuccess
 {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [ProgressHUD show:@"获取设备信息"];
-    });
-    [self performSelector:@selector(getServiceInfo) withObject:nil afterDelay:0.5f];
-//    [self getServiceInfo];
+    [self.view makeToastActivity];
     
+    [self performSelector:@selector(getServiceInfo) withObject:nil afterDelay:0.5f];
 }
 
 -(void)getServiceInfo
 {
-    if (getSn==nil) {
+    if (getSn==nil)
+    {
         getSn = [[GetSnService alloc] init];
     }
     __weak LoginSNViewController *__self = self;
     getSn.getSnInfo = ^(int nStatus,int nAllCout)
     {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [ProgressHUD dismiss];
+        dispatch_async(dispatch_get_main_queue(),
+        ^{
+            [__self.view hideToastActivity];
         });
         NSString *strInfo = @"";
         switch (nStatus)
         {
             case 1:
-            {
-                
-            }
+            {}
             break;
             case 0:
             {
@@ -320,7 +320,7 @@
             if (nAllCout == 1)
             {
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    PlayP2PViewController *playP2p = [[PlayP2PViewController alloc] initWithNO:__self.strNo name:__self.strNo format:0];
+                    PlayP2PViewController *playP2p = [[PlayP2PViewController alloc] initWithNO:__self.strNo name:__self.strNo format:1];
                     [__self presentViewController:playP2p animated:YES completion:nil];
                 });
             }

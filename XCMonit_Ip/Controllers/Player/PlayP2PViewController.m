@@ -109,6 +109,7 @@
 
 -(void)dealloc
 {
+    DLog(@"out");
     [_videoFrames removeAllObjects];
     [_tapGestureRecognizer removeTarget:self action:@selector(handleTapNew:)];//修改成新的
     [_doubleRecognizer removeTarget:self action:@selector(handleTapNew:)];//修改成新的
@@ -609,7 +610,6 @@
         }
     }
     //4:3  16:10
-//    _glView = [[UIImageView alloc] initWithFrame:frameCenter decoder:_decoder];
     _glView = [[UIImageView alloc] initWithFrame:frameCenter];
     _glView.contentMode = UIViewContentModeScaleToFill;//UIViewContentModeScaleAspectFill;UIViewContentModeScaleAspectFit
     _glView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleBottomMargin;
@@ -769,7 +769,6 @@
 - (CGFloat)presentVideoFrame: (KxVideoFrame *) frame
 {
     //修改成OPENGL 贴图RGB与YUV两种方式
-//    [_glView render:frame];
     KxVideoFrameRGB *rgbImg = (KxVideoFrameRGB *)frame;
     [_glView setImage:[rgbImg asImage]];
     return 0;
@@ -778,39 +777,42 @@
 -(void)asyncDecodeFrames
 {
     if (self.decoding)
+    {
+//        DLog(@"22222????");
         return;
-    
+    }
+//    DLog(@"11111");
     __weak PlayP2PViewController *wearSelf = self;
-    self.decoding = YES;
+    _decoding = YES;
     dispatch_async(_dispatchQueue,
     ^{
         BOOL good = YES;
         while (good && wearSelf.playing)
         {
             good = NO;
-            @autoreleasepool
+            if (!wearSelf.playing)
             {
-                if (!wearSelf.playing)
-                {
-                    DLog(@"跑出去");
-                    return ;
-                }
-                NSArray *frames = [wearSelf.decoder decodeFrames];
-                if (frames ==nil)
-                {
-                    //发生错误;
-                    break;
-                }else if(frames.count)
-                {
-                    good = [wearSelf addFrames:frames];
-                }
-                frames = nil;
+                DLog(@"跑出去");
+                wearSelf.decoding = NO;
+                return ;
             }
+            NSArray *frames = [wearSelf.decoder decodeFrames];
+            if (frames ==nil)
+            {
+                //发生错误;
+//                DLog(@"?????");
+                break;
+            }else if(frames.count)
+            {
+                good = [wearSelf addFrames:frames];
+            }
+           frames = nil;
         }
         if (!wearSelf.playing)
         {
             DLog(@"已经中断");
         }
+//        DLog(@"3333333");
         wearSelf.decoding = NO;
     });
 }
@@ -881,7 +883,6 @@
             stopBtn.selected = YES;
             stopBtn.enabled = NO;
         });
-        
     }
 }
 #pragma mark 连接视频  起点
@@ -902,7 +903,8 @@
         }
         else
         {
-            dispatch_async(dispatch_get_main_queue(), ^{
+            dispatch_async(dispatch_get_main_queue(),
+            ^{
                 [ProgressHUD showPlayRight:XCLocalized(@"loading") viewInfo:__weakSelf.view];
             });
         }
@@ -911,7 +913,6 @@
     dispatch_async(dispatch_get_global_queue(0, 0),
     ^{
         [__weakSelf decoderInfo];
-        
     });
     nPlayStatus = 1;
 }

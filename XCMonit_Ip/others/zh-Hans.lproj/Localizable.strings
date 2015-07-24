@@ -148,7 +148,7 @@
 "deleteDeviceOK"="删除成功";
 "deleteDeviceFail"="删除失败";
 "deleteDeviceFail_server"="服务器信息错误";
-
+"recordFail"="录像失败";
 
 
 "keyboardFirst"="上一个";
@@ -258,10 +258,10 @@
 "search"="局域网搜索";
 "searching"="正在搜索...";
 "WIFIOK"="请确认WIFI连接正常";
-"3Error"="连续失败粗疏过多";
+"3Error"="连续失败次数过多";
 "SNLogin"="序列号登录";
 "testUser"="游客";
-
+"SNEmpty"="序列号不能为空";
 "searchHistory"="搜索";
 "otherLogin"="其他方式登录";
 "Remote"="远程回放";

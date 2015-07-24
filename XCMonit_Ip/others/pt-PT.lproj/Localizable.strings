@@ -227,8 +227,9 @@
 "search"="LAN Pesquisa";
 "searching"="Pesquisando";
 "WIFIOK"="Verifique se a conexão wi-fi é normal";
+"recordFail"="falha de gravação";
 
-
+"SNEmpty"="Serial Number can not be empty";
 
 "versionCheck"="A detecção de versão";
 "versionLaster"="A versão atual é a mais recente";

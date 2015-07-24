@@ -382,25 +382,19 @@
 {
     [super viewDidAppear:animated];
     [UIApplication sharedApplication].idleTimerDisabled = YES;
-    
     PlayControlModel *playModel = [[PlayControlModel alloc] init];
-    
     playModel.nPlayIndex = 0;
     ((PlayControllerView*)[_array objectAtIndex:nIndex]).bPlay = YES;
     ((PlayControllerView*)[_array objectAtIndex:nIndex]).strKey = @"0";
     [_decoderInfo setValue:playModel forKey:@"0"];
-    
     __weak PlayFourViewController *weakSelf = self;
-    
     __weak NSString *__strNO = _strNO;
-    
     PlayControllerView *playView = (PlayControllerView *)[_array objectAtIndex:0];
     __weak PlayControllerView *__playView = playView;
     dispatch_async(dispatch_get_main_queue(),
     ^{
          [__playView.mainView makeToastActivity];
     });
-    
     dispatch_async(dispatch_get_global_queue(0, 0),
    ^{
        [weakSelf startPlayWithNO:__strNO channel:@"0" codeType:2];

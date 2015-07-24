@@ -30,7 +30,6 @@ bool RecvFile::ProcessFrameData(char* aFrameData, int aFrameDataLength)
         [aryVideo addObject:dataInfo];
     }
     dataInfo = nil;
-    
     if (bRecord)
     {
         if(bStart)
@@ -76,7 +75,6 @@ bool RecvFile::DeviceDisconnectNotify()
     }
     DLog(@"发送");
     [[NSNotificationCenter defaultCenter] postNotificationName:NSCONNECT_P2P_FAIL_VC object:XCLocalized(@"Disconnect")];
-    
     [[NSNotificationCenter defaultCenter] postNotificationName:NSCONNECT_P2P_DISCONNECT object:[NSString stringWithFormat:@"%li",(long)nChannel]];
     
     return true;
@@ -174,18 +172,12 @@ void RecvFile::closeTran()
                 printf("success stop relay stream \n");
             }
         }
-        else if(streamType == 1)
-        {
-            PlayRecordCtrlMsg msg;
-//            msg.ctrl = PB_STOP;
-            relayconn->PlayBackRecordCtrl(&msg);
-        }
-        if(relayconn!=NULL)
-        {
+//        if(relayconn!=NULL)
+//        {
             relayconn->Close();
             delete relayconn;
             relayconn = NULL;
-        }
+//        }
     }
 }
 

@@ -714,6 +714,8 @@ int nInfoNum = 0;
                 [theLock unlock];
                 continue;
             }
+            data = nil;
+            [theLock unlock];
         }
         else
         {

@@ -479,7 +479,6 @@
     {
         heightInfo = kScreenSourchWidth;
     }
-    
     if(IOS_SYSTEM_8)
     {
         fWidth = self.view.width;
@@ -925,6 +924,11 @@
     }
     else
     {
+        if(imgView.image==nil)
+        {
+            [self.view makeToast:XCLocalized(@"recordFail") duration:1.0 position:@"center"]; 
+            return ;
+        }
         NSString *strPath = [CaptureService captureRecordRGB:imgView];
         if (strPath == nil || [strPath isEqualToString:@""])
         {
@@ -933,6 +937,7 @@
         }
         else
         {
+            [self.view makeToast:XCLocalized(@"startRecord") duration:1.0 position:@"center"];
             //录像成功
             if (aryDecode.count>0)
             {
