@@ -228,7 +228,7 @@
 "searching"="Pesquisando";
 "WIFIOK"="Verifique se a conexão wi-fi é normal";
 "recordFail"="falha de gravação";
-
+"deviceOff"="O dispositivo não está on-line";
 "SNEmpty"="Serial Number can not be empty";
 
 "versionCheck"="A detecção de versão";

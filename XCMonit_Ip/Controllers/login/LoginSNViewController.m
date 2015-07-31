@@ -308,6 +308,10 @@
                 strInfo = XCLocalized(@"loginTime");
             }
             break;
+            case 10:
+            {
+                strInfo = XCLocalized(@"deviceOff");
+            }
             default:
             {
                 
@@ -319,7 +323,8 @@
         {
             if (nAllCout == 1)
             {
-                dispatch_async(dispatch_get_main_queue(), ^{
+                dispatch_async(dispatch_get_main_queue(),
+                ^{
                     PlayP2PViewController *playP2p = [[PlayP2PViewController alloc] initWithNO:__self.strNo name:__self.strNo format:1];
                     [__self presentViewController:playP2p animated:YES completion:nil];
                 });

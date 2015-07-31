@@ -264,6 +264,7 @@
 
 "Manually"="Manually add";
 
+"deviceOff"="Device is not online";
 "search"="LAN Search";
 "searching"="Searching";
 "WIFIOK"="Make sure the wifi connection is normal";

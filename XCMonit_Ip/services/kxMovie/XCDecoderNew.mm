@@ -399,6 +399,7 @@ Release_avformat_open_input:
             return result;
         }
         nRef = 0;
+#if 0
         NSData *data = nil;
         @synchronized(recv->aryVideo)
         {
@@ -414,16 +415,19 @@ Release_avformat_open_input:
                 packet.size = 0;
             }
         }
-#if 0
+#endif
+        
+#if 1
         @synchronized(recv->aryVideo)
         {
             if (recv->aryVideo.count>0)
             {
                 NSData *data = [recv->aryVideo objectAtIndex:0];
-                if(data.length<500*1024)
+                if(data!=nil)
                 {
                     packet.size = (int)data.length;
-                    memcpy(puf, [data bytes], data.length);
+                    puf = (uint8_t *)malloc(data.length);
+                    memcpy(puf,[data bytes],data.length);
                     [recv->aryVideo removeObjectAtIndex:0];
                     packet.data = puf;
                 }
@@ -465,7 +469,8 @@ Release_avformat_open_input:
             }
             if (0 == len || -1 == len)
             {
-                break;
+                free(puf);
+                continue;
             }
         }
         else

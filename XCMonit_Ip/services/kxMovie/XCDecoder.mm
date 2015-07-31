@@ -627,7 +627,7 @@ int nInfoNum = 0;
     int nRef = 0;
     CGFloat minDuration = 0;
     CGFloat decodedDuration = 0;
-    uint8_t *puf= (uint8_t*)malloc(500*1024);
+    uint8_t *puf= nil;
     CGFloat fStart = 0;
     while (!bFinish)
     {
@@ -636,6 +636,7 @@ int nInfoNum = 0;
             return result;
         }
         nRef = 0;
+#if 0
         NSData *data = nil;
         @synchronized(recv->aryVideo)
         {
@@ -651,15 +652,18 @@ int nInfoNum = 0;
                 packet.size = 0;
             }
         }
-#if 0
+#endif
+        
+#if 1
         @synchronized(recv->aryVideo)
         {
             if (recv->aryVideo.count>0)
             {
                 NSData *data = [recv->aryVideo objectAtIndex:0];
-                if (data.length < 500*1024)
+                if (data!=nil)
                 {
                     packet.size = (int)data.length;
+                    puf = (uint8_t*)malloc(data.length);
                     memcpy(puf, [data bytes], data.length);
                     [recv->aryVideo removeObjectAtIndex:0];
                     data = nil;
@@ -710,25 +714,23 @@ int nInfoNum = 0;
             }
             if (0 == len || -1 == len)
             {
-                data = nil;
+                free(puf);
                 [theLock unlock];
                 continue;
             }
-            data = nil;
             [theLock unlock];
         }
         else
         {
             if(nTimeOut==1)
             {
-                data = nil;
+                free(puf);
                 [theLock unlock];
                 return result;
             }
             //结束
             _isEOF = YES;
             [[NSNotificationCenter defaultCenter] postNotificationName:NSCONNECT_P2P_FAIL_VC object:XCLocalized(@"Disconnect")];
-            data = nil;
             [theLock unlock];
             break;
         }

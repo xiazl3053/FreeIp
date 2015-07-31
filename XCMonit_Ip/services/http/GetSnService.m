@@ -42,9 +42,20 @@
                 else if(array.count ==2 )
                 {
                     NSArray *ary = array[1];
-                    if (_getSnInfo)
+                    
+                    int nLine = [ary[1] intValue];
+                    if (nLine) {
+                        if (_getSnInfo)
+                        {
+                            _getSnInfo(1,[ary[2] intValue]);
+                        }
+                    }
+                    else
                     {
-                        _getSnInfo(1,[ary[2] intValue]);
+                        if (_getSnInfo)
+                        {
+                            _getSnInfo(10,0);
+                        }
                     }
                 }
             }
