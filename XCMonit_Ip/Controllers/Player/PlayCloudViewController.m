@@ -132,10 +132,10 @@
     
     dispatch_time_t after = dispatch_time(DISPATCH_TIME_NOW, 0.5 * NSEC_PER_SEC );
     dispatch_after(after, dispatch_get_global_queue(0, 0),
-   ^{
-       [__self stopVideo];
-       [__self cloudInit];
-   });
+                   ^{
+                       [__self stopVideo];
+                       [__self cloudInit];
+                   });
 }
 
 -(void)initWithScrol
@@ -179,10 +179,10 @@
     nChannel = (int)sender.tag;
     dispatch_time_t after = dispatch_time(DISPATCH_TIME_NOW, 0.5 * NSEC_PER_SEC );
     dispatch_after(after, dispatch_get_global_queue(0, 0),
-    ^{
-         [__self stopVideo];
-         [__self cloudInit];
-    });
+                   ^{
+                       [__self stopVideo];
+                       [__self cloudInit];
+                   });
 }
 
 -(void)clickRightBtn:(UIButton *)sender
@@ -323,7 +323,7 @@
     [downViewBg setImage:[UIImage imageNamed:@"ptz_bg"]];
     downViewBg.tag = 10089;
     [downView insertSubview:downViewBg atIndex:0];
-   
+    
     //CloudButton
     btnPause = [[CloudButton alloc] initWithFrame:Rect(60, 200,60, 49) normal:@"play_cl" high:@"pause_cl_h" select:@"pause_cl"];
     [downView addSubview:btnPause];
@@ -376,9 +376,9 @@
     }
     __weak PlayCloudViewController *__self = self;
     dispatch_async(dispatch_get_global_queue(0, 0),
-    ^{
-       [__self startPlayCloud_gcd];
-    });
+                   ^{
+                       [__self startPlayCloud_gcd];
+                   });
     btnPause.selected = YES;
     [ProgressHUD dismiss];
 }
@@ -421,42 +421,42 @@
         {
             [__aryDecode removeAllObjects];
             dispatch_async(dispatch_get_main_queue(),
-               ^{
-                   [__self.view hideToastActivity];
-                   [__self.view makeToast:XCLocalized(@"noRecords")];
-                   __btnPause.selected = NO;
-               });
+                           ^{
+                               [__self.view hideToastActivity];
+                               [__self.view makeToast:XCLocalized(@"noRecords")];
+                               __btnPause.selected = NO;
+                           });
         }
         else if(nStatus==-1)
         {
             DLog(@"删除decode");
             [__aryDecode removeAllObjects];
             dispatch_async(dispatch_get_main_queue(),
-            ^{
-                [__self.view hideToastActivity];
-                [__self.view makeToast:XCLocalized(@"connectFail")];
-                __btnPause.selected = NO;
-            });
+                           ^{
+                               [__self.view hideToastActivity];
+                               [__self.view makeToast:XCLocalized(@"connectFail")];
+                               __btnPause.selected = NO;
+                           });
         }
         else
         {
             dispatch_async(dispatch_get_main_queue(),
-            ^{
-                [__self.view hideToastActivity];
-            });
+                           ^{
+                               [__self.view hideToastActivity];
+                           });
             [__timeView.aryDate removeAllObjects];
             [__timeView.aryDate addObjectsFromArray:ary];
             DLog(@"请求播放视频");
             [__timeView startTimeCome];
             dispatch_async(dispatch_get_main_queue(),
-            ^{
-                [ProgressHUD dismiss];
-                __btnPause.selected = YES;
-            });
+                           ^{
+                               [ProgressHUD dismiss];
+                               __btnPause.selected = YES;
+                           });
             dispatch_async(dispatch_get_global_queue(0, 0),
-            ^{
-                [__self startPlayCloud];
-            });
+                           ^{
+                               [__self startPlayCloud];
+                           });
         }
     };
     [cloudDec checkView:timeView.strDate];
@@ -529,9 +529,9 @@
     
     __weak PlayCloudViewController *__self = self;
     dispatch_async(dispatch_get_global_queue(0,0),
-    ^{
-        [__self cloudInit];
-    });
+                   ^{
+                       [__self cloudInit];
+                   });
 }
 
 -(void)viewWillAppear:(BOOL)animated
@@ -569,15 +569,15 @@
         CloudTime *cloud = [timeView.aryDate objectAtIndex:nTemp];
         __weak TimeView *__timeView = timeView;
         dispatch_async(dispatch_get_main_queue(),
-        ^{
-            [__timeView setDragTime:cloud.iStart];
-        });
+                       ^{
+                           [__timeView setDragTime:cloud.iStart];
+                       });
         __weak PlayCloudViewController *__self =self;
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5 * NSEC_PER_SEC)), dispatch_get_global_queue(0, 0),
-        ^{
-               [__self rePlayInfo];
-        });
-   }
+                       ^{
+                           [__self rePlayInfo];
+                       });
+    }
 }
 
 -(void)disconnect
@@ -585,10 +585,10 @@
     __weak PlayCloudViewController *__self = self;
     __weak UIButton *__btnPause = btnPause;
     dispatch_async(dispatch_get_main_queue(),
-    ^{
-        [__self.view makeToast:XCLocalized(@"Disconnect") duration:1.5f position:@"center"];
-        __btnPause.selected = NO;
-    });
+                   ^{
+                       [__self.view makeToast:XCLocalized(@"Disconnect") duration:1.5f position:@"center"];
+                       __btnPause.selected = NO;
+                   });
     if (aryDecode.count==0)
     {
         
@@ -607,19 +607,23 @@
 
 -(void)rePlayInfo
 {
-//    if (_bPlaying)
-//    {
-        if (aryDecode.count==0)
-        {
-            return ;
-        }
-        CloudDecode *cloudDec = [aryDecode objectAtIndex:0];
-        [cloudDec dragTime:[timeView currentTime]];
-//    }
+    //    if (_bPlaying)
+    //    {
+    if (aryDecode.count==0)
+    {
+        return ;
+    }
+    CloudDecode *cloudDec = [aryDecode objectAtIndex:0];
+    [cloudDec dragTime:[timeView currentTime]];
+    //    }
 }
 
 -(void)doneDidTouch
 {
+    __weak PlayCloudViewController *__self = self;
+    dispatch_async(dispatch_get_global_queue(0, 0), ^{
+        [__self stopVideo];
+    });
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
@@ -647,9 +651,9 @@
 {
     __weak PlayCloudViewController *__self = self;
     dispatch_async(dispatch_get_main_queue(),
-    ^{
-        [__self initGlView];
-    });
+                   ^{
+                       [__self initGlView];
+                   });
     _bPlaying = YES;
     _bDecoding = NO;
     if(aryDecode.count==0)
@@ -664,14 +668,14 @@
     _videoFrames = [NSMutableArray array];
     DLog(@"开始播放");
     dispatch_async(dispatch_get_global_queue(0, 0),
-    ^{
-        [__self startPlay];
-    });
+                   ^{
+                       [__self startPlay];
+                   });
     __weak UIButton *__btnPause = btnPause;
     dispatch_async(dispatch_get_main_queue()
                    , ^{
                        __btnPause.selected = YES;
-                });
+                   });
     
     //开始解码模块
 }
@@ -695,13 +699,13 @@
     {
         if(_videoFrames.count>0)
         {
-//            fps = 0.04;
+            //            fps = 0.04;
             [self updatePlayUI];
         }
-//        else
-//        {
-//            fps = 0;
-//        }
+        //        else
+        //        {
+        //            fps = 0;
+        //        }
         if (_videoFrames.count==0)
         {
             //解码开启
@@ -710,9 +714,9 @@
         __weak PlayCloudViewController *__weakSelf = self;
         dispatch_time_t after = dispatch_time(DISPATCH_TIME_NOW, 0.03 * NSEC_PER_SEC );
         dispatch_after(after, dispatch_get_global_queue(0, 0),
-        ^{
-             [__weakSelf startPlay];
-        });
+                       ^{
+                           [__weakSelf startPlay];
+                       });
     }
 }
 
@@ -771,9 +775,9 @@
         __weak UIImageView *__imgView = imgView;
         __weak UIImage *__image = [rgbFrame asImage];
         dispatch_sync(dispatch_get_main_queue(),
-        ^{
-              [__imgView setImage:__image];
-        });
+                      ^{
+                          [__imgView setImage:__image];
+                      });
         interval = frame.duration;
     }
     frame = nil;
@@ -816,7 +820,6 @@
     {
         return ;
     }
-    
     if(btnRecord.selected)
     {
         if ([NSThread isMainThread])
@@ -832,13 +835,12 @@
     [cloudDec stopDecode];
     _bPlaying = NO;
     _bDecoding = YES;
-    
     @synchronized(aryDecode)
     {
         [aryDecode removeObjectAtIndex:0];
     }
     cloudDec = nil;
-   //18127853526
+    //18127853526
     //   17727610912
     @synchronized(_videoFrames)
     {
@@ -858,15 +860,15 @@
         __weak TimeView *__timeView = timeView;
         __weak UIButton *__btnPause = btnPause;
         dispatch_async(dispatch_get_main_queue(),
-        ^{
-            if(__imgView!=nil)
-            {
-                 [__imgView removeFromSuperview];
-            }
-            [__timeView.aryDate removeAllObjects];
-            [__timeView startTimeCome];
-            __btnPause.selected = NO;
-        });
+                       ^{
+                           if(__imgView!=nil)
+                           {
+                               [__imgView removeFromSuperview];
+                           }
+                           [__timeView.aryDate removeAllObjects];
+                           [__timeView startTimeCome];
+                           __btnPause.selected = NO;
+                       });
         imgView = nil;
     }
     [self.view addGestureRecognizer:_tapGestureRecognizer];
@@ -917,9 +919,9 @@
             [cloudDec stopRecord];
             __weak PlayCloudViewController *__self = self;
             dispatch_async(dispatch_get_main_queue(),
-            ^{
-                   [__self.view makeToast:XCLocalized(@"stopRecord") duration:1.0 position:@"center"];
-            });
+                           ^{
+                               [__self.view makeToast:XCLocalized(@"stopRecord") duration:1.0 position:@"center"];
+                           });
         }
     }
     else

@@ -23,6 +23,7 @@
 		169F54F819234970000EDE63 /* librutil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 169F54F419234970000EDE63 /* librutil.a */; };
 		169F54F919234970000EDE63 /* libsdkclient.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 169F54F519234970000EDE63 /* libsdkclient.a */; };
 		169F550019235511000EDE63 /* libstdc++.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 169F54FF19235511000EDE63 /* libstdc++.6.dylib */; };
+		4DC308991B705BA40059C0E3 /* ScanDeviceViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DC308981B705BA40059C0E3 /* ScanDeviceViewController.m */; };
 		BB12DFE11962B5B2001E3764 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BB12DFE01962B5B2001E3764 /* Accelerate.framework */; };
 		BB12DFE31962B84C001E3764 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BB12DFE21962B84C001E3764 /* AudioToolbox.framework */; };
 		BB12DFE51962B85D001E3764 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BB12DFE41962B85D001E3764 /* CoreAudio.framework */; };
@@ -261,6 +262,8 @@
 		169F54F519234970000EDE63 /* libsdkclient.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libsdkclient.a; path = p2plib/libsdkclient.a; sourceTree = "<group>"; };
 		169F54FD19235504000EDE63 /* libstdc++.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libstdc++.dylib"; path = "usr/lib/libstdc++.dylib"; sourceTree = SDKROOT; };
 		169F54FF19235511000EDE63 /* libstdc++.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libstdc++.6.dylib"; path = "usr/lib/libstdc++.6.dylib"; sourceTree = SDKROOT; };
+		4DC308971B705BA40059C0E3 /* ScanDeviceViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScanDeviceViewController.h; sourceTree = "<group>"; };
+		4DC308981B705BA40059C0E3 /* ScanDeviceViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ScanDeviceViewController.m; sourceTree = "<group>"; };
 		BB12DFE01962B5B2001E3764 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
 		BB12DFE21962B84C001E3764 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		BB12DFE41962B85D001E3764 /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
@@ -872,6 +875,8 @@
 				BB1F838019A4A950004BE9AA /* UpdDevNameViewController.m */,
 				BB1BC4D519BEED7100C27572 /* QrcodeViewController.h */,
 				BB1BC4D619BEED7100C27572 /* QrcodeViewController.m */,
+				4DC308971B705BA40059C0E3 /* ScanDeviceViewController.h */,
+				4DC308981B705BA40059C0E3 /* ScanDeviceViewController.m */,
 			);
 			path = device;
 			sourceTree = "<group>";
@@ -1903,6 +1908,7 @@
 				BB1F84C219A4A950004BE9AA /* UIScrollView+MJRefresh.m in Sources */,
 				BB1F84A719A4A950004BE9AA /* RTSPPlayViewController.m in Sources */,
 				BB230E5019E8C06400EF79AB /* UpdMobileViewController.m in Sources */,
+				4DC308991B705BA40059C0E3 /* ScanDeviceViewController.m in Sources */,
 				BB1F84B119A4A950004BE9AA /* FMDatabaseQueue.m in Sources */,
 				BB230E5319E8C1D200EF79AB /* UpdRealService.m in Sources */,
 			);
@@ -2060,7 +2066,7 @@
 					_FOR_DEBUG_,
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "bfdac09b-79e7-475e-b942-c16e18a2b39a";
+				PROVISIONING_PROFILE = "377cc6b8-17ec-4795-8c22-6050e4b2871b";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = 1;
 				VALID_ARCHS = "armv7 arm64";
@@ -2101,7 +2107,7 @@
 					_FOR_DEBUG_,
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "bfdac09b-79e7-475e-b942-c16e18a2b39a";
+				PROVISIONING_PROFILE = "377cc6b8-17ec-4795-8c22-6050e4b2871b";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = 1;
 				VALID_ARCHS = "armv7 arm64";

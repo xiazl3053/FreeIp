@@ -15,8 +15,8 @@
 #import "GetSnService.h"
 #import "PlayP2PViewController.h"
 #import "PlayFourViewController.h"
-
 #import "DeviceInfoModel.h"
+#import "ScanDeviceViewController.h"
 
 @interface LoginSNViewController()<UITextFieldDelegate>
 {
@@ -60,9 +60,15 @@
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
+
+-(void)scanEvent
+{
+    ScanDeviceViewController *scanDev = [[ScanDeviceViewController alloc] init];
+    [self presentViewController:scanDev animated:YES completion:nil];
+}
+
 -(void)initWithMiddle
 {
-    
     UILabel *lblContent = [[UILabel alloc] initWithFrame:Rect(30, 100, kScreenWidth-60, 0.5)];
     [self.view addSubview:lblContent];
     [lblContent setBackgroundColor:UIColorFromRGBHex(0xd8e6ea)];
@@ -95,6 +101,12 @@
     [txtSN setFont:XCFontInfo(12)];
     [self.view addSubview:txtSN];
     
+    UIButton *btnScan = [UIButton buttonWithType:UIButtonTypeCustom];
+    [btnScan setImage:[UIImage imageNamed:@"btn_login_code_down"] forState:UIControlStateNormal];
+    [btnScan setImage:[UIImage imageNamed:@"btn_login_code_nor"] forState:UIControlStateHighlighted];
+    [self.view addSubview:btnScan];
+    [btnScan addTarget:self action:@selector(scanEvent) forControlEvents:UIControlEventTouchUpInside];
+    btnScan.frame = Rect(txtSN.x+txtSN.width-44, txtSN.y, 44, 44);
     
     txtUser = [[UITextField alloc] initWithFrame:Rect(txtSN.x, txtSN.y+txtSN.height+10,txtSN.width, 44)];
     [txtUser setBorderStyle:UITextBorderStyleNone];
@@ -138,7 +150,7 @@
     txtSN.delegate = self;
     txtUser.delegate = self;
     
-//
+    //
     UIButton *btnLogin = [UIButton buttonWithType:UIButtonTypeCustom];
     [btnLogin setBackgroundColor:RGB(15, 173, 225)];
     [btnLogin setTitle:XCLocalized(@"Loginbtn") forState:UIControlStateNormal];
@@ -156,6 +168,24 @@
     [super viewDidLoad];
     [self initHeadView];
     [self initWithMiddle];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(setTextInfo:) name:NS_SCAN_DEVICE_NUMBER_VC object:nil];
+}
+
+-(void)setTextInfo:(NSNotification *)notify
+{
+    NSString *strInfo = [notify object];
+    if ([NSThread isMainThread])
+    {
+        [txtSN setText:strInfo];
+    }
+    else
+    {
+        __weak UITextField *__txtSN = txtSN;
+        __block NSString *__strInfo = strInfo;
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [__txtSN setText:__strInfo];
+        });
+    }
 }
 
 -(void)viewDidAppear:(BOOL)animated
@@ -194,7 +224,7 @@
     {
         [self.view hideToastActivity];
         [self.view makeToast:XCLocalized(@"xuleihao")];
-        return; 
+        return;
     }
     __weak LoginSNViewController *__self = self;
     snService.sn_login = ^(int nStatus)
@@ -206,37 +236,37 @@
             {
                 strInfo = XCLocalized(@"ServerException");
             }
-            break;
+                break;
             case 1:
             {
-               strInfo = @"OK";
+                strInfo = @"OK";
             }
-            break;
+                break;
             case 191:
             {
                 strInfo = XCLocalized(@"ServerException");
             }
-            break;
+                break;
             case 194:
             {
                 strInfo = XCLocalized(@"3Error");
             }
-            break;
+                break;
             case 192:
             {
                 strInfo = XCLocalized(@"serialError");
             }
-            break;
+                break;
             case 193:
             {
                 strInfo = XCLocalized(@"authError");
             }
-            break;
+                break;
             default:
             {
                 strInfo = XCLocalized(@"ServerException");
             }
-            break;
+                break;
         }
         if (nStatus == 1)
         {
@@ -271,20 +301,20 @@
     getSn.getSnInfo = ^(int nStatus,int nAllCout)
     {
         dispatch_async(dispatch_get_main_queue(),
-        ^{
-            [__self.view hideToastActivity];
-        });
+                       ^{
+                           [__self.view hideToastActivity];
+                       });
         NSString *strInfo = @"";
         switch (nStatus)
         {
             case 1:
             {}
-            break;
+                break;
             case 0:
             {
                 strInfo = XCLocalized(@"ServerException");
             }
-            break;
+                break;
             case 201:
             {
                 
@@ -296,7 +326,7 @@
                 
                 strInfo = XCLocalized(@"loginTime");
             }
-            break;
+                break;
             case 10:
             {
                 strInfo = XCLocalized(@"deviceOff");
@@ -306,37 +336,37 @@
                 
                 strInfo = XCLocalized(@"ServerException");
             }
-            break;
+                break;
         }
         if (nStatus==1)
         {
             if (nAllCout == 1)
             {
                 dispatch_async(dispatch_get_main_queue(),
-                ^{
-                    PlayP2PViewController *playP2p = [[PlayP2PViewController alloc] initWithNO:__self.strNo name:__self.strNo format:1];
-                    [__self presentViewController:playP2p animated:YES completion:nil];
-                });
+                               ^{
+                                   PlayP2PViewController *playP2p = [[PlayP2PViewController alloc] initWithNO:__self.strNo name:__self.strNo format:1];
+                                   [__self presentViewController:playP2p animated:YES completion:nil];
+                               });
             }
             else if(nAllCout > 1)
             {
                 dispatch_async(dispatch_get_main_queue(),
-                ^{
-                    DeviceInfoModel *devInfo = [[DeviceInfoModel alloc] init];
-                    devInfo.strDevNO = __self.strNo;
-                    devInfo.strDevType = [NSString stringWithFormat:@"DVR-%d",nAllCout];
-                    devInfo.strDevName = __self.strNo;
-                    PlayFourViewController *playFour = [[PlayFourViewController alloc] initWithSNDevice:devInfo];
-                    [__self presentViewController:playFour animated:YES completion:nil];
-                });
+                               ^{
+                                   DeviceInfoModel *devInfo = [[DeviceInfoModel alloc] init];
+                                   devInfo.strDevNO = __self.strNo;
+                                   devInfo.strDevType = [NSString stringWithFormat:@"DVR-%d",nAllCout];
+                                   devInfo.strDevName = __self.strNo;
+                                   PlayFourViewController *playFour = [[PlayFourViewController alloc] initWithSNDevice:devInfo];
+                                   [__self presentViewController:playFour animated:YES completion:nil];
+                               });
             }
         }
         else
         {
             dispatch_async(dispatch_get_main_queue(),
-            ^{
-                [__self.view makeToast:strInfo];
-            });
+                           ^{
+                               [__self.view makeToast:strInfo];
+                           });
         }
     };
     [getSn requestSn:@"2134567890"];
@@ -372,8 +402,10 @@
 -(void)viewWillDisappear:(BOOL)animated
 {
     [super viewWillDisappear:animated];
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:NSKEY_BOARD_RETURN_VC object:nil];
+    //    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
+
 
 -(void)viewWillAppear:(BOOL)animated
 {
@@ -385,7 +417,8 @@
 {
     return NO;
 }
--(UIInterfaceOrientationMask)supportedInterfaceOrientations
+
+-(NSUInteger)supportedInterfaceOrientations
 {
     return UIInterfaceOrientationMaskPortrait;
 }
