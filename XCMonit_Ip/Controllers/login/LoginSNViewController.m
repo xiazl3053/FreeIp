@@ -44,8 +44,8 @@
     UIButton *btnBack = [UIButton buttonWithType:UIButtonTypeCustom];
     [headView addSubview:btnBack];
     btnBack.frame = Rect(0, 20, 44, 44);
-    [btnBack setImage:[UIImage imageNamed:@"NaviBtn_Back_h"] forState:UIControlStateNormal];
-    [btnBack setImage:[UIImage imageNamed:@"NaviBtn_Back"] forState:UIControlStateHighlighted];
+    [btnBack setImage:[UIImage imageNamed:@"btn_return_nor"] forState:UIControlStateNormal];
+    [btnBack setImage:[UIImage imageNamed:@"btn_return_down"] forState:UIControlStateHighlighted];
     [btnBack addTarget:self action:@selector(navBack) forControlEvents:UIControlEventTouchUpInside];
     UILabel *lblName = [[UILabel alloc] initWithFrame:Rect(80, 25, kScreenWidth-160, 30)];
     [lblName setTextColor:RGB(255, 255, 255)];
@@ -74,9 +74,9 @@
     [lblTemp setFont:XCFontInfo(12)];
     [lblTemp setTextAlignment:NSTextAlignmentCenter];
     [self.view addSubview:lblTemp];
-    UIColor *color = [UIColor grayColor];
+    UIColor *color = UIColorFromRGBHex(0xAAAAAA);
     
-    txtSN = [[UITextField alloc] initWithFrame:Rect(30, lblTemp.y+lblTemp.height+20,kScreenWidth-60, 44)];
+    txtSN = [[UITextField alloc] initWithFrame:Rect(15, lblTemp.y+lblTemp.height+20,kScreenWidth-30, 44)];
     [txtSN setBorderStyle:UITextBorderStyleNone];
     [txtSN setBackgroundColor:RGB(255, 255, 255)];
     txtSN.layer.borderColor = UIColorFromRGBHex(0xc6cfd2).CGColor;
@@ -84,6 +84,7 @@
     txtSN.layer.masksToBounds = YES;
     txtSN.layer.cornerRadius = 3;
     txtSN.attributedPlaceholder = [[NSAttributedString alloc] initWithString:XCLocalized(@"inputNO") attributes:@{NSForegroundColorAttributeName: color}];
+    [txtSN setTextColor:color];
     UIImageView *imgPwd = [[UIImageView alloc] init];
     imgPwd.frame = Rect(0, 0, 44, 44);
     imgPwd.image = [UIImage imageNamed:@"sn_login"];
@@ -95,7 +96,7 @@
     [self.view addSubview:txtSN];
     
     
-    txtUser = [[UITextField alloc] initWithFrame:Rect(30, txtSN.y+txtSN.height+10,kScreenWidth-60, 44)];
+    txtUser = [[UITextField alloc] initWithFrame:Rect(txtSN.x, txtSN.y+txtSN.height+10,txtSN.width, 44)];
     [txtUser setBorderStyle:UITextBorderStyleNone];
     [txtUser setBackgroundColor:RGB(255, 255, 255)];
     txtUser.attributedPlaceholder = [[NSAttributedString alloc] initWithString:XCLocalized(@"Loginuser") attributes:@{NSForegroundColorAttributeName: color}];
@@ -104,6 +105,7 @@
     imgPwd1.image = [UIImage imageNamed:@"sn_user"];
     imgPwd1.contentMode = UIViewContentModeScaleAspectFit;
     txtUser.leftView = imgPwd1;
+    [txtUser setTextColor:color];
     txtUser.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
     txtUser.leftViewMode = UITextFieldViewModeAlways;
     txtUser.layer.borderColor = UIColorFromRGBHex(0xc6cfd2).CGColor;
@@ -113,7 +115,7 @@
     [txtUser setFont:XCFontInfo(12)];
     [self.view addSubview:txtUser];
     
-    txtPwd = [[UITextField alloc] initWithFrame:Rect(30, txtUser.y+txtUser.height+10,kScreenWidth-60, 44)];
+    txtPwd = [[UITextField alloc] initWithFrame:Rect(txtSN.x, txtUser.y+txtUser.height+10,txtSN.width, 44)];
     [txtPwd setBorderStyle:UITextBorderStyleNone];
     [txtPwd setBackgroundColor:RGB(255, 255, 255)];
     [txtPwd setFont:XCFontInfo(12)];
@@ -131,7 +133,7 @@
     txtPwd.layer.cornerRadius = 3;
     [self.view addSubview:txtPwd];
     [txtPwd setSecureTextEntry:YES];
-    
+    [txtPwd setTextColor:color];
     txtPwd.delegate = self;
     txtSN.delegate = self;
     txtUser.delegate = self;
@@ -145,7 +147,7 @@
     btnLogin.layer.cornerRadius = 3;
     [self.view addSubview:btnLogin];
     [btnLogin addTarget:self action:@selector(loginServerInfo) forControlEvents:UIControlEventTouchUpInside];
-    btnLogin.frame = Rect(30, txtPwd.y+txtPwd.height+20, kScreenWidth-60, 44);
+    btnLogin.frame = Rect(txtSN.x, txtPwd.y+txtPwd.height+20, txtSN.width, 44);
     
 }
 
@@ -165,17 +167,6 @@
 -(void)loginServerInfo
 {
     [self.view makeToastActivity];
-//    if([NSThread isMainThread])
-//    {
-//        [ProgressHUD show:XCLocalized(@"logining")];
-//    }
-//    else
-//    {
-//        dispatch_async(dispatch_get_main_queue(),
-//        ^{
-//            [ProgressHUD show:XCLocalized(@"logining")];
-//        });
-//    }
     [self performSelector:@selector(loginServer) withObject:nil afterDelay:0.5f];
 }
 
@@ -185,9 +176,7 @@
     {
         snService = [[LoginSNService alloc] init];
     }
-    
     [self closekeyBoard];
-    
     NSString *strUser = txtUser.text;
     NSString *strPwd = txtPwd.text;
     NSString *strNO = txtSN.text;

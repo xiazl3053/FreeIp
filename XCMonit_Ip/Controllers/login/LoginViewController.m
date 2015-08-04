@@ -94,15 +94,15 @@
     [lblName setTextColor:[UIColor whiteColor]];
     [lblName setText:XCLocalized(@"Loginbtn")];
     [lblName setTextAlignment:NSTextAlignmentCenter];
-    [lblName setFont:XCFontInfo(24)];
+    [lblName setFont:XCFontInfo(17)];
     [self.view setBackgroundColor:RGB(245, 245, 246)];
     
-    UILabel *lblContent = [[UILabel alloc] initWithFrame:Rect(30, 100, kScreenWidth-60, 0.5)];
+    UILabel *lblContent = [[UILabel alloc] initWithFrame:Rect(15, 91, kScreenWidth-60, 0.5)];
     [self.view addSubview:lblContent];
     [lblContent setBackgroundColor:UIColorFromRGBHex(0xd8e6ea)];
     
     
-    UILabel *lblTemp = [[UILabel alloc] initWithFrame:Rect(kScreenWidth/2-40, 90, 80, 20)];
+    UILabel *lblTemp = [[UILabel alloc] initWithFrame:Rect(kScreenWidth/2-40, 81, 80, 20)];
     [lblTemp setText:XCLocalized(@"Loginbtn")];
     [lblTemp setBackgroundColor:UIColorFromRGBHex(0xf7f7f7)];
     [lblTemp setTextColor:UIColorFromRGBHex(0xbcc7cb)];
@@ -110,8 +110,8 @@
     [lblTemp setTextAlignment:NSTextAlignmentCenter];
     [self.view addSubview:lblTemp];
     
-    _txtUser = [[UITextField alloc] initWithFrame:CGRectMake(30, 120 , kScreenWidth-60, 44)];
-    _txtPwd = [[UITextField alloc] initWithFrame:CGRectMake(30, _txtUser.frame.origin.y+_txtUser.frame.size.height+10, _txtUser.width, 44)];
+    _txtUser = [[UITextField alloc] initWithFrame:CGRectMake(15,118, kScreenWidth-30, 44)];
+    _txtPwd = [[UITextField alloc] initWithFrame:CGRectMake(15, _txtUser.frame.origin.y+_txtUser.frame.size.height+10, _txtUser.width, 44)];
     
     [_txtUser setBorderStyle:UITextBorderStyleNone];
     [_txtPwd setBorderStyle:UITextBorderStyleNone];
@@ -120,10 +120,12 @@
     _txtUser.returnKeyType = UIReturnKeyDone;
     _txtUser.clearButtonMode = UITextFieldViewModeWhileEditing;
     
+    
     UIImageView *imgUser = [[UIImageView alloc] init];
-    imgUser.frame = Rect(0, 15, 45, 17);
-    imgUser.image = [UIImage imageNamed:@"userName_Icon"];
+    imgUser.frame = Rect(0, 0, 44, 44);
+    imgUser.image = [UIImage imageNamed:@"sn_user"];
     imgUser.contentMode = UIViewContentModeScaleAspectFit;
+    
     [_txtUser setReturnKeyType:UIReturnKeyNext];
     [_txtUser setKeyboardType:UIKeyboardTypeASCIICapable];
     _txtUser.leftView = imgUser;
@@ -136,10 +138,11 @@
     _txtPwd.clearButtonMode = UITextFieldViewModeWhileEditing;
     
     UIImageView *imgPwd = [[UIImageView alloc] init];
-    imgPwd.frame = Rect(0, 15, 45, 17);
-    imgPwd.image = [UIImage imageNamed:@"password_Icon"];
+    imgPwd.frame = Rect(0, 0, 44, 44);
+    imgPwd.image = [UIImage imageNamed:@"sn_pwd"];
     imgPwd.contentMode = UIViewContentModeScaleAspectFit;
     _txtPwd.leftView = imgPwd;
+    
     _txtPwd.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
     _txtPwd.leftViewMode = UITextFieldViewModeAlways;
     [_txtPwd setBackgroundColor:RGB(255, 255, 255)];
@@ -172,26 +175,23 @@
     
     _check = [[QCheckBox alloc] initWithDelegate:self];
     
-    UIFont *font = [UIFont fontWithName:@"Helvetica" size:kFONT_LOGIN_SIZE];
+    UIFont *font = [UIFont fontWithName:@"Helvetica" size:12];
     
     CGSize labelsize = [XCLocalized(@"autoLogin") sizeWithFont:font constrainedToSize:CGSizeMake(200.0f, MAXFLOAT) lineBreakMode:NSLineBreakByWordWrapping];
     
-    _check.frame = Rect(30, _txtPwd.frame.origin.y+_txtPwd.frame.size.height+12, 100, 26);
+    _check.frame = Rect(15, _txtPwd.frame.origin.y+_txtPwd.frame.size.height+12, 120, 30);
     [_check setTitle:XCLocalized(@"saveLogin") forState:UIControlStateNormal];
-    [_check setTitleColor:[UIColor darkGrayColor] forState:UIControlStateNormal];
+    [_check setTitleColor:UIColorFromRGBHex(0xaaaaaa) forState:UIControlStateNormal];
     
-    [_check.titleLabel setFont:[UIFont fontWithName:@"Helvetica" size:kFONT_LOGIN_SIZE]];
+    [_check.titleLabel setFont:[UIFont fontWithName:@"Helvetica" size:12]];
     [self.view addSubview:_check];
     
     _check.checked = [DeviceInfoDb querySavePwd];
-    
     _autoLogin = [[QCheckBox alloc] initWithDelegate:self];
-    
-    _autoLogin.frame = Rect(kScreenWidth-65-labelsize.width, _txtPwd.frame.origin.y+_txtPwd.frame.size.height+12, labelsize.width+20, 26);
+    _autoLogin.frame = Rect(kScreenWidth-47-labelsize.width, _txtPwd.frame.origin.y+_txtPwd.frame.size.height+12, labelsize.width+32, 30);
     [_autoLogin setTitle:XCLocalized(@"autoLogin") forState:UIControlStateNormal];
-    [_autoLogin setTitleColor:[UIColor darkGrayColor] forState:UIControlStateNormal];
-    
-    [_autoLogin.titleLabel setFont:[UIFont fontWithName:@"Helvetica" size:kFONT_LOGIN_SIZE]];
+    [_autoLogin setTitleColor:UIColorFromRGBHex(0xaaaaaa) forState:UIControlStateNormal];
+    [_autoLogin.titleLabel setFont:[UIFont fontWithName:@"Helvetica" size:12]];
     
     [self.view addSubview:_autoLogin];
     _autoLogin.checked = [DeviceInfoDb queryLogin];
@@ -199,29 +199,30 @@
     _btnLogin = [UIButton buttonWithType:UIButtonTypeCustom];
     _btnRegin = [UIButton buttonWithType:UIButtonTypeCustom];
     _btnFind = [UIButton buttonWithType:UIButtonTypeCustom];
-    [_btnLogin setFrame:CGRectMake(30, _autoLogin.frame.origin.y+_autoLogin.frame.size.height+12, kScreenWidth-60, 39)];
-    
+    [_btnLogin setFrame:CGRectMake(15, _autoLogin.frame.origin.y+_autoLogin.frame.size.height+12, _txtUser.width, 44)];
     
     [_btnLogin setBackgroundImage:[UIImage imageNamed:@"btnBG"] forState:UIControlStateNormal];
-    [_btnLogin setBackgroundImage:[UIImage imageNamed:@"btnCl"] forState:UIControlStateHighlighted];
+    [_btnLogin setBackgroundImage:[UIImage imageNamed:@"btnBG_H"] forState:UIControlStateHighlighted];
+    _btnLogin.layer.masksToBounds = YES;
+    _btnLogin.layer.cornerRadius = 3;
     
     
     [_btnFind setContentHorizontalAlignment:UIControlContentHorizontalAlignmentLeft];
     [_btnFind setTitleColor:RGB(15, 173, 225) forState:UIControlStateNormal];
     [_btnFind setTitle:XCLocalized(@"find_pwd") forState:UIControlStateNormal];
-    
-    _btnFind.titleLabel.font = XCFontInfo(15);
-    CGSize findSize = [XCLocalized(@"find_pwd") sizeWithFont:XCFontInfo(15) constrainedToSize:CGSizeMake(200.0f, MAXFLOAT) lineBreakMode:NSLineBreakByWordWrapping];
+    _btnFind.titleLabel.font = XCFontInfo(12);
+    CGSize findSize = [XCLocalized(@"find_pwd") sizeWithFont:XCFontInfo(12) constrainedToSize:CGSizeMake(200.0f, MAXFLOAT) lineBreakMode:NSLineBreakByWordWrapping];
     [_btnFind setFrame:Rect(kScreenWidth/2-findSize.width/2,_btnLogin.frame.origin.y+_btnLogin.frame.size.height+20, findSize.width,25)];
     
     [_btnLogin setTitle:XCLocalized(@"Loginbtn") forState:UIControlStateNormal];
     [_btnLogin setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    _btnLogin.titleLabel.font = XCFontInfo(15);
     
     [_btnRegin setTitleColor:RGB(255, 255, 255) forState:UIControlStateNormal];
     [_btnRegin setTitleColor:RGB(252, 173, 113) forState:UIControlStateHighlighted];
     [_btnRegin setTitle:XCLocalized(@"RegisterView") forState:UIControlStateNormal];
     [_btnRegin setContentHorizontalAlignment:UIControlContentHorizontalAlignmentRight];
-    _btnRegin.titleLabel.font = [UIFont fontWithName:@"Helvetica" size:22.0f];
+    _btnRegin.titleLabel.font = [UIFont fontWithName:@"Helvetica" size:15.0f];
     
     [_btnRegin addTarget:self action:@selector(registerServver) forControlEvents:UIControlEventTouchUpInside];
     [_btnLogin addTarget:self action:@selector(loginServer) forControlEvents:UIControlEventTouchUpInside];
@@ -239,11 +240,11 @@
     [self.view addSubview:_btnLogin];
     [headView addSubview:_btnRegin];
     
-    [_btnRegin setFrame:Rect(kScreenWidth - 100,30,90,25)];
+    [_btnRegin setFrame:Rect(kScreenWidth - 100,30,85,25)];
     [self.view addSubview:_btnFind];
     _guessLogin = [[GuessLoginService alloc] init];
     
-    UILabel *lblContent1 = [[UILabel alloc] initWithFrame:Rect(30, _btnFind.y+_btnFind.height+20, kScreenWidth-60, 0.5)];
+    UILabel *lblContent1 = [[UILabel alloc] initWithFrame:Rect(30, _btnFind.y+_btnFind.height+20, _txtUser.width, 0.5)];
     [self.view addSubview:lblContent1];
     [lblContent1 setBackgroundColor:UIColorFromRGBHex(0xd8e6ea)];
     
@@ -272,9 +273,10 @@
     [self.view addSubview:btnSN];
     [self.view addSubview:btnGuess];
     
-    btnSN.frame = Rect(30, lblTemp1.y+lblTemp1.height+20,kScreenWidth-60, 44);
-    btnGuess.frame = Rect(30, btnSN.y+btnSN.height+11, kScreenWidth-60, 44);
-    
+    btnSN.frame = Rect(15, lblTemp1.y+lblTemp1.height+20,_txtUser.width, 44);
+    btnGuess.frame = Rect(15, btnSN.y+btnSN.height+11, _txtUser.width, 44);
+    btnGuess.titleLabel.font = XCFontInfo(15);
+    btnSN.titleLabel.font = XCFontInfo(15);
     [btnSN addTarget:self action:@selector(loginSN) forControlEvents:UIControlEventTouchUpInside];
     [btnGuess addTarget:self action:@selector(loginGuess) forControlEvents:UIControlEventTouchUpInside];
 }
