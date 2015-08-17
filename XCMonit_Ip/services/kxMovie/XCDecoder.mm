@@ -847,7 +847,6 @@ int nInfoNum = 0;
         long nSize = floor(((float)seconds/_allTime)*file_size);
         fseek(file_record, nSize, SEEK_SET);
         pts = seconds;
-//        avcodec_flush_buffers(pCodecCtx);
     }
 }
 

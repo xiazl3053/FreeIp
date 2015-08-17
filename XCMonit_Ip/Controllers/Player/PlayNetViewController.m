@@ -470,8 +470,6 @@ static NSMutableDictionary * gHistory;
     [_downHUD addSubview:_progressSlider];
     [_downHUD addSubview:_leftLabel];
     
-    
-    
     _playBtn = [UIButton buttonWithType:UIButtonTypeCustom];
     [_playBtn setImage:[UIImage imageNamed:@"realplay"] forState:UIControlStateNormal];
     [_playBtn setImage:[UIImage imageNamed:@"pause"] forState:UIControlStateSelected];
@@ -1037,7 +1035,6 @@ static NSMutableDictionary * gHistory;
 {
     UISlider *slider = sender;
     [self setMoviePosition:slider.value * _record.allTime];
-    
 }
 
 
@@ -1049,7 +1046,6 @@ static NSMutableDictionary * gHistory;
 - (void) setMoviePosition: (CGFloat) position
 {
     self.playing = NO;
-    //  _disableUpdateHUD = YES;
     _moviePosition = position;
     __weak PlayNetViewController *_weakSelf =self;
     dispatch_async(dispatch_get_global_queue(0, 0), ^(void)
@@ -1076,7 +1072,6 @@ static NSMutableDictionary * gHistory;
            });
        }
    });
-    
 }
 
 - (void) setDecoderPosition: (CGFloat) position
