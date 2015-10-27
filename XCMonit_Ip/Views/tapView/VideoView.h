@@ -17,7 +17,6 @@
 
 @end
 
-
 @interface VideoView : UIView
 
 @property (nonatomic,assign) id<VideoViewDelegate> delegate;

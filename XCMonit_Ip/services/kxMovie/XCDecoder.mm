@@ -192,6 +192,8 @@ NSData * copyFrameData(UInt8 *src, int linesize, int width, int height)
     NSInteger nsiFrame;
     CGFloat fSrcWidth,fSrcHeight;
     NSRecursiveLock *theLock;
+    
+    CGFloat fWidth,fHeight;
 }
 
 @property (readwrite) BOOL isEOF;
@@ -322,7 +324,7 @@ NSData * copyFrameData(UInt8 *src, int linesize, int width, int height)
     }
     _bNotify = YES;
     _bIsDecoding = YES;
-    _videoFrameFormat = KxVideoFrameFormatYUV;
+    _videoFrameFormat = KxVideoFrameFormatRGB;
     pts = 0;
     return YES;
 }
@@ -997,11 +999,14 @@ Release_open_input:
                   _picture.linesize);
         KxVideoFrameRGB *rgbFrame = [[KxVideoFrameRGB alloc] init];
         rgbFrame.linesize = _picture.linesize[0];
+//        NSLog(@"linesize:%zi",rgbFrame.linesize);
         rgbFrame.rgb = [NSData dataWithBytes:_picture.data[0]
-                                      length:rgbFrame.linesize * pCodecCtx->height];
+                                      length:rgbFrame.linesize * fHeight];
         frame = rgbFrame;
-        frame.width = pCodecCtx->width;
-        frame.height = pCodecCtx->height;
+        frame.width = fWidth;
+        frame.height = fHeight;
+//        frame.width = pCodecCtx->width;
+//        frame.height = pCodecCtx->height;
     }
     frame.duration = 1.0 / _fps;
     pts += frame.duration;
@@ -1014,22 +1019,25 @@ Release_open_input:
 {
     [self closeScaler];
     DLog(@"新的:%d-%d",pCodecCtx->width,pCodecCtx->height);
+//    CGFloat fSize = pCodecCtx->width/kScreenSourchWidth;
+    fWidth = pCodecCtx->width;
+    fHeight = pCodecCtx->height;
+    
     _pictureValid = avpicture_alloc(&_picture,
                                     PIX_FMT_RGB24,
-                                    pCodecCtx->width,
-                                    pCodecCtx->height) == 0;
+                                    fWidth,
+                                    fHeight) == 0;
     if (!_pictureValid)
         return NO;
     _swsContext = sws_getCachedContext(_swsContext,
                                        pCodecCtx->width,
                                        pCodecCtx->height,
                                        pCodecCtx->pix_fmt,
-                                       pCodecCtx->width,
-                                       pCodecCtx->height,
+                                       fWidth,
+                                       fHeight,
                                        PIX_FMT_RGB24,
                                        SWS_FAST_BILINEAR,
                                        NULL, NULL, NULL);
-    
     return _swsContext != NULL;
 }
 #pragma mark 关闭转换

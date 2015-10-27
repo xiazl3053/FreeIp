@@ -47,26 +47,59 @@
     }
     return self;
 }
+
 #pragma mark navBar 加入  添加与删除按钮
 - (void)initUI
 {
     [self setNaviBarTitle:XCLocalized(@"rtspList")];
+    
+    UIButton *btnBack = [UIButton buttonWithType:UIButtonTypeCustom];
+    [btnBack setImage:[UIImage imageNamed:@"NaviBtn_Back"] forState:UIControlStateNormal];
+    [btnBack setImage:[UIImage imageNamed:@"NaviBtn_Back_H"] forState:UIControlStateHighlighted];
+    [self setNaviBarLeftBtn:btnBack];
+    [btnBack addTarget:self action:@selector(navBack) forControlEvents:UIControlEventTouchUpInside];
+    
+    UIView *downView = [[UIView alloc] initWithFrame:Rect(0, kScreenSourchHeight-49, kScreenSourchWidth, 49)];
+    [self.view addSubview:downView];
+    
+    UILabel *sLine3 = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, kScreenWidth, 0.5)];
+    sLine3.backgroundColor = [UIColor colorWithRed:198/255.0
+                                             green:198/255.0
+                                              blue:198/255.0
+                                             alpha:1.0];
+    sLine3.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleBottomMargin;
+    [downView addSubview:sLine3];
+    
+    UILabel *lblTemp = [[UILabel alloc] initWithFrame:Rect(kScreenSourchWidth/2-0.25, 0, 0.5, 49)];
+    [lblTemp setBackgroundColor:[UIColor colorWithRed:198/255.0
+                                                green:198/255.0
+                                                 blue:198/255.0
+                                                alpha:1.0]];
+    [downView addSubview:lblTemp];
+    
     UIButton *btnAdd = [UIButton buttonWithType:UIButtonTypeCustom];
     [btnAdd setImage:[UIImage imageNamed:@"add_icon"] forState:UIControlStateNormal];
     [btnAdd addTarget:self action:@selector(addDevice) forControlEvents:UIControlEventTouchUpInside];
-    [self setNaviBarRightBtn:btnAdd];
+    [downView addSubview:btnAdd];
+    btnAdd.frame = Rect(0, 1, kScreenSourchWidth/2-1,48);
+    
+    
+    
     _btnDel = [UIButton buttonWithType:UIButtonTypeCustom];
     [_btnDel setImage:[UIImage imageNamed:@"dustbin_ico"] forState:UIControlStateNormal];
     [_btnDel setImage:[UIImage imageNamed:@"ok_ico"] forState:UIControlStateSelected];
     [_btnDel addTarget:self action:@selector(delDevice) forControlEvents:UIControlEventTouchUpInside];
-    [self setNaviBarLeftBtn:_btnDel];
+    [downView addSubview:_btnDel];
+    _btnDel.frame = Rect(kScreenSourchWidth/2, 1, kScreenSourchWidth/2-1, 48);
+    
+    
 }
 #pragma mark 进入添加设备界面
 -(void)addDevice
 {
     directView.hidden = YES;
     RTSPAddDeviceViewController *rtsp = [[RTSPAddDeviceViewController alloc] init];
-    [self.parentViewController presentViewController:rtsp animated:YES completion:^{}];
+    [self presentViewController:rtsp animated:YES completion:^{}];
 }
 #pragma mark 开始界面
 -(void)viewDidAppear:(BOOL)animated
@@ -152,6 +185,7 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    
     [self initUI];
 
     _tableView = [[UIFolderTableView alloc] initWithFrame:CGRectMake(0, [CustomNaviBarView barSize].height, kScreenWidth,

@@ -26,7 +26,7 @@ bool P2PSDK_New::ProcessFrameData(char* aFrameData, int aFrameDataLength)
         [aryVideo addObject:dataInfo];
     }
     dataInfo = nil;
-//    DLog(@"%hhu--%hhu--%hhu--%hhu--%hhu",pbuf[0],pbuf[1],pbuf[2],pbuf[3],pbuf[4]);
+    
     if (bRecord)
     {
         if(bStart)

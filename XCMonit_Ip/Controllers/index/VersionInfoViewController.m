@@ -62,8 +62,13 @@
     NSString *strVersion = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
     DLog(@"strVersion:%@",strVersion);
     _lblInfo = [[UILabel alloc] initWithFrame:Rect(0, [CustomNaviBarView barSize].height+270, kScreenWidth, 30)];
+#ifdef DEBUG
+    NSString *strInfo = [NSString stringWithFormat:@"DEBUG_V%@",strVersion];
+    [_lblInfo setText:strInfo];
+#else
     NSString *strInfo = [NSString stringWithFormat:@"V%@",strVersion];
     [_lblInfo setText:strInfo];
+#endif
     [_lblInfo setFont:[UIFont fontWithName:@"Helvetica" size:20.0f]];
     [_lblInfo setTextAlignment:NSTextAlignmentCenter];
     

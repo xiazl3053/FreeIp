@@ -197,11 +197,18 @@ NSData* copyFrameDataNew(UInt8 *src, int linesize, int width, int height)
         }
         else if(nConnectStatus == -1)
         {
-            DLog(@"结束");
+            if (_connectBlock)
+            {
+                _connectBlock(0);
+            }
             return NO;
         }
         if (!_bNotify)
         {
+            if(_connectBlock)
+            {
+                _connectBlock(0);
+            }
             DLog(@"退出了?");
             return NO;
         }
@@ -210,6 +217,13 @@ NSData* copyFrameDataNew(UInt8 *src, int linesize, int width, int height)
         if (fTime>=30)
         {
             DLog(@"超时建立连接");
+            if (_bNotify)
+            {
+                _nError = 1;//Disconnect
+                _strError = XCLocalized(@"Disconnect");
+                [[NSNotificationCenter defaultCenter] postNotificationName:NSCONNECT_P2P_DVR_FAIL_VC object:self];
+                _bNotify = NO;
+            }
             return NO;
         }
     }
@@ -253,6 +267,11 @@ NSData* copyFrameDataNew(UInt8 *src, int linesize, int width, int height)
     _fFPS = 25.0f;
     _bIsDecoding = YES;
     nFFMpegStatus = 2;
+    if (_connectBlock)
+    {
+        _connectBlock(1);
+    }
+    
     return YES;
     
 Release_avformat_open_input:
@@ -389,7 +408,7 @@ Release_avformat_open_input:
     {
         return  result;
     }
-    uint8_t *puf = (uint8_t *)malloc(500*1024);
+    uint8_t *puf = nil;
     CGFloat fStart = 0;
 
     while (!bFinish)
@@ -399,25 +418,7 @@ Release_avformat_open_input:
             return result;
         }
         nRef = 0;
-#if 0
-        NSData *data = nil;
-        @synchronized(recv->aryVideo)
-        {
-            if (recv->aryVideo.count>0)
-            {
-                data = [recv->aryVideo objectAtIndex:0];
-                packet.size = (int)data.length;
-                [recv->aryVideo removeObjectAtIndex:0];
-                packet.data = (uint8_t*)[data bytes];
-            }
-            else
-            {
-                packet.size = 0;
-            }
-        }
-#endif
         
-#if 1
         @synchronized(recv->aryVideo)
         {
             if (recv->aryVideo.count>0)
@@ -437,7 +438,7 @@ Release_avformat_open_input:
                 packet.size = 0;
             }
         }
-#endif
+        
         if (packet.size==0)
         {
             [NSThread sleepForTimeInterval:0.03f];
@@ -500,10 +501,10 @@ Release_avformat_open_input:
     if (!pVideoFrame->data[0])
         return nil;
     
-    KxVideoFrame *frame;
+    KxVideoFrame *frame=nil;
     
-    if (_videoFrameFormat == KxVideoFrameFormatYUV) {
-        
+    if (_videoFrameFormat == KxVideoFrameFormatYUV)
+    {
         KxVideoFrameYUV * yuvFrame = [[KxVideoFrameYUV alloc] init];
         
         yuvFrame.luma = copyFrameDataNew(pVideoFrame->data[0],
@@ -521,8 +522,8 @@ Release_avformat_open_input:
                                          pVideoFrame->width / 2,
                                          pVideoFrame->height / 2);
         frame = yuvFrame;
-        
-    } else
+    }
+    else
     {
         if (fSrcWidth != pCodecCtx->width || fSrcHeight != pCodecCtx->height)
         {
@@ -545,12 +546,13 @@ Release_avformat_open_input:
                                       length:rgbFrame.linesize * pCodecCtx->height];
         frame = rgbFrame;
     }
-
+    
     frame.width = pCodecCtx->width;
     frame.height = pCodecCtx->height;
     frame.duration = 1.0 / _fFPS;
     _moviePosition += frame.duration;
     frame.position = _moviePosition;
+    
     return frame;
 }
 
@@ -592,10 +594,15 @@ Release_avformat_open_input:
     _nNum=0;
     if (sdk==NULL)
     {
-        DLog(@"没有解析出相应的IP");
-        self.nError = 1;
-        self.strError = XCLocalized(@"connectFail");
-        [[NSNotificationCenter defaultCenter] postNotificationName:NSCONNECT_P2P_DVR_FAIL_VC object:self];
+        if(_bNotify)
+        {
+            DLog(@"没有解析出相应的IP");
+            self.nError = 1;
+            self.strError = XCLocalized(@"connectFail");
+            [[NSNotificationCenter defaultCenter] postNotificationName:NSCONNECT_P2P_DVR_FAIL_VC object:self];
+            nConnectStatus = -1;
+            _bNotify = NO;
+        }
         return;
     }
     if (!recv)
@@ -625,10 +632,10 @@ Release_avformat_open_input:
        }
        else
        {
+           DLog(@"P2P打洞失败");
            _weakSelf.nNum++;
            if (!_weakSelf.bTran)//close TRAN
            {
-               DLog(@"tran-p2p fail");
                if (_weakSelf.bNotify)
                {
                    if(_weakSelf.nNum==2)
@@ -668,6 +675,7 @@ Release_avformat_open_input:
        }
        else
        {
+           DLog(@"转发失败");
            _weakSelf.nNum++;
            if (!_weakSelf.bP2P)//close TRAN
            {
@@ -682,6 +690,10 @@ Release_avformat_open_input:
                        [[NSNotificationCenter defaultCenter] postNotificationName:NSCONNECT_P2P_DVR_FAIL_VC object:_weakSelf];
                    }
                }
+           }
+           else
+           {
+               DLog(@"等待P2P");
            }
        }
    });
@@ -725,6 +737,7 @@ Release_avformat_open_input:
 }
 -(void)dealloc
 {
+    DLog(@"释放!!!!!:%d",_nChannel);
     if(recv)
     {
         recv->StopRecv();
@@ -736,7 +749,6 @@ Release_avformat_open_input:
         [PPSHAREINIT setP2PSDKNull];
     }
     [self closeFile];
-    DLog(@"释放");
 }
 -(void)closeFile
 {
@@ -788,9 +800,6 @@ Release_avformat_open_input:
                                     PIX_FMT_RGB24,
                                     pCodecCtx->width,
                                     pCodecCtx->height) == 0;
-//    if (!_pictureValid)
-//        return NO;
-    
     _swsContext = sws_getCachedContext(_swsContext,
                                        pCodecCtx->width,
                                        pCodecCtx->height,

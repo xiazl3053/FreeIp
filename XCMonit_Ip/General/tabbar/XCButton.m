@@ -38,7 +38,7 @@
     if (self)
     {
         self.titleLabel.textAlignment = NSTextAlignmentCenter;
-        self.titleLabel.font = [UIFont fontWithName:@"Helvetica" size:9.0f];
+        self.titleLabel.font = [UIFont fontWithName:@"Helvetica" size:12.0f];
         
         [self setTitle:tabInfo.strTitle forState:UIControlStateNormal];
         [self setTitleColor:[UIColor darkGrayColor] forState:UIControlStateNormal];
@@ -62,7 +62,7 @@
 
 - (CGRect)titleRectForContentRect:(CGRect)contentRect
 {
-    return CGRectMake(0.0, 36, 48, 12);
+    return CGRectMake(0.0, 33, 48, 15);
 }
 
 /*

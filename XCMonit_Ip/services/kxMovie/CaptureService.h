@@ -20,5 +20,4 @@ DEFINE_SINGLETON_FOR_HEADER(CaptureService);
 +(BOOL)captureToPhotoRGB:(UIImageView *)imageView devName:(NSString *)strDevName;
 +(NSString*)captureRecordRGB:(UIImageView*)imageView;
 
-
 @end

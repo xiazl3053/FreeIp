@@ -23,6 +23,7 @@
 		169F54F819234970000EDE63 /* librutil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 169F54F419234970000EDE63 /* librutil.a */; };
 		169F54F919234970000EDE63 /* libsdkclient.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 169F54F519234970000EDE63 /* libsdkclient.a */; };
 		169F550019235511000EDE63 /* libstdc++.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 169F54FF19235511000EDE63 /* libstdc++.6.dylib */; };
+		4D6B01171BC8EF8D00FD66C4 /* XCMoreButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D6B01161BC8EF8D00FD66C4 /* XCMoreButton.m */; };
 		4DC308991B705BA40059C0E3 /* ScanDeviceViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DC308981B705BA40059C0E3 /* ScanDeviceViewController.m */; };
 		BB12DFE11962B5B2001E3764 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BB12DFE01962B5B2001E3764 /* Accelerate.framework */; };
 		BB12DFE31962B84C001E3764 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BB12DFE21962B84C001E3764 /* AudioToolbox.framework */; };
@@ -262,6 +263,8 @@
 		169F54F519234970000EDE63 /* libsdkclient.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libsdkclient.a; path = p2plib/libsdkclient.a; sourceTree = "<group>"; };
 		169F54FD19235504000EDE63 /* libstdc++.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libstdc++.dylib"; path = "usr/lib/libstdc++.dylib"; sourceTree = SDKROOT; };
 		169F54FF19235511000EDE63 /* libstdc++.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libstdc++.6.dylib"; path = "usr/lib/libstdc++.6.dylib"; sourceTree = SDKROOT; };
+		4D6B01151BC8EF8D00FD66C4 /* XCMoreButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XCMoreButton.h; sourceTree = "<group>"; };
+		4D6B01161BC8EF8D00FD66C4 /* XCMoreButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XCMoreButton.m; sourceTree = "<group>"; };
 		4DC308971B705BA40059C0E3 /* ScanDeviceViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScanDeviceViewController.h; sourceTree = "<group>"; };
 		4DC308981B705BA40059C0E3 /* ScanDeviceViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ScanDeviceViewController.m; sourceTree = "<group>"; };
 		BB12DFE01962B5B2001E3764 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
@@ -809,6 +812,15 @@
 			path = XCMonit_Ip;
 			sourceTree = "<group>";
 		};
+		4D6B01141BC8EF3500FD66C4 /* view */ = {
+			isa = PBXGroup;
+			children = (
+				4D6B01151BC8EF8D00FD66C4 /* XCMoreButton.h */,
+				4D6B01161BC8EF8D00FD66C4 /* XCMoreButton.m */,
+			);
+			name = view;
+			sourceTree = "<group>";
+		};
 		BB1801D91B0AD8B3001BDAEE /* Cloud */ = {
 			isa = PBXGroup;
 			children = (
@@ -914,6 +926,7 @@
 		BB1F838F19A4A950004BE9AA /* login */ = {
 			isa = PBXGroup;
 			children = (
+				4D6B01141BC8EF3500FD66C4 /* view */,
 				BB1F839019A4A950004BE9AA /* LoginViewController.h */,
 				BB1F839119A4A950004BE9AA /* LoginViewController.m */,
 				BB257AFC19B6B5AC00076B0F /* RegisterViewController.h */,
@@ -1865,6 +1878,7 @@
 				BB33BD7F19B0837700A76D37 /* VRGCalendarView.m in Sources */,
 				BB1F84AE19A4A950004BE9AA /* FMDatabase.m in Sources */,
 				BB1F84BE19A4A950004BE9AA /* MJRefreshConst.m in Sources */,
+				4D6B01171BC8EF8D00FD66C4 /* XCMoreButton.m in Sources */,
 				BB3CE33A19B862E7006435AA /* SubRTSPView.m in Sources */,
 				BBB600711A5392610084E1F1 /* Reachability.m in Sources */,
 				BB1F84F519A4A950004BE9AA /* main.m in Sources */,
@@ -2066,7 +2080,7 @@
 					_FOR_DEBUG_,
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "377cc6b8-17ec-4795-8c22-6050e4b2871b";
+				PROVISIONING_PROFILE = "eda68367-0282-48a7-805d-ff9e35b3a256";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = 1;
 				VALID_ARCHS = "armv7 arm64";
@@ -2107,7 +2121,7 @@
 					_FOR_DEBUG_,
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "377cc6b8-17ec-4795-8c22-6050e4b2871b";
+				PROVISIONING_PROFILE = "35e57e41-ccaf-4ffd-83a0-bf261869e50c";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = 1;
 				VALID_ARCHS = "armv7 arm64";

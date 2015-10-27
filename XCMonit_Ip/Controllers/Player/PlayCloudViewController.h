@@ -10,7 +10,7 @@
 @class DeviceInfoModel;
 @interface PlayCloudViewController : UIViewController
 
--(id)initWithSNDevice:(DeviceInfoModel*)devInfo;
--(id)initWithDev:(DeviceInfoModel*)devInfo;
+- (id)initWithSNDevice:(DeviceInfoModel*)devInfo;
+- (id)initWithDev:(DeviceInfoModel*)devInfo;
 
 @end

@@ -106,11 +106,11 @@
     btn1.layer.borderColor = (RGB(178, 178, 178)).CGColor;
     btn2.layer.borderColor = (RGB(178, 178, 178)).CGColor;
     btn3.layer.borderColor = (RGB(178, 178, 178)).CGColor;
-    btn1.layer.MasksToBounds = YES;
+    btn1.layer.masksToBounds = YES;
     btn1.layer.cornerRadius = 2.0f;
-    btn2.layer.MasksToBounds = YES;
+    btn2.layer.masksToBounds = YES;
     btn2.layer.cornerRadius = 2.0f;
-    btn3.layer.MasksToBounds = YES;
+    btn3.layer.masksToBounds = YES;
     btn3.layer.cornerRadius = 2.0f;
     
     btn1.frame = Rect(30, 30, kScreenWidth-60, 45);

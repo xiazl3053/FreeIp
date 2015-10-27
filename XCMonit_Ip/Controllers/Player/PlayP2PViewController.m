@@ -191,8 +191,8 @@
         return ;
     }
     CGPoint curPoint = [sender locationInView:self.view];
-    CGFloat frameX = (_glView.x + (curPoint.x-lastX)) > 0 ? 0 : (abs(_glView.x+(curPoint.x-lastX))+fWidth >= _glView.width ? -(_glView.width-fWidth) : (_glView.x+(curPoint.x-lastX)));
-    CGFloat frameY =(_glView.y + (curPoint.y-lastY))>0?0: (abs(_glView.y+(curPoint.y-lastY))+fHeight >= _glView.height ? -(_glView.height-fHeight) : (_glView.y+(curPoint.y-lastY)));
+    CGFloat frameX = (_glView.x + (curPoint.x-lastX)) > 0 ? 0 : (fabs(_glView.x+(curPoint.x-lastX))+fWidth >= _glView.width ? -(_glView.width-fWidth) : (_glView.x+(curPoint.x-lastX)));
+    CGFloat frameY =(_glView.y + (curPoint.y-lastY))>0?0: (fabs(_glView.y+(curPoint.y-lastY))+fHeight >= _glView.height ? -(_glView.height-fHeight) : (_glView.y+(curPoint.y-lastY)));
     _glView.frame = Rect(frameX,frameY , _glView.width, _glView.height);
     lastX = curPoint.x;
     lastY = curPoint.y;
@@ -619,7 +619,6 @@
     [_glView setUserInteractionEnabled:YES];
     [_glView addGestureRecognizer:_panGesture];
     [self.btnPlay setEnabled:YES];
-    
     [self.btnPlay setSelected:YES];
     [self setPlayMode:YES];
 }
@@ -630,6 +629,7 @@
     {
         return;
     }
+    
     __weak PlayP2PViewController *wearSelf = self;
     dispatch_async(dispatch_get_main_queue(),
     ^{
@@ -761,7 +761,6 @@
         interval = frame.duration;
         _bufferedDuration -= frame.duration;
         frame = nil;
-        
     }
     return interval;
 }

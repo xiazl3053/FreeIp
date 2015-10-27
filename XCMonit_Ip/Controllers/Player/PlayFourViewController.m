@@ -157,77 +157,111 @@
     int nPlayIndex = (int)playModel.nPlayIndex;
     //如果有正在录像的  需要停止
     __weak PlayFourViewController *__weakSelf = self;
-    __block NSString *__strKey = strKey;
+    
     NSString *strInfo = XCLocalized(@"Disconnect");
+    __block int __nPlayIndex = nPlayIndex;
+    //如果有正在录像的  需要停止
     __block NSString *_strInfo = strInfo;
-
+    
+    __block NSString *__strKey = strKey;
+    
     dispatch_group_t group = dispatch_group_create();
     
-    dispatch_group_async(group,dispatch_get_global_queue(0, 0),
-    ^{
-        [__weakSelf closePlayForKey:__strKey];
-    });
+    dispatch_group_async(group, dispatch_get_global_queue(0, 0),
+                         ^{
+                             [__weakSelf closePlayForKey:__strKey];
+                         });
+    
     dispatch_group_async(group,dispatch_get_main_queue(),
-    ^{
-       DLog(@"输出错误:%@",_strInfo);
-       [__playView.mainView makeToast:_strInfo];
-       [__weakSelf updateClickView];
-    });
+                         ^{
+                             [__playView.mainView makeToast:_strInfo];
+                             [__weakSelf updateClickView];
+                         });
     
     dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
-
+    
     nArray[nChannel]++;
+    
     DLog(@"第%d个通道",nChannel);
-    if (nArray[nChannel]<=3 && !bExit)
+    if (nArray[nChannel]<=1 && !bExit)
     {
         DLog(@"第%d次重连",nArray[nChannel]);
-        dispatch_group_async(group,dispatch_get_main_queue(),
-        ^{
-            [__weakSelf startNewWindow:nPlayIndex channel:strKey];
-        });
+        
+        dispatch_group_async(group,dispatch_get_global_queue(0,0),
+         ^{
+             [__weakSelf startNewWindow:__nPlayIndex channel:strKey];
+         });
     }
-    
+    else
+    {
+        nArray[nChannel] = 0;
+        DLog(@"重新次数到顶!");
+    }
+
 }
 
 #pragma mark 连接设备失败触发，包含ffmpeg与p2p连接设备两种动作
 -(void)connectP2PFail:(NSNotification*)notify
 {
     XCDecoderNew *decoder = [notify object];
+    
     __weak XCDecoderNew *weakDecode = decoder;
+    
     NSString *strKey = [NSString stringWithFormat:@"%d",decoder.nChannel];
+    
     PlayControlModel *playModel = [_decoderInfo valueForKey:strKey];
+    
     PlayControllerView *playView = [_array objectAtIndex:playModel.nPlayIndex];
+    
     __weak PlayControllerView *__playView = playView;
+    
     int nChannel = [strKey intValue];
+    
     int nPlayIndex = (int)playModel.nPlayIndex;
+    
+    __block int __nPlayIndex = nPlayIndex;
     //如果有正在录像的  需要停止
     __weak PlayFourViewController *__weakSelf = self;
-    __block NSString *__strKey = strKey;
+    
     NSString *strInfo = [weakDecode.strError copy];
+    
     __block NSString *_strInfo = strInfo;
+    
+    __block NSString *__strKey = strKey;
+    
+    DLog(@"输出错误:%@-key:%@--通道:%d--窗口:%d",strInfo,strKey,nChannel,nPlayIndex);
+    
     dispatch_group_t group = dispatch_group_create();
     
-    dispatch_group_async(group,dispatch_get_global_queue(0, 0), ^{
+    dispatch_group_async(group, dispatch_get_global_queue(0, 0),
+    ^{
         [__weakSelf closePlayForKey:__strKey];
     });
+    
     dispatch_group_async(group,dispatch_get_main_queue(),
     ^{
-         DLog(@"输出错误:%@",_strInfo);
          [__playView.mainView makeToast:_strInfo];
          [__weakSelf updateClickView];
     });
     
     dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
+    
     nArray[nChannel]++;
+
     DLog(@"第%d个通道",nChannel);
-    if (nArray[nChannel]<=3 && !bExit)
+    if (nArray[nChannel]<=1 && !bExit)
     {
         DLog(@"第%d次重连",nArray[nChannel]);
         
-        dispatch_group_async(group,dispatch_get_main_queue(),
+        dispatch_group_async(group,dispatch_get_global_queue(0,0),
         ^{
-             [__weakSelf startNewWindow:nPlayIndex channel:strKey];
+             [__weakSelf startNewWindow:__nPlayIndex channel:strKey];
         });
+    }
+    else
+    {
+        nArray[nChannel] = 0;
+        DLog(@"重新次数到顶!");
     }
 }
 
@@ -268,10 +302,7 @@
     [self initToolBar];
     _decoderInfo = [NSMutableDictionary dictionary];
     [[UIApplication sharedApplication] setStatusBarHidden:YES];
-    _borderLabel = [[UILabel alloc] initWithFrame:Rect(0, 0, 0, 0)];
-    [_borderLabel setBackgroundColor:[UIColor clearColor]];
-    _borderLabel.layer.borderWidth = 1;
-    _borderLabel.layer.borderColor = [[UIColor greenColor] CGColor];
+
     [self.view addSubview:_borderLabel];
     [_borderLabel setFrame:((PlayControllerView*)[_array objectAtIndex:0]).mainRect];
     bExit = NO;
@@ -316,11 +347,7 @@
     playModel.bDecoding = YES;
     //停止视频
     __weak PlayControllerView *__playView = playView;
-    __weak PlayFourViewController *__self = self;
-    dispatch_async(dispatch_get_main_queue(),
-    ^{
-        [ProgressHUD showPlayRight:XCLocalized(@"videoSwitch") viewInfo:__self.view];
-    });
+
     if([playModel.decode getRealType]==1)
     {
          //使用sdk切换
@@ -331,13 +358,13 @@
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0f * NSEC_PER_SEC)), dispatch_get_global_queue(0, 0),
         ^{
                BOOL bFlag = [__decoder switchP2PCode:__nCode];
-               dispatch_async(dispatch_get_main_queue(),
-               ^{
-                        [ProgressHUD dismiss];
-               });
                if(bFlag)
                {
                    [__self playMovieWithChannel:__strKey];
+               }
+               else
+               {
+                   DLog(@"失败");
                }
         });
     }
@@ -347,25 +374,28 @@
         dispatch_group_t group = dispatch_group_create();
         int nChannel = [playView.strKey intValue];
         DLog(@"nChannel:%d",nChannel);
+        NSString *strKey = [NSString stringWithFormat:@"%d",nChannel];
+        int nPlayIndex = (int)playModel.nPlayIndex;
+        
+        __block int __nPlayIndex = nPlayIndex;
+        
+        __block NSString *__strKey = strKey;
+        
         dispatch_group_async(group, dispatch_get_global_queue(0, 0),
         ^{
              [__self closePlayForKey:__playView.strKey];
         });
         dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
-        __block int __nChannel = nChannel;
+        
         __block int __nCodeType = nCodeType;
-        DLog(@"码流类型:%d",nCodeType);
-    
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [__self setBtnNO];
-            [ProgressHUD dismiss];
         
-        });
-        dispatch_async(dispatch_get_global_queue(0, 0),
+        dispatch_async(dispatch_get_main_queue(),
         ^{
-            [__self startPlayWithNO:__self.strNO channel:[NSString stringWithFormat:@"%d",__nChannel] codeType:__nCodeType];
+            [__self setBtnNO];
         });
-        
+        dispatch_group_async(group, dispatch_get_global_queue(0, 0),^{
+            [__self startNewWindow:__nPlayIndex channel:__strKey codeType:__nCodeType];
+        });
     }
 }
 
@@ -382,23 +412,12 @@
 {
     [super viewDidAppear:animated];
     [UIApplication sharedApplication].idleTimerDisabled = YES;
-    PlayControlModel *playModel = [[PlayControlModel alloc] init];
-    playModel.nPlayIndex = 0;
-    ((PlayControllerView*)[_array objectAtIndex:nIndex]).bPlay = YES;
-    ((PlayControllerView*)[_array objectAtIndex:nIndex]).strKey = @"0";
-    [_decoderInfo setValue:playModel forKey:@"0"];
-    __weak PlayFourViewController *weakSelf = self;
-    __weak NSString *__strNO = _strNO;
-    PlayControllerView *playView = (PlayControllerView *)[_array objectAtIndex:0];
-    __weak PlayControllerView *__playView = playView;
-    dispatch_async(dispatch_get_main_queue(),
-    ^{
-         [__playView.mainView makeToastActivity];
-    });
+    
+    __weak PlayFourViewController *__self = self;
     dispatch_async(dispatch_get_global_queue(0, 0),
-   ^{
-       [weakSelf startPlayWithNO:__strNO channel:@"0" codeType:2];
-   });
+    ^{
+        [__self startNewWindow:0 channel:@"0"];
+    });
 }
 
 #pragma mark 界面设置
@@ -459,12 +478,12 @@
     }
     _topHUD.alpha = 1;
     
-    UILabel *sLine1 = [[UILabel alloc] initWithFrame:CGRectMake(0, 49.6, kScreenWidth, 0.2)];
+    UILabel *sLine1 = [[UILabel alloc] initWithFrame:CGRectMake(0, 49.0, kScreenWidth, 0.4)];
     sLine1.backgroundColor = [UIColor colorWithRed:198/255.0
                                              green:198/255.0
                                               blue:198/255.0
                                              alpha:1.0];
-    UILabel *sLine2 = [[UILabel alloc] initWithFrame:CGRectMake(0, 49.8, kScreenWidth, 0.2)] ;
+    UILabel *sLine2 = [[UILabel alloc] initWithFrame:CGRectMake(0, 49.4, kScreenWidth, 0.4)] ;
     sLine2.backgroundColor = [UIColor whiteColor];
     
     sLine1.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleBottomMargin;
@@ -515,7 +534,6 @@
     VideoView *_mainView2 = [[VideoView alloc] initWithFrame:Rect(kVideoFrame+2,51, kVideoFrame, kVideoFrame)];
     
     VideoView *_mainView3 = [[VideoView alloc] initWithFrame:Rect(0,_mainView2.frame.origin.y+_mainView2.frame.size.height+1, kVideoFrame, kVideoFrame)];
-    
     VideoView *_mainView4 = [[VideoView alloc] initWithFrame:Rect(kVideoFrame+2,_mainView3.frame.origin.y,kVideoFrame,kVideoFrame)];
     
     if (isPhone4)
@@ -680,14 +698,14 @@
     _downHUD = [[UIView alloc] initWithFrame:CGRectMake(0, kScreenHeight-50,kScreenWidth, 50)];
     _downHUD.autoresizingMask = UIViewAutoresizingFlexibleWidth;
     [self.view addSubview:_downHUD];
-    _downHUD.alpha = 1.0f;
+//    _downHUD.alpha = 1.0f;
     
-    UILabel *sLine3 = [[UILabel alloc] initWithFrame:CGRectMake(0, 0.1, kScreenWidth, 0.2)];
+    UILabel *sLine3 = [[UILabel alloc] initWithFrame:CGRectMake(0, 0.1, kScreenWidth, 0.4)];
     sLine3.backgroundColor = [UIColor colorWithRed:198/255.0
                                              green:198/255.0
                                               blue:198/255.0
                                              alpha:1.0];
-    UILabel *sLine4 = [[UILabel alloc] initWithFrame:CGRectMake(0, 0.3, kScreenWidth, 0.2)] ;
+    UILabel *sLine4 = [[UILabel alloc] initWithFrame:CGRectMake(0, 0.5, kScreenWidth, 0.4)] ;
     sLine4.backgroundColor = [UIColor whiteColor];
     sLine3.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleBottomMargin;
     sLine4.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleBottomMargin;
@@ -855,21 +873,26 @@
 -(void)stopCurVideo
 {
     PlayControllerView *playView = [_array objectAtIndex:nIndex];
+    DLog(@"停止:%d--strKey:%@",nIndex,playView.strKey);
     PlayControlModel *playModel = [_decoderInfo objectForKey:playView.strKey];
     if (playModel)
     {
- //       [self closePlayForKey:playView.strKey];
+        
         __weak PlayFourViewController *__weakSelf = self;
         __weak PlayControllerView *__playView = playView;
+        nArray[[playView.strKey intValue]]=0;
         dispatch_group_t group = dispatch_group_create();
+        
         dispatch_group_async(group, dispatch_get_global_queue(0, 0),
         ^{
                 [__weakSelf closePlayForKey:__playView.strKey];
         });
+        
         dispatch_group_notify(group,dispatch_get_main_queue(),
         ^{
             [__weakSelf updateClickView];
         });
+        
         group = nil;
     }
 }
@@ -877,7 +900,6 @@
 #pragma mark 停止所有正在播放的视频
 -(void)stopVideo
 {
-    _bPlay = NO;
     __weak PlayFourViewController *weakSelf =self;
     for (NSString *strKey in [_decoderInfo allKeys])
     {
@@ -890,7 +912,6 @@
 
 -(void)stopAllRecord
 {
-    _bPlay = NO;
     __weak PlayFourViewController *weakSelf =self;
     for (NSString *strKey in [weakSelf.decoderInfo allKeys])
     {
@@ -1062,15 +1083,17 @@
     //如果当前通道正在播放，改变播放窗口
     if (playCon)
     {
+        DLog(@"改变窗口播放");
         //将glView换到另外一个mainView中   当前选中的视频框
         //将之前的playView播放方式取消
         PlayControllerView *playConOld = (PlayControllerView*)[_array objectAtIndex:playCon.nPlayIndex] ;
         playConOld.bPlay = NO;
         playConOld.strKey = @"";
         
-        
         PlayControllerView *playView = ((PlayControllerView*)[_array objectAtIndex:nIndex]);
+        DLog(@"旧通道:%zi",playCon.nPlayIndex);
         playCon.nPlayIndex = nIndex;
+        DLog(@"新通道:%zi",playCon.nPlayIndex);
         playView.bPlay = YES;
         playView.strKey = strChannel;
         playView.bRecord = playConOld.bRecord;
@@ -1090,6 +1113,7 @@
         //在空的视频框连接一个通道
         __weak PlayFourViewController *__self = self;
         __block int __nIndex = nIndex;
+        DLog(@"空窗口播放:%d",nIndex);
         dispatch_async(dispatch_get_global_queue(0, 0),
         ^{
             [__self startNewWindow:__nIndex channel:__strChannel];
@@ -1099,28 +1123,44 @@
 
 -(void)startNewWindow:(int)nPlayIndex channel:(NSString*)strChannel
 {
+    [self startNewWindow:nPlayIndex channel:strChannel codeType:2];
+}
+
+-(void)startNewWindow:(int)nPlayIndex channel:(NSString*)strChannel codeType:(int)nCodeType
+{
     PlayControlModel *playModelNew = [[PlayControlModel alloc] init];
-    DLog(@"新通道:%d",nPlayIndex);
+    
     playModelNew.nPlayIndex = nPlayIndex;
+    
+    DLog(@"新通道:%zi--通道:%@",playModelNew.nPlayIndex,strChannel);
+    
     PlayControllerView *playViewNew = (PlayControllerView *)[_array objectAtIndex:playModelNew.nPlayIndex];
     
     playViewNew.bPlay = YES;
+    
     playViewNew.strKey = strChannel;
     
-    [_decoderInfo setValue:playModelNew forKey:strChannel];
+    [_decoderInfo setObject:playModelNew forKey:strChannel];
+    
     __weak NSString *__strNO = _strNO;
+    
     __block NSString *__strChannel = strChannel;
+    
     __weak PlayControllerView *__playView = playViewNew;
+    
+    DLog(@"PlayView:%@---PlayModel:%zi",playViewNew.strKey,playModelNew.nPlayIndex);
+    
     dispatch_async(dispatch_get_main_queue(),
     ^{
         [__playView.mainView makeToastActivity];
     });
+    
     __weak PlayFourViewController *weakSelf = self;
+    __block int __nCodeType = nCodeType;
     dispatch_async(dispatch_get_global_queue(0, 0),
     ^{
-          [weakSelf startPlayWithNO:__strNO channel:__strChannel codeType:2];
+          [weakSelf startPlayWithNO:__strNO channel:__strChannel codeType:__nCodeType];
     });
-    
 }
 
 #pragma mark 关闭视频
@@ -1130,7 +1170,9 @@
     DLog(@"key:%@",strKey);
     if(playModel)
     {
+        DLog(@"playModel.nPlayIndex:%zi",playModel.nPlayIndex);
         PlayControllerView *playView = (PlayControllerView*)[_array objectAtIndex:playModel.nPlayIndex];
+        DLog(@"playView:%d",playView.bPlay);
         if (playView.bRecord)
         {
             DLog(@"停止录像");
@@ -1141,26 +1183,41 @@
         [playModel.decode releaseDecode];
         __weak PlayControllerView *__playView = playView;
         __weak UIImageView *__glView = playModel.glView;
-        dispatch_async(dispatch_get_main_queue(),^{
+        
+        dispatch_async(dispatch_get_main_queue(),
+        ^{
             [__glView removeFromSuperview];
             [__playView.mainView hideToastActivity];
         });
-        [NSThread sleepForTimeInterval:0.3f];
+        [NSThread sleepForTimeInterval:0.5f];
         playModel.decode = nil;
         playModel.glView = nil;
         [_decoderInfo removeObjectForKey:strKey];
         playView.strKey = nil;
         DLog(@"关闭一路");
+        playModel = nil;
     }
 }
 
 -(void)clickView:(id)sender
 {
     VideoView *view = (VideoView*)sender;
-    [_borderLabel setFrame:view.frame];
+    
+    PlayControllerView *oldView = [_array objectAtIndex:nIndex];
+    
+    oldView.mainView.layer.borderWidth = 0;
+    
+    if(!bFull)
+    {
+        view.layer.borderWidth = 1;
+    }
+    
     nIndex = (int)view.nCursel;
+    
     PlayControllerView *playView = [_array objectAtIndex:nIndex];
+    
     PlayControlModel *playModel = [_decoderInfo objectForKey:playView.strKey];
+    
     if(![UserInfo sharedUserInfo].bGuess && playView.bPlay && playModel && playModel.glView)
     {
         ((UIButton*)[_downHUD viewWithTag:1002]).enabled = YES;
@@ -1187,6 +1244,8 @@
         ((UIButton*)[_downHUD viewWithTag:1005]).enabled = NO;
         [btnBD setEnabled:NO];
         [btnHD setEnabled:NO];
+        
+        return ;
     }
     if (bScreen)
     {
@@ -1219,24 +1278,17 @@
         }
         if (!bFull)
         {
-            
+            playView.mainView.layer.borderWidth = 0;
         }
         else
         {
-            __weak PlayControllerView *_playView = playView;
-            __weak PlayControlModel *_playModel = playModel;
-            __weak PlayFourViewController *_weakSelf = self;
-            dispatch_async(dispatch_get_main_queue(),
-            ^{
-                [_playView.mainView setFrame:_playView.mainRect];
-                [_playModel.glView removeFromSuperview];
-                [_playView.mainView insertSubview:_playModel.glView atIndex:0];
-                [_weakSelf.borderLabel setFrame:view.frame];
-            });
+            [playView.mainView setFrame:playView.mainRect];
+            [playModel.glView removeFromSuperview];
+            [playView.mainView insertSubview:playModel.glView atIndex:0];
+            playView.mainView.layer.borderWidth = 1;
         }
         _currentView = playView.mainView;
         [self fullPlayMode];
-        _borderLabel.hidden = !bFull;
         bFull = !bFull;
     }
     else
@@ -1247,18 +1299,11 @@
             {
                 [((PlayControllerView*)[_array objectAtIndex:i]).mainView setHidden:NO];
             }
-            __weak PlayControllerView *_playView = playView;
-            __weak PlayControlModel *_playModel = playModel;
-            __weak PlayFourViewController *_weakSelf = self;
-            dispatch_async(dispatch_get_main_queue(),
-            ^{
-                [_playView.mainView setFrame:_playView.mainRect];
-                [_playModel.glView removeFromSuperview];
-                [_playView.mainView insertSubview:_playModel.glView atIndex:0];
-                [_weakSelf.borderLabel setFrame:view.frame];
-            });
+            [playView.mainView setFrame:playView.mainRect];
+            [playModel.glView removeFromSuperview];
+            [playView.mainView insertSubview:playModel.glView atIndex:0];
+            playView.mainView.layer.borderWidth = 0;
             [self fullPlayMode];
-            _borderLabel.hidden = !bFull;
             bFull = !bFull;
         }
     }
@@ -1268,7 +1313,6 @@
 {
     DLog(@"111111111111");
 }
-
 
 #pragma mark 全屏与四屏切换，设置frame与bounds
 -(void)fullPlayMode
@@ -1375,8 +1419,6 @@
         UIButton *btnSender = (UIButton*)[_downHUD viewWithTag:1005];
         btnSender.enabled = NO;
     }
-//    [self switchVideoCode:nType];
-//    [self set]
     btn.enabled = NO;
 }
 
@@ -1463,6 +1505,7 @@
     PlayControlModel *playModel = [_decoderInfo valueForKey:strKey];
     if (!playModel)//如果不存在，创建对象，进行连接
     {
+        DLog(@"BUG!!!!");
         playModel = [[PlayControlModel alloc] init];
         [_decoderInfo setValue:playModel forKey:strKey];
     }
@@ -1476,25 +1519,22 @@
     __weak XCDecoderNew *weakdecode = playModel.decode;
     //通道字符串
     __block NSString *__strChannel = strKey;
+    
+//    playModel.nPlayIndex = nIndex;
+    
+    playModel.decode.connectBlock = ^(int nStatus)
+    {
+        if (nStatus==1)
+        {
+            [weakSelf initGlViewWithNO:__strNO channel:__strChannel];
+        }
+    };
+    
     dispatch_async(dispatch_get_global_queue(0, 0),
     ^{
           [weakdecode startConnectWithChan:__strNO channel:[__strChannel intValue]];
     });
-    _bPlay = YES;
-    playModel.nPlayIndex = nIndex;
-    dispatch_async(dispatch_get_global_queue(0, 0),
-    ^{
-        while (!weakdecode.fFPS)
-        {
-            [NSThread sleepForTimeInterval:0.2f];
-            if (!weakSelf.bPlay)
-            {
-                return ;
-            }
-        }
-        [weakSelf startNewPlay:__strChannel];
-        [weakSelf initGlViewWithNO:__strNO channel:__strChannel];
-    });
+   
 }
 
 #pragma mark 初始化显示
@@ -1518,10 +1558,13 @@
     __weak PlayControlModel *_playModel = playModel;
     __weak PlayControllerView *_playView = playView;
     __weak PlayFourViewController *_weakSelf = self;
+    
+    [self startNewPlay:strKey];
+    
     dispatch_async(dispatch_get_main_queue(),
     ^{
-        [_playView.mainView insertSubview:_playModel.glView atIndex:0];
         [__weakPlay.mainView hideToastActivity];
+        [_playView.mainView insertSubview:_playModel.glView atIndex:0];
         [_weakSelf updateClickView];
     });
 }
@@ -1635,8 +1678,8 @@
        return ;
     }
     CGPoint curPoint = [sender locationInView:self.view];
-    CGFloat frameX = (_currentView.x + (curPoint.x-lastX)) > 0 ? 0 : (abs(_currentView.x+(curPoint.x-lastX))+fWidth >= _currentView.width ? -(_currentView.width-fWidth) : (_currentView.x+(curPoint.x-lastX)));
-    CGFloat frameY =(_currentView.y + (curPoint.y-lastY))>0?0: (abs(_currentView.y+(curPoint.y-lastY))+fHeight >= _currentView.height ? -(_currentView.height-fHeight) : (_currentView.y+(curPoint.y-lastY)));
+    CGFloat frameX = (_currentView.x + (curPoint.x-lastX)) > 0 ? 0 : (fabs(_currentView.x+(curPoint.x-lastX))+fWidth >= _currentView.width ? -(_currentView.width-fWidth) : (_currentView.x+(curPoint.x-lastX)));
+    CGFloat frameY =(_currentView.y + (curPoint.y-lastY))>0?0: (fabs(_currentView.y+(curPoint.y-lastY))+fHeight >= _currentView.height ? -(_currentView.height-fHeight) : (_currentView.y+(curPoint.y-lastY)));
     _currentView.frame = Rect(frameX,frameY , _currentView.width, _currentView.height);
     lastX = curPoint.x;
     lastY = curPoint.y;

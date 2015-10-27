@@ -25,7 +25,9 @@
 #define SN_HTTP_HOST @"http://www.nicecamcctv.com/"
 
 #endif
-
+//Otimização de decodificação
+//Decoding optimization
+//解码优化
 
 /*
  P2P直接打洞成功:芬兰、俄罗斯民房、摩尔多瓦、

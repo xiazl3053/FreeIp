@@ -113,8 +113,8 @@
         return ;
     }
     CGPoint curPoint = [sender locationInView:self.view];
-    CGFloat frameX = (_glView.x + (curPoint.x-lastX)) > 0 ? 0 : (abs(_glView.x+(curPoint.x-lastX))+fWidth >= _glView.width ? -(_glView.width-fWidth) : (_glView.x+(curPoint.x-lastX)));
-    CGFloat frameY =(_glView.y + (curPoint.y-lastY))>0?0: (abs(_glView.y+(curPoint.y-lastY))+fHeight >= _glView.height ? -(_glView.height-fHeight) : (_glView.y+(curPoint.y-lastY)));
+    CGFloat frameX = (_glView.x + (curPoint.x-lastX)) > 0 ? 0 : (fabs(_glView.x+(curPoint.x-lastX))+fWidth >= _glView.width ? -(_glView.width-fWidth) : (_glView.x+(curPoint.x-lastX)));
+    CGFloat frameY =(_glView.y + (curPoint.y-lastY))>0?0: (fabs(_glView.y+(curPoint.y-lastY))+fHeight >= _glView.height ? -(_glView.height-fHeight) : (_glView.y+(curPoint.y-lastY)));
     _glView.frame = Rect(frameX,frameY , _glView.width, _glView.height);
     lastX = curPoint.x;
     lastY = curPoint.y;
@@ -682,6 +682,10 @@
 {
     _bPlaying = NO;
     _bDecoding = NO;
+    if (bRecord)
+    {
+        [self recordVideo:_btnRecord];
+    }
     [_rtspDecoder releaseRtspDecoder];
     __weak RTSPPlayViewController *weakSelf = self;
     __weak UIImageView *__imageView = _glView;

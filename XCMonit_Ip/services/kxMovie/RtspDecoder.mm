@@ -294,6 +294,7 @@ Release_format_input:
         
         sprintf((char*)direct->userinfo.ucUsername,"%s",[rtspInfo.strUser UTF8String]);
         sprintf((char*)direct->userinfo.ucPassWord, "%s",[rtspInfo.strPwd UTF8String]);
+        
         int rsl = PC_InitCtx();
         if(0!=rsl)
         {
@@ -304,7 +305,7 @@ Release_format_input:
         {
             return DIRECT_CONNNECT_NEW_FAIL;
         }
-        direct->nPort = rtspInfo.nPort;
+        direct->nPort = (int)rtspInfo.nPort;
         if (strAddress)
         {
             sprintf((char*)direct->cAddress,"%s",[strAddress UTF8String]);

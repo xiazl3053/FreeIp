@@ -52,7 +52,6 @@ bool RecvFile::ProcessFrameData(char* aFrameData, int aFrameDataLength)
                 nFrameNum++;
             }
         }
-        
     }
     return true;
 }
@@ -355,6 +354,7 @@ int RecvFile::initP2PParam()
     }
     return -1;
 }
+
 BOOL RecvFile::connectP2PStream(int nCodeType)
 {
     int ret = 0;

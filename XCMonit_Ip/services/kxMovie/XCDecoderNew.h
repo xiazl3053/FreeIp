@@ -8,6 +8,9 @@
 
 #import <Foundation/Foundation.h>
 #import "DecoderPublic.h"
+
+typedef void(^P2PConnectBlock)(int nStatus);
+
 @interface XCDecoderNew : NSObject
 
 
@@ -30,6 +33,7 @@
 -(NSMutableArray*)decodeFrames;
 -(int)getRealType;
 
+@property (nonatomic,copy) P2PConnectBlock connectBlock;
 @property (nonatomic,assign) int nCodeType;
 @property (nonatomic,strong) NSMutableArray *videoArray;
 @property (nonatomic,assign) CGFloat fFPS;

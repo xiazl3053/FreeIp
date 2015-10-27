@@ -26,6 +26,10 @@
     {
         [self setBackgroundColor:RGB(0, 0,0)];
         
+        self.layer.borderColor = [UIColor greenColor].CGColor;
+        
+        self.layer.borderWidth = 0;
+        
         _tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(clickOnView)];
         _doubleGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(doubleClickView)];
         _tapGesture.numberOfTapsRequired =1;

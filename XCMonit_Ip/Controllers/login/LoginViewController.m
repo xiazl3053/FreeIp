@@ -8,6 +8,7 @@
 #import "LoginViewController.h"
 #import "IndexViewController.h"
 #import "UtilsMacro.h"
+#import "XCMoreButton.h"
 #import "LoginSNViewController.h"
 #import "LoginSNService.h"
 #import "IQKeyboardManager.h"
@@ -20,16 +21,12 @@
 #import "ProgressHUD.h"
 #import "RTSPListViewController.h"
 #import "UIView+Extension.h"
-
 #import "RegisterViewController.h"
 #import "QCheckBox.h"
 #import "FirstStepViewController.h"
 #import "GuessLoginService.h"
 #import "GuessListViewController.h"
-
-
 //FFMPEG 在程序开始中调用
-
 //#include "libswresample/swresample.h"
 #include "libavformat/avformat.h"
 #include "libswscale/swscale.h"
@@ -230,11 +227,9 @@
     
     _imgGuess = [[UIImageView alloc] initWithFrame:Rect(0, kScreenHeight-81.5+HEIGHT_MENU_VIEW(20, 0), 82.5, 81.5)];
     _imgGuess.image = [UIImage imageNamed:XCLocalized(@"guessImg")];
-//    [self.view addSubview:_imgGuess];
     [_imgGuess addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(loginGuess)]];
     [_imgGuess setUserInteractionEnabled:YES];
     
-//    [self.view addSubview:_imgBg];
     [self.view addSubview:_txtUser];
     [self.view addSubview:_txtPwd];
     [self.view addSubview:_btnLogin];
@@ -244,11 +239,11 @@
     [self.view addSubview:_btnFind];
     _guessLogin = [[GuessLoginService alloc] init];
     
-    UILabel *lblContent1 = [[UILabel alloc] initWithFrame:Rect(30, _btnFind.y+_btnFind.height+20, _txtUser.width, 0.5)];
+    UILabel *lblContent1 = [[UILabel alloc] initWithFrame:Rect(30, kScreenSourchHeight-118, _txtUser.width, 0.5)];
     [self.view addSubview:lblContent1];
     [lblContent1 setBackgroundColor:UIColorFromRGBHex(0xd8e6ea)];
     
-    UILabel *lblTemp1 = [[UILabel alloc] initWithFrame:Rect(kScreenWidth/2-40, _btnFind.y+_btnFind.height+10, 80, 20)];
+    UILabel *lblTemp1 = [[UILabel alloc] initWithFrame:Rect(kScreenWidth/2-40, kScreenSourchHeight-128, 80, 20)];
     [lblTemp1 setText:XCLocalized(@"otherLogin")];
     [lblTemp1 setBackgroundColor:UIColorFromRGBHex(0xf7f7f7)];
     [lblTemp1 setTextColor:UIColorFromRGBHex(0xbcc7cb)];
@@ -256,52 +251,34 @@
     [lblTemp1 setTextAlignment:NSTextAlignmentCenter];
     [self.view addSubview:lblTemp1];
     
-    UIButton *btnSN = [UIButton buttonWithType:UIButtonTypeCustom];
-    [btnSN setTitle:XCLocalized(@"SNLogin") forState:UIControlStateNormal];
-    [btnSN setBackgroundColor:RGB(252, 173, 113)];
-    [btnSN setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-    btnSN.layer.masksToBounds = YES;
-    btnSN.layer.cornerRadius = 3;
     
-    UIButton *btnGuess = [UIButton buttonWithType:UIButtonTypeCustom];
-    [btnGuess setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-    [btnGuess setTitle:XCLocalized(@"testUser") forState:UIControlStateNormal];
-    [btnGuess setBackgroundColor:RGB(0, 218, 95)];
-    btnGuess.layer.masksToBounds = YES;
-    btnGuess.layer.cornerRadius = 3;
+    XCMoreInfo *snInfo = [[XCMoreInfo alloc] initWithInfo:XCLocalized(@"SNLogin") normal:@"btn_login_number_nor" high:@"btn_login_number_down"];
+    XCMoreInfo *guessInfo = [[XCMoreInfo alloc] initWithInfo:XCLocalized(@"testUser") normal:@"btn_login_visit_nor" high:@"btn_login_visit_down"];
+    XCMoreInfo *directInfo = [[XCMoreInfo alloc] initWithInfo:XCLocalized(@"rtsp") normal:@"btn_login_connect_nor" high:@"btn_login_connect_down"];
+    
+    XCMoreButton *btnSN = [[XCMoreButton alloc] initWithFrame:Rect(kScreenSourchWidth/3,lblTemp1.y+lblTemp1.height+27.5,kScreenSourchWidth/3, 80) info:snInfo];
+    XCMoreButton *btnGuess = [[XCMoreButton alloc] initWithFrame:Rect(0, btnSN.y, btnSN.width, btnSN.height) info:guessInfo];
+    
+    XCMoreButton *btnDirect = [[XCMoreButton alloc] initWithFrame:Rect(kScreenSourchWidth/3*2, btnSN.y, btnSN.width, btnSN.height) info:directInfo];
     
     [self.view addSubview:btnSN];
+    
     [self.view addSubview:btnGuess];
     
-    btnSN.frame = Rect(15, lblTemp1.y+lblTemp1.height+20,_txtUser.width, 44);
-    btnGuess.frame = Rect(15, btnSN.y+btnSN.height+11, _txtUser.width, 44);
-    btnGuess.titleLabel.font = XCFontInfo(15);
-    btnSN.titleLabel.font = XCFontInfo(15);
+    [self.view addSubview:btnDirect];
+    
     [btnSN addTarget:self action:@selector(loginSN) forControlEvents:UIControlEventTouchUpInside];
     [btnGuess addTarget:self action:@selector(loginGuess) forControlEvents:UIControlEventTouchUpInside];
+    [btnDirect addTarget:self action:@selector(GotoRTSPView) forControlEvents:UIControlEventTouchUpInside];
+}
+
+-(void)enterDirect
+{
+    
 }
 
 -(void)loginSN
 {
-//    NSString *strUser = [_txtUser text];
-//    NSString *strPwd = [_txtPwd text];
-//    if (strUser == nil || [strUser isEqualToString:@""])
-//    {
-//        DLog(@"");
-//        [self.view makeToast:XCLocalized(@"userAuth")];
-//        return ;
-//    }
-//    if (strPwd == nil || [strPwd isEqualToString:@""])
-//    {
-//        DLog(@"");
-//        [self.view makeToast:XCLocalized(@"pwdAuth")];
-//        return ;
-//    }
-//    if(loginSN==nil)
-//    {
-//        loginSN = [[LoginSNService alloc] init];
-//    }
-//    [loginSN requestLoginSN:strUser pwd:strPwd sn:@"9743200000001"];
     LoginSNViewController *index = [[LoginSNViewController alloc] init];
     [self presentViewController:index animated:YES completion:^{}];
 }
@@ -423,12 +400,7 @@
 }
 -(void)loginServer
 {
-//    if (UIApplicationOpenSettingsURLString != NULL)
-//    {
-//        NSURL *appSettings = [NSURL URLWithString:UIApplicationOpenSettingsURLString];
-//        [[UIApplication sharedApplication] openURL:appSettings];
-//    }
-//    return ;
+    
     NSString *nsUser = [_txtUser text];
     NSString *nsPwd = [_txtPwd text];
     if(_bLogin)

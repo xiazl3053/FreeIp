@@ -31,63 +31,56 @@
 - (id)initWithItems:(NSArray *)items
 {
     self = [super init];
-    if (self) {
+    if (self)
+    {
         DLog(@"%f",kScreenHeight);
         float originY = kScreenHeight - 49;
         self.frame = CGRectMake(0, originY+HEIGHT_MENU_VIEW(20, 0) , kScreenWidth, 49);
         [self setBackgroundColor:RGB(255, 255, 255)];
         _buttonData = [[NSMutableArray alloc]initWithArray:items];
         
-        UILabel *sLine1 = [[UILabel alloc] initWithFrame:CGRectMake(0, 0.5, kScreenWidth, 0.5)];
+        UILabel *sLine1 = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, kScreenWidth, 0.5)];
         sLine1.backgroundColor = [UIColor colorWithRed:198/255.0
                                                  green:198/255.0
                                                   blue:198/255.0
                                                  alpha:1.0];
-        UILabel *sLine2 = [[UILabel alloc] initWithFrame:CGRectMake(0, 1 , kScreenWidth, 0.5)] ;
-        sLine2.backgroundColor = [UIColor whiteColor];
-        
         [self addSubview:sLine1];
-        [self addSubview:sLine2];
         
         [self setupButtons];
+        
         _nIndex = 0;
     }
     return self;
 }
-- (void)setupButtons {
+- (void)setupButtons
+{
     NSInteger count = 0;
-    NSInteger xExtra = 0;
-    CGFloat buttonSize = kScreenWidth / [self.buttonData count];
-    for (XCTabInfo *tabInfo in self.buttonData) {
-        NSInteger extra = 0;
-        if ([self.buttonData count] % 2 == 1) {
-            if ([self.buttonData count] == 5) {
-                NSInteger i = (count +1) + (floor([self.buttonData count] / 2));
-                if (i == [self.buttonData count]) {
-                    extra = 1;
-                }else if([self.buttonData count] == 3){
-                    buttonSize = floor(kScreenWidth / [self.buttonData count]);
-                }
-            }else{
-                if (count + 1 == 2) {
-                    extra = 1;
-                } else if (count + 1 == 3) {
-                    xExtra = 1;
-                }
-            }
-        }
+    
+    CGFloat buttonSize = kScreenWidth / [self.buttonData count]-0.6;
+    for (XCTabInfo *tabInfo in self.buttonData)
+    {
         NSInteger buttonX = count * buttonSize;
         UIView *view = [[UIView alloc] initWithFrame:Rect(buttonX, 0, buttonSize, 48)];
         view.userInteractionEnabled = YES;
         [view setTag:count+20];
         [view addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapIndex:)]];
         
-       // DLog(@"",buttonSize);
         XCButton *tabButton = [[XCButton alloc] initWithTabInfo:tabInfo frame:CGRectMake(buttonSize/2-48/2.0, 0 ,48, 48)];
         [tabButton setTag:count+10];
+        
         [tabButton addTarget:self action:@selector(clickIndex:) forControlEvents:UIControlEventTouchUpInside];
         [view addSubview:tabButton];
         [self addSubview:view];
+        
+        if ([self.buttonData count] > count+1)
+        {
+            UILabel *lblContent = [[UILabel alloc] initWithFrame:Rect(view.frame.origin.x + view.frame.size.width,0, 0.5,49)];
+            [lblContent setBackgroundColor:[UIColor colorWithRed:198/255.0
+                                                        green:198/255.0
+                                                         blue:198/255.0
+                                                           alpha:1.0]];
+            [self addSubview:lblContent];
+        }
         
         count++;
     }

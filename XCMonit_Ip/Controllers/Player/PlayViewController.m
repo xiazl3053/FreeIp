@@ -73,8 +73,8 @@
         return ;
     }
     CGPoint curPoint = [sender locationInView:self.view];
-    CGFloat frameX = (_imgView.x + (curPoint.x-lastX)) > 0 ? 0 : (abs(_imgView.x+(curPoint.x-lastX))+fWidth >= _imgView.width ? -(_imgView.width-fWidth) : (_imgView.x+(curPoint.x-lastX)));
-    CGFloat frameY =(_imgView.y + (curPoint.y-lastY))>0?0: (abs(_imgView.y+(curPoint.y-lastY))+fHeight >= _imgView.height ? -(_imgView.height-fHeight) : (_imgView.y+(curPoint.y-lastY)));
+    CGFloat frameX = (_imgView.x + (curPoint.x-lastX)) > 0 ? 0 : (fabs(_imgView.x+(curPoint.x-lastX))+fWidth >= _imgView.width ? -(_imgView.width-fWidth) : (_imgView.x+(curPoint.x-lastX)));
+    CGFloat frameY =(_imgView.y + (curPoint.y-lastY))>0?0: (fabs(_imgView.y+(curPoint.y-lastY))+fHeight >= _imgView.height ? -(_imgView.height-fHeight) : (_imgView.y+(curPoint.y-lastY)));
     _imgView.frame = Rect(frameX,frameY , _imgView.width, _imgView.height);
     lastX = curPoint.x;
     lastY = curPoint.y;

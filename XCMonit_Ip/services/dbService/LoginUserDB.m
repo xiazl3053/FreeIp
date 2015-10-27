@@ -29,7 +29,7 @@
 +(BOOL)addLoginUser:(UserModel *)userModel
 {
     //INSERT OR ignore
-    NSString *strSql = @"INSERT IGNORE INTO userInfo (username,pwd) SELECT username,pwd FROM userInfo where username = ?";
+//    NSString *strSql = @"INSERT IGNORE INTO userInfo (username,pwd) SELECT username,pwd FROM userInfo where username = ?";
     return NO;
 }
 

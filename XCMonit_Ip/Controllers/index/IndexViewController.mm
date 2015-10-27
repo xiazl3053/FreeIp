@@ -22,7 +22,6 @@
 #import "XCDecoder.h"
 #import "P2PInitService.h"
 #import "LoginViewController.h"
-#import "RTSPListViewController.h"
 #import "UserInfo.h"
 #import "UserInfoService.h"
 #import "UserAllInfoModel.h"
@@ -44,7 +43,6 @@
 @property (nonatomic,strong) UserInfoService *userServie;
 @property (nonatomic,strong) HomeViewController *homeView;
 @property (nonatomic,strong) DeviceViewController *deviceView;
-@property (nonatomic,strong) RTSPListViewController *rtspView;
 @property (nonatomic,strong) MoreViewController *moreView;
 
 @end
@@ -76,17 +74,12 @@ DEFINE_SINGLETON_FOR_CLASS(IndexViewController);
     
     if(![UserInfo sharedUserInfo].bGuess)
     {
-        XCTabInfo *tb4 = [[XCTabInfo alloc] initWithTabInfo:XCLocalized(@"rtsp") normal:@"rtsp" high:@"rtsp_h"];
-        _rtspView = [[RTSPListViewController alloc] init];
-        tb4.viewController = _rtspView;
-        [self addChildViewController:_rtspView];
-        
         XCTabInfo *tb3 = [[XCTabInfo alloc] initWithTabInfo:XCLocalized(@"more") normal:@"about.png" high:@"about_h.png"];
         _moreView = [[MoreViewController alloc] init];
         tb3.viewController = _moreView;
         [self addChildViewController:_moreView];
         
-        NSArray *aryItem = [[NSArray alloc] initWithObjects:tb1,tb2,tb4,tb3, nil];
+        NSArray *aryItem = [[NSArray alloc] initWithObjects:tb1,tb2,tb3, nil];
         _tabBar = [[XCTabBar alloc] initWithItems:aryItem];
         _tabBar.delegate = self;
         [self.view addSubview:_tabBar];
@@ -137,8 +130,6 @@ DEFINE_SINGLETON_FOR_CLASS(IndexViewController);
         [__P2PInit getIPWithHostName:XCLocalized(@"p2pserver")];
         DLog(@"解析IP:%@",__P2PInit.strAddress);
     });
-    
-    DLog(@"重新添加一次");
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(connectAgain) name:NS_APPLITION_ENTER_FOREG object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(enter_background) name:NS_APPLITION_ENTER_BACK object:nil];
     
@@ -238,7 +229,6 @@ DEFINE_SINGLETON_FOR_CLASS(IndexViewController);
     _userServie = nil;
     _decoder = nil;
     _scrollViewInfo = nil;
-    _rtspView = nil;
     _moreView = nil;
 }
 

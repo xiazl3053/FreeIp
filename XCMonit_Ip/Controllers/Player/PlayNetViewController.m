@@ -132,7 +132,8 @@ static NSMutableDictionary * gHistory;
 @property (nonatomic,strong) NSString *strPath;//进度
 @property (nonatomic,strong) XCDecoder *decoder;//解码类
 @property (nonatomic,strong) RecordModel *record;//录像记录
-@property (nonatomic,strong) KxMovieGLView *glView;;//opengl view
+//@property (nonatomic,strong) KxMovieGLView *glView;;//opengl view
+@property (nonatomic,strong) UIImageView *glView;
 
 @end
 
@@ -579,8 +580,8 @@ static NSMutableDictionary * gHistory;
         return ;
     }
     CGPoint curPoint = [sender locationInView:self.view];
-    CGFloat frameX = (_glView.x + (curPoint.x-lastX)) > 0 ? 0 : (abs(_glView.x+(curPoint.x-lastX))+fWidth >= _glView.width ? -(_glView.width-fWidth) : (_glView.x+(curPoint.x-lastX)));
-    CGFloat frameY =(_glView.y + (curPoint.y-lastY))>0?0: (abs(_glView.y+(curPoint.y-lastY))+fHeight >= _glView.height ? -(_glView.height-fHeight) : (_glView.y+(curPoint.y-lastY)));
+    CGFloat frameX = (_glView.x + (curPoint.x-lastX)) > 0 ? 0 : (fabs(_glView.x+(curPoint.x-lastX))+fWidth >= _glView.width ? -(_glView.width-fWidth) : (_glView.x+(curPoint.x-lastX)));
+    CGFloat frameY =(_glView.y + (curPoint.y-lastY))>0?0: (fabs(_glView.y+(curPoint.y-lastY))+fHeight >= _glView.height ? -(_glView.height-fHeight) : (_glView.y+(curPoint.y-lastY)));
     _glView.frame = Rect(frameX,frameY , _glView.width, _glView.height);
     lastX = curPoint.x;
     lastY = curPoint.y;
@@ -752,7 +753,7 @@ static NSMutableDictionary * gHistory;
     [self asyncDecodeFrames];
     __weak PlayNetViewController *wearSelf = self;
     dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, 0.6 * NSEC_PER_SEC);
-    dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
+    dispatch_after(popTime, dispatch_get_global_queue(0, 0), ^(void){
         [wearSelf tick];
     });
 }
@@ -769,8 +770,6 @@ static NSMutableDictionary * gHistory;
     });
     self.playing = NO;
     self.decoding = YES;
-    
-    DLog(@"pause movie");
 }
 
 - (void) handlePan: (UIPanGestureRecognizer *) sender
@@ -780,8 +779,8 @@ static NSMutableDictionary * gHistory;
         
         const CGPoint vt = [sender velocityInView:self.view];
         const CGPoint pt = [sender translationInView:self.view];
-        const CGFloat sp = MAX(0.1, log10(fabsf(vt.x)) - 1.0);
-        const CGFloat sc = fabsf(pt.x) * 0.33 * sp;
+        const CGFloat sp = MAX(0.1, log10(fabs(vt.x)) - 1.0);
+        const CGFloat sc = fabs(pt.x) * 0.33 * sp;
         if (sc > 10) {
             
             const CGFloat ff = pt.x > 0 ? 1.0 : -1.0;
@@ -809,7 +808,8 @@ static NSMutableDictionary * gHistory;
     {
         interval = [self presentFrame];
     }
-    if (self.playing) {
+    if (self.playing)
+    {
         const NSUInteger leftFrames = _videoFrames.count;
         if (!leftFrames || !(_bufferedDuration > _minBufferedDuration))
         {
@@ -825,8 +825,8 @@ static NSMutableDictionary * gHistory;
             });
             return ;
         }
-        dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, 0.038 * NSEC_PER_SEC);
-        dispatch_after(popTime, dispatch_get_main_queue(), ^(void)
+        dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, 0.025 * NSEC_PER_SEC);
+        dispatch_after(popTime, dispatch_get_global_queue(0,0), ^(void)
         {
            [wearSelf tick];
         });
@@ -896,7 +896,8 @@ static NSMutableDictionary * gHistory;
     KxVideoFrame *frame;
     @synchronized(_videoFrames)
     {
-        if (_videoFrames.count > 0) {
+        if (_videoFrames.count > 0)
+        {
             frame = _videoFrames[0];
             [_videoFrames removeObjectAtIndex:0];
             _bufferedDuration -= frame.duration;
@@ -904,7 +905,12 @@ static NSMutableDictionary * gHistory;
     }
     if (frame)
     {
-        [_glView render:frame];
+        __weak PlayNetViewController *__self = self;
+        __weak KxVideoFrame *__frame = frame;
+        dispatch_sync(dispatch_get_main_queue(),
+        ^{
+            [__self presentVideoFrame:__frame];
+        });
         _moviePosition = frame.position;
         interval = frame.duration;
         frame = nil;
@@ -916,7 +922,8 @@ static NSMutableDictionary * gHistory;
 - (CGFloat)presentVideoFrame: (KxVideoFrame *) frame
 {
     //修改成OPENGL 贴图RGB与YUV两种方式
-    [_glView render:frame];
+    KxVideoFrameRGB *rgbFrame = (KxVideoFrameRGB *)frame;
+    [_glView setImage:rgbFrame.asImage];
     return 0;
 }
 
@@ -1018,12 +1025,11 @@ static NSMutableDictionary * gHistory;
     {
         return ;
     }
-
-    _glView = [[KxMovieGLView alloc] initWithFrame:Rect(0, 0,fWidth, fHeight) decoder:_decoder];
+    _glView = [[UIImageView alloc] initWithFrame:Rect(0, 0, fWidth, fHeight)];
     _glView.contentMode = UIViewContentModeScaleAspectFit;//UIViewContentModeScaleAspectFill;UIViewContentModeScaleAspectFit
     _glView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleBottomMargin;
     [_glView setUserInteractionEnabled:YES];
-    _glView.contentMode = UIViewContentModeScaleAspectFill;
+    _glView.contentMode = UIViewContentModeScaleToFill;
     [self.view insertSubview:_glView atIndex:0];
     [_glView addGestureRecognizer:_panGesture];
     [_glView addGestureRecognizer:pinchGesture];
@@ -1125,6 +1131,8 @@ static NSMutableDictionary * gHistory;
     _topHUD.frame = Rect(0, 0, fWidth,49);
     [_topHUD viewWithTag:1008].frame = _topHUD.bounds;
     [_downHUD viewWithTag:1008].frame = _downHUD.bounds;
+    
+    _glView.frame = Rect(0, 0, fWidth, fHeight);
     _rewindBtn.frame = Rect(50, 30, 40, 40);
     _playBtn.frame = Rect(95,  30, 40, 40);
     _forwardBtn.frame = Rect(140, 30, 40, 40);

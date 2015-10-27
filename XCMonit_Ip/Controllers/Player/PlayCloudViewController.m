@@ -48,7 +48,6 @@
     NSString *strDevName;
     UIView *rightView;
     UIButton *rightBtn;
-    UIImageView *imgView;
     int nChannel;
     NSMutableArray *aryDecode;
 }
@@ -57,6 +56,7 @@
 @property (nonatomic,copy) NSString *strNO;
 @property (nonatomic,strong) NSMutableArray *videoFrames;
 @property (nonatomic,strong) UIDatePicker *picker;
+@property (nonatomic,strong) UIImageView *imgView;
 @end
 
 @implementation PlayCloudViewController
@@ -146,12 +146,15 @@
     scrolView = [[UIScrollView alloc] initWithFrame:Rect(60, 0, 60, 320)];
     [rightView addSubview:scrolView];
     rightBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-    rightBtn.frame = Rect(0, 160,60, 60);
+    
+    CGFloat fRightY = kScreenSourchWidth > kScreenSourchHeight ? kScreenSourchHeight/2 : kScreenSourchWidth/2;
+    
+    rightBtn.frame = Rect(0, fRightY-30,60, 60);
     [rightBtn addTarget:self action:@selector(clickRightBtn:) forControlEvents:UIControlEventTouchUpInside];
     [rightBtn setImage:[UIImage imageNamed:@"right_cl"] forState:UIControlStateSelected];
     [rightBtn setImage:[UIImage imageNamed:@"right_cl_h"] forState:UIControlStateNormal];
     [rightView addSubview:rightBtn];
-    for (int i=0; i<nAllCount; i++)
+    for (int i = 0; i < nAllCount; i++)
     {
         UIButton *btnAction = [UIButton buttonWithType:UIButtonTypeCustom];
         [btnAction setTitle:[NSString stringWithFormat:@"%d",i+1] forState:UIControlStateNormal];
@@ -208,9 +211,9 @@
         return ;
     }
     CGPoint curPoint = [sender locationInView:self.view];
-    CGFloat frameX = (imgView.x + (curPoint.x-lastX)) > 0 ? 0 : (abs(imgView.x+(curPoint.x-lastX))+fWidth >= imgView.width ? -(imgView.width-fWidth) : (imgView.x+(curPoint.x-lastX)));
-    CGFloat frameY =(imgView.y + (curPoint.y-lastY))>0 ? 0: (abs(imgView.y+(curPoint.y-lastY))+fHeight >= imgView.height ? -(imgView.height-fHeight) : (imgView.y+(curPoint.y-lastY)));
-    imgView.frame = Rect(frameX,frameY , imgView.width, imgView.height);
+    CGFloat frameX = (_imgView.x + (curPoint.x-lastX)) > 0 ? 0 : (abs((int)(_imgView.x+(curPoint.x-lastX)))+fWidth >= _imgView.width ? -(_imgView.width-fWidth) : (_imgView.x+(curPoint.x-lastX)));
+    CGFloat frameY =(_imgView.y + (curPoint.y-lastY))>0 ? 0: (abs((int)(_imgView.y+(curPoint.y-lastY)))+fHeight >= _imgView.height ? -(_imgView.height-fHeight) : (_imgView.y+(curPoint.y-lastY)));
+    _imgView.frame = Rect(frameX,frameY , _imgView.width, _imgView.height);
     lastX = curPoint.x;
     lastY = curPoint.y;
 }
@@ -222,8 +225,8 @@
         //   lastScale = 1.0;
         return;
     }
-    CGFloat glWidth = imgView.frame.size.width;
-    CGFloat glHeight = imgView.frame.size.height;
+    CGFloat glWidth = _imgView.frame.size.width;
+    CGFloat glHeight = _imgView.frame.size.height;
     CGFloat fScale = 0;
     
     if ([sender scale]>1)
@@ -235,19 +238,19 @@
         fScale = 0.99;
     }
     
-    if (imgView.frame.size.width * [sender scale] <= fWidth)
+    if (_imgView.frame.size.width * [sender scale] <= fWidth)
     {
         lastScale = 1.0f;
-        imgView.frame = Rect(0, 0, fWidth, fHeight);
-        [imgView removeGestureRecognizer:_panGesture];
+        _imgView.frame = Rect(0, 0, fWidth, fHeight);
+        [_imgView removeGestureRecognizer:_panGesture];
     }
     else
     {
         lastScale = 1.5f;
-        [imgView addGestureRecognizer:_panGesture];
+        [_imgView addGestureRecognizer:_panGesture];
         CGFloat nowWidth = glWidth*fScale>fWidth*4?fWidth*4:glWidth*fScale;
         CGFloat nowHeight =glHeight*fScale >fHeight* 4?fHeight*4:glHeight*fScale;
-        imgView.frame = Rect(fWidth/2 - nowWidth/2,fHeight/2- nowHeight/2,nowWidth,nowHeight);
+        _imgView.frame = Rect(fWidth/2 - nowWidth/2,fHeight/2- nowHeight/2,nowWidth,nowHeight);
     }
 }
 
@@ -376,9 +379,9 @@
     }
     __weak PlayCloudViewController *__self = self;
     dispatch_async(dispatch_get_global_queue(0, 0),
-                   ^{
-                       [__self startPlayCloud_gcd];
-                   });
+       ^{
+           [__self startPlayCloud_gcd];
+       });
     btnPause.selected = YES;
     [ProgressHUD dismiss];
 }
@@ -650,10 +653,18 @@
 -(void)startPlayCloud_gcd
 {
     __weak PlayCloudViewController *__self = self;
+    if ([NSThread isMainThread])
+    {
+        DLog(@"主线程!");
+    }
+    else
+    {
+        DLog(@"子线程!");
+    }
     dispatch_async(dispatch_get_main_queue(),
-                   ^{
-                       [__self initGlView];
-                   });
+    ^{
+         [__self initGlView];
+    });
     _bPlaying = YES;
     _bDecoding = NO;
     if(aryDecode.count==0)
@@ -668,29 +679,34 @@
     _videoFrames = [NSMutableArray array];
     DLog(@"开始播放");
     dispatch_async(dispatch_get_global_queue(0, 0),
-                   ^{
-                       [__self startPlay];
-                   });
+               ^{
+                   [__self startPlay];
+               });
     __weak UIButton *__btnPause = btnPause;
     dispatch_async(dispatch_get_main_queue()
-                   , ^{
-                       __btnPause.selected = YES;
-                   });
+   , ^{
+       __btnPause.selected = YES;
+   });
     
     //开始解码模块
 }
 
 -(void)initGlView
 {
-    if (imgView == nil)
+    if (_imgView == nil)
     {
-        imgView = [[UIImageView alloc] initWithFrame:Rect(0, 0, fWidth, fHeight)];
+        _imgView = [[UIImageView alloc] initWithFrame:Rect(0, 0, fWidth, fHeight)];
     }
-    [self.view insertSubview:imgView atIndex:0];
-    [imgView setUserInteractionEnabled:YES];
-    [imgView addGestureRecognizer:_tapGestureRecognizer];
-    [imgView addGestureRecognizer:pinchGesture];
-    [imgView addGestureRecognizer:_panGesture];
+    _imgView.contentMode = UIViewContentModeScaleToFill;
+    
+    _imgView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleBottomMargin;
+    
+    [self.view insertSubview:_imgView atIndex:0];
+    
+    [_imgView setUserInteractionEnabled:YES];
+    [_imgView addGestureRecognizer:_tapGestureRecognizer];
+    [_imgView addGestureRecognizer:pinchGesture];
+    [_imgView addGestureRecognizer:_panGesture];
 }
 
 -(void)startPlay
@@ -699,24 +715,19 @@
     {
         if(_videoFrames.count>0)
         {
-            //            fps = 0.04;
             [self updatePlayUI];
         }
-        //        else
-        //        {
-        //            fps = 0;
-        //        }
         if (_videoFrames.count==0)
         {
             //解码开启
             [self decodeAsync];
         }
         __weak PlayCloudViewController *__weakSelf = self;
-        dispatch_time_t after = dispatch_time(DISPATCH_TIME_NOW, 0.03 * NSEC_PER_SEC );
+        dispatch_time_t after = dispatch_time(DISPATCH_TIME_NOW, 0.001 * NSEC_PER_SEC);
         dispatch_after(after, dispatch_get_global_queue(0, 0),
-                       ^{
-                           [__weakSelf startPlay];
-                       });
+           ^{
+               [__weakSelf startPlay];
+           });
     }
 }
 
@@ -757,6 +768,14 @@
     });
 }
 
+-(CGFloat)presentVideoFrame: (KxVideoFrame *) frame
+{
+    //修改成OPENGL 贴图RGB与YUV两种方式
+    KxVideoFrameRGB *rgbImg = (KxVideoFrameRGB *)frame;
+    [_imgView setImage:[rgbImg asImage]];
+    return 0;
+}
+
 -(CGFloat)updatePlayUI
 {
     CGFloat interval = 0;
@@ -771,13 +790,15 @@
     }
     if (frame)
     {
-        KxVideoFrameRGB *rgbFrame = (KxVideoFrameRGB*)frame;
-        __weak UIImageView *__imgView = imgView;
-        __weak UIImage *__image = [rgbFrame asImage];
+//        __weak KxVideoFrame *__frame = frame;
+        __weak PlayCloudViewController *__self = self;
+        UIImage *rgbImage = ((KxVideoFrameRGB*)frame).asImage;
+        __weak UIImage *__rgbImage = rgbImage;
         dispatch_sync(dispatch_get_main_queue(),
-                      ^{
-                          [__imgView setImage:__image];
-                      });
+        ^{
+//              [__self presentVideoFrame:__frame];
+            [__self.imgView setImage:__rgbImage];
+        });
         interval = frame.duration;
     }
     frame = nil;
@@ -840,8 +861,6 @@
         [aryDecode removeObjectAtIndex:0];
     }
     cloudDec = nil;
-    //18127853526
-    //   17727610912
     @synchronized(_videoFrames)
     {
         [_videoFrames removeAllObjects];
@@ -852,11 +871,11 @@
         [timeView.aryDate removeAllObjects];
         [timeView startTimeCome];
         btnPause.selected = NO;
-        [imgView removeFromSuperview];
+        [_imgView removeFromSuperview];
     }
     else
     {
-        __weak UIImageView *__imgView = imgView;
+        __weak UIImageView *__imgView = _imgView;
         __weak TimeView *__timeView = timeView;
         __weak UIButton *__btnPause = btnPause;
         dispatch_async(dispatch_get_main_queue(),
@@ -869,7 +888,7 @@
                            [__timeView startTimeCome];
                            __btnPause.selected = NO;
                        });
-        imgView = nil;
+        _imgView = nil;
     }
     [self.view addGestureRecognizer:_tapGestureRecognizer];
 }
@@ -880,7 +899,7 @@
     
     _bDecoding = YES;
     _bPlaying = NO;
-    [imgView removeFromSuperview];
+    [_imgView removeFromSuperview];
     @synchronized(_videoFrames)
     {
         [_videoFrames removeAllObjects];
@@ -899,7 +918,7 @@
 
 -(void)captureView
 {
-    BOOL bFLag = [CaptureService captureToPhotoRGB:imgView devName:strDevName];
+    BOOL bFLag = [CaptureService captureToPhotoRGB:_imgView devName:strDevName];
     if (bFLag)
     {
         [self.view makeToast:XCLocalized(@"captureS") duration:1.0f position:@"center"];
@@ -926,12 +945,12 @@
     }
     else
     {
-        if(imgView.image==nil)
+        if(_imgView.image==nil)
         {
             [self.view makeToast:XCLocalized(@"recordFail") duration:1.0 position:@"center"]; 
             return ;
         }
-        NSString *strPath = [CaptureService captureRecordRGB:imgView];
+        NSString *strPath = [CaptureService captureRecordRGB:_imgView];
         if (strPath == nil || [strPath isEqualToString:@""])
         {
             //录像失败
